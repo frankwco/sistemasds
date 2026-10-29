@@ -135,13 +135,22 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	@Inject
 	private EntityManager manager;
 
+	private boolean dadosCarregados = false;
+
 	@PostConstruct
 	public void inicializar() {
+		// Carga pesada movida para garantirCarregado(): o template cria este bean em
+		// todas as telas (contador do menu) e nao deve pagar essas consultas.
+	}
 
+	private void garantirCarregado() {
+		if (dadosCarregados) {
+			return;
+		}
+		dadosCarregados = true;
 		preencherMensagemSite();
 		buscarContratosVencidos();
 		totalExcedentesAbertos = fechamentoMesService.buscarTotalExcedentesAbertos();
-
 	}
 	 public void incrementar() {
 		 //System.out.println("AAAA");
@@ -310,6 +319,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public List<InformacaoFinanceira> getListInformacoesFinanceirasVencidas() {
+		garantirCarregado();
 		return listInformacoesFinanceirasVencidas;
 	}
 
@@ -318,6 +328,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public List<InformacaoFinanceira> getListInformacoesFinanceirasVencer() {
+		garantirCarregado();
 		return listInformacoesFinanceirasVencer;
 	}
 
@@ -326,6 +337,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public Date getDataContratosVencer() {
+		garantirCarregado();
 		return dataContratosVencer;
 	}
 
@@ -334,6 +346,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public List<MensagemSite> getListaMensagemSite() {
+		garantirCarregado();
 		return listaMensagemSite;
 	}
 
@@ -350,6 +363,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public List<MensagemSite> getMensagensAtualizarEmail() {
+		garantirCarregado();
 		return mensagensAtualizarEmail;
 	}
 
@@ -366,6 +380,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	}
 
 	public Double getTotalExcedentesAbertos() {
+		garantirCarregado();
 		return totalExcedentesAbertos;
 	}
 	   public int getNumero() {

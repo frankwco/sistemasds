@@ -86,6 +86,47 @@ public class ColetaAppMB implements Serializable {
 	@Inject
 	private ColetaAppAssinaturaService coletaAppAssinaturaService; // inserir no banco
 
+	@Inject
+	private GenericDAO<Cliente> daoCliente;
+
+	@Inject
+	private GenericDAO<PontoColeta> daoPontoColeta;
+
+	@Inject
+	private GenericDAO<Cidade> daoCidade;
+
+	// Listas dos filtros: carregadas depois da tela abrir (ver carregarFiltros)
+	private List<Cliente> listaClientesFiltro = new ArrayList<>();
+	private List<PontoColeta> listaPontosColetaFiltro = new ArrayList<>();
+	private List<Cidade> listaCidadesFiltro = new ArrayList<>();
+	private boolean filtrosCarregados = false;
+
+	public void carregarFiltros() {
+		if (filtrosCarregados) {
+			return;
+		}
+		listaClientesFiltro = daoCliente.listaComStatus(Cliente.class, "cidade.nome, nomeRazaoSocial");
+		listaPontosColetaFiltro = daoPontoColeta.listaComStatus(PontoColeta.class, " nomeRota, ordem asc");
+		listaCidadesFiltro = daoCidade.listar(Cidade.class, "selecionada is true");
+		filtrosCarregados = true;
+	}
+
+	public boolean isFiltrosCarregados() {
+		return filtrosCarregados;
+	}
+
+	public List<Cliente> getListaClientesFiltro() {
+		return listaClientesFiltro;
+	}
+
+	public List<PontoColeta> getListaPontosColetaFiltro() {
+		return listaPontosColetaFiltro;
+	}
+
+	public List<Cidade> getListaCidadesFiltro() {
+		return listaCidadesFiltro;
+	}
+
 	@PostConstruct
 	public void inicializar() {
 
