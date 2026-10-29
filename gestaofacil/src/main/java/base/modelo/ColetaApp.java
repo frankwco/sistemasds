@@ -460,6 +460,25 @@ public class ColetaApp implements Serializable {
 		this.longitude = longitude;
 	}
 
+	/** Link do Google Maps para o local do registro da coleta; null se nao houver localizacao valida. */
+	public String getUrlMapa() {
+		if (latitude == null || longitude == null) {
+			return null;
+		}
+		String lat = latitude.trim().replace(',', '.');
+		String lng = longitude.trim().replace(',', '.');
+		try {
+			double dLat = Double.parseDouble(lat);
+			double dLng = Double.parseDouble(lng);
+			if (dLat == 0 && dLng == 0) {
+				return null;
+			}
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		return "https://www.google.com/maps?q=" + lat + "," + lng;
+	}
+
 	public String getDataUsuarioVeiculo() {
 		String retorno = "";
 		retorno = "Data: " + new FormataDataMB().formatarDataHora(dataUltimaColeta) + "<br/>";

@@ -420,6 +420,15 @@
 										actionListener="#{coletaAppMB.selecionarColeta(list)}"
 										update=":formAlterarColeta" />
 								</span>
+
+								<h:panelGroup rendered="#{not empty list.urlMapa}">
+									<span class="btn-blue-modern">
+										<p:commandButton value="  Ver no Mapa"
+											icon="fa fa-map-marker" type="button" global="false"
+											title="Abrir no mapa o local onde a coleta foi registrada"
+											onclick="window.open('#{list.urlMapa}', '_blank'); return false;" />
+									</span>
+								</h:panelGroup>
 							</div>
 						</p:column>
 
