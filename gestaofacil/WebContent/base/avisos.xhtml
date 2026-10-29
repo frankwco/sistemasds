@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<p:ajaxStatus onstart="PF('statusDialog').show()"
+				onsuccess="PF('statusDialog').hide()" />
+
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+				closable="false" resizable="false" showHeader="false">
+				<h:outputText style="font-weight:bold"
+					value="Aguarde, realizando operação...." />
+				<br />
+				<center>
+					<p:graphicImage name="img/aguarde.gif" />
+				</center>
+			</p:dialog>
+			<!-- TITULO -->
+			<div class="row">
+				<div class="col-md-12">
+					<h1 class="page-header">Cadastros</h1>
+
+				</div>
+			</div>
+			<!-- FIM TITULO -->
+
+			<!-- BOTAO CADASTRAR -->
+			<div class="row container-fluid">
+		
+
+
+			</div>
+
+			<!-- FIM DO BOTAO CADASTRAR -->
+			<div class="ui-fluid">
+
+				<p:tabView>
+					<p:tab title="Pesquisar por Vencimento dos Contratos">
+
+						<h:form>
+							<p:panelGrid columns="8"
+								columnClasses="ui-grid-col-1, ui-grid-col-3, ui-grid-col-2, ui-grid-col-2"
+								layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+
+								<p:outputLabel value="Situação:" />
+								<p:selectOneMenu style="width:125px"
+									value="#{informacoesFinanceirasMB.situacaoConsulta}">
+
+									<f:selectItem itemLabel="Todos Ativos" itemValue="Todos Ativos" />
+									<f:selectItem itemLabel="Todos Inativos"
+										itemValue="Todos Inativos" />
+									<f:selectItem itemLabel="Ativos por Data"
+										itemValue="Ativos por Data" />
+									<f:selectItem itemLabel="Inativos por Data"
+										itemValue="Inativos por Data" />
+									<f:selectItem itemLabel="Renovados por Data"
+										itemValue="Renovados por Data" />
+									<f:selectItem itemLabel="Todos Renovados"
+										itemValue="Todos Renovados" />
+									<f:selectItem itemLabel="Todos os Contratos"
+										itemValue="Todos os Contratos" />
+									<p:ajax event="itemSelect" update="dataInicial, dataFinal" />
+								</p:selectOneMenu>
+
+								<p:outputLabel value="Vencimento Inicial: " />
+								<p:calendar id="dataInicial"
+									disabled="#{!informacoesFinanceirasMB.situacaoConsulta.contains('Data')}"
+									value="#{informacoesFinanceirasMB.dataVencimentoInicial}"
+									pattern="dd/MM/yyyy" />
+								<p:outputLabel value="Vencimento Final: " />
+								<p:calendar id="dataFinal"
+									disabled="#{!informacoesFinanceirasMB.situacaoConsulta.contains('Data')}"
+									value="#{informacoesFinanceirasMB.dataVencimentoFinal}"
+									pattern="dd/MM/yyyy" />
+
+
+								<p:outputLabel value="" />
+								<p:commandButton value="Pesquisar"
+									update="frmTabela, :dlgInformacao"
+									actionListener="#{informacoesFinanceirasMB.buscarContratosVencimento()}" />
+
+							</p:panelGrid>
+						</h:form>
+						<hr />
+						<h:form>
+						Estes botões serão desativados em atualizações futuras....
+							<p:panelGrid columns="12"
+								columnClasses="ui-grid-col-4, ui-grid-col-4, ui-grid-col-4"
+								layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+								<p:commandButton value="Todos os Contratos" update="frmTabela"
+									actionListener="#{informacoesFinanceirasMB.buscarContratosAtivosInativos('Todos')}" />
+
+								<p:commandButton value="Contratos Ativos" update="frmTabela"
+									actionListener="#{informacoesFinanceirasMB.buscarContratosAtivosInativos('Ativo')}" />
+
+								<p:commandButton value="Contratos Inativos" update="frmTabela"
+									actionListener="#{informacoesFinanceirasMB.buscarContratosAtivosInativos('Inativo')}" />
+
+							</p:panelGrid>
+						</h:form>
+
+					</p:tab>
+				</p:tabView>
+			</div>
+
+			<!-- TABELA-->
+			<div class="col-md-12" style="min-height: 700px">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela"
+						value="#{informacoesFinanceirasMB.listInformacoesFinanceiras}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum Cliente Cadastrado!!"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+						<p:ajax event="filter" global="false" />
+						
+						<p:column headerText="Número CTT"
+							style="white-space:normal !important;"
+							filterBy="#{list.codigoContratoAtual}"
+							sortBy="#{list.codigoContratoAtual}"
+							filterMatchMode="contains">
+							<h:outputText
+								value="#{list.codigoContratoAtual}" />
+						</p:column>
+
+						<p:column headerText="Cliente"
+							style="white-space:normal !important;"
+							filterBy="#{list.cliente.nomeRazaoSocial}"
+							sortBy="#{list.cliente.nomeRazaoSocial}"
+							filterMatchMode="contains">
+							<h:outputText
+								value="#{list.id}-(único: #{list.idInformacaoFinanceiraUnico})-#{list.cliente.nomeRazaoSocial}" />
+						</p:column>
+
+
+						<p:column headerText="Pontos de Coleta" filterMatchMode="contains"
+							filterBy="#{list.listaItensInformacoesFinanceiraPontoColetaString}"
+							style="white-space:normal !important;">
+							<h:outputText escape="false"
+								value="#{list.listaItensInformacoesFinanceiraPontoColetaString}" />
+						</p:column>
+
+						<p:column width="70" headerText="Vencimento">
+							<center>
+								<h:outputText
+									value="#{formataDataMB.formatarData(list.dataFinal)}">
+
+								</h:outputText>
+								<br />
+								<h:outputText value="#{list.situacaoContrato}" />
+							</center>
+						</p:column>
+
+						<p:column headerText="Opções">
+							<p:panelGrid columns="3" styleClass="ui-noborder">
+
+							
+
+								<p:commandButton alt="Avisos" icon="ui-icon-check"
+									update=":frmModalSalvar, :dlgInformacoesFinanceiras"
+									title="Alterar" styleClass="btn btn-block"
+									oncomplete="PF('dlgInformacoesFinanceiras').show();"
+									actionListener="#{informacoesFinanceirasMB.preencherLista(list)}">
+								</p:commandButton>
+
+							</p:panelGrid>
+						</p:column>
+
+
+
+					</p:dataTable>
+				</h:form>
+
+			</div>
+			<!--FIM DA TABELA-->
+
+
+			<!-- DIALOG SALVAR -->
+			<p:dialog
+				header="Informações de Contrato - #{informacoesFinanceirasMB.tipoContrato}"
+				widgetVar="dlgInformacoesFinanceiras" modal="true" responsive="true"
+				width="80%" id="dlgInformacoesFinanceiras" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+
+
+				<h:form id="frmModalSalvar">
+					<p:tabView id="tabViewInformacoesFinanceiras">
+
+						
+						<p:tab id="tabSituacaoContrato" title="Avisos">
+							<div class="ui-fluid">
+								<p:panelGrid columns="2"
+									columnClasses="ui-grid-col-3, ui-grid-col-9" layout="grid"
+									styleClass="ui-panelgrid-blank ui-fluid">
+									<h:outputText value="Situação do Contrato *" />
+									<p:selectOneMenu style="width:100%"
+										requiredMessage="Situação Obrigatória!" dropdown="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceiras.situacaoContrato}"
+										panelStyle="width:180px" effect="fade">
+										<f:selectItem itemLabel="Ativo" itemValue="Ativo" />
+										<f:selectItem itemLabel="Inativo" itemValue="Inativo" />
+										<f:selectItem itemLabel="Renovado" itemValue="Renovado" />
+									</p:selectOneMenu>
+
+									<h:outputText value="Observações da Situação" />
+									<p:inputTextarea rows="8"
+										value="#{informacoesFinanceirasMB.informacoesFinanceiras.aviso}" />
+
+
+								</p:panelGrid>
+
+							</div>
+
+
+						</p:tab>
+
+						
+					</p:tabView>
+
+
+
+
+					<div class="modal-footer">
+
+						<p:commandButton value="Salvar e Conferir/Imprimir"
+							actionListener="#{informacoesFinanceirasMB.salvar('sim')}"
+							styleClass="ui-priority-primary"
+							update=":dlgInformacao :frmTabela">
+							<p:confirm header="Confirmação"
+								message="Tem certeza que deseja SALVAR ou RENOVAR o contrato?" />
+
+						</p:commandButton>
+
+						<p:commandButton value="Somente Salvar"
+							actionListener="#{informacoesFinanceirasMB.salvar('não')}"
+							styleClass="ui-priority-primary"
+							update=":dlgInformacao :frmTabela">
+							<p:confirm header="Confirmação"
+								message="Tem certeza que deseja SALVAR ou RENOVAR o contrato?" />
+
+						</p:commandButton>
+
+
+					</div>
+
+
+				</h:form>
+			</p:dialog>
+			<!-- FIM DO DIALOG SALVAR -->
+
+			<!-- INÍCIO DO DIALOG DE ALTERAR PARCELA -->
+
+			<p:dialog header="Alterar Parcela" widgetVar="dlgAlterarParcela"
+				modal="true" responsive="true" width="80%" id="dlgAlterarParcela"
+				closable="true" closeOnEscape="true" resizable="false"
+				draggable="false">
+				<h:form>
+					<p:commandButton value="Imprimir Contrato Renovado" />
+					<p:commandButton value="Renovar Próximo Contrato >>" />
+				</h:form>
+
+				<h:form id="frmModalAlterarParcela">
+
+					<p:panelGrid id="painelContasReceber" columns="4"
+						columnClasses="ui-grid-col-2, ui-grid-col-4, ui-grid-col-2, ui-grid-col-4"
+						layout="grid" styleClass="ui-panelgrid-blank ui-fluid">
+
+						<h:outputText value="Número da Parcela: " />
+						<p:inputText
+							value="#{informacoesFinanceirasMB.contasReceberParcela.parcela}" />
+
+						<h:outputText value="Total de Parcelas: " />
+						<p:inputText
+							value="#{informacoesFinanceirasMB.contasReceberParcela.quantidadeParcelas}" />
+
+						<h:outputText value="Referente ao Mês: " />
+						<p:inputText
+							value="#{informacoesFinanceirasMB.contasReceberParcela.referenteMes}" />
+
+						<h:outputText value="Referente ao Ano: " />
+						<p:inputText
+							value="#{informacoesFinanceirasMB.contasReceberParcela.referenteAno}" />
+
+						<h:outputText value="Valor da Parcela: " />
+						<p:inputNumber required="true"
+							requiredMessage="Valor da parcela Obrigatório" decimalPlaces="2"
+							thousandSeparator="." decimalSeparator=","
+							title="Valor por Parcelas"
+							value="#{informacoesFinanceirasMB.contasReceberParcela.valorParcela}" />
+
+						<h:outputText value="Valor Pago: " />
+						<p:inputNumber requiredMessage="Valor Pago" decimalPlaces="2"
+							thousandSeparator="." decimalSeparator="," title="Valor Pago"
+							value="#{informacoesFinanceirasMB.contasReceberParcela.valorPago}" />
+
+						<h:outputText value="Data do Vencimento: " />
+						<p:calendar required="true" requiredMessage="Data Obrigatória!!"
+							value="#{informacoesFinanceirasMB.contasReceberParcela.dataVencimento}"
+							pattern="dd/MM/yyyy" />
+
+						<h:outputText value="Data do Pagamento: " />
+						<p:calendar requiredMessage="Data Obrigatória!!"
+							value="#{informacoesFinanceirasMB.contasReceberParcela.dataPagamento}"
+							pattern="dd/MM/yyyy" />
+
+						<h:outputText value="Faturado? " />
+						<p:selectOneMenu
+							value="#{informacoesFinanceirasMB.contasReceberParcela.boletoEmitido}"
+							style="width:160px; ">
+							<f:selectItem itemLabel="Sim" itemValue="true" />
+							<f:selectItem itemLabel="Não" itemValue="false" />
+						</p:selectOneMenu>
+
+						<h:outputText value="Nosso Número: " />
+						<p:inputText
+							value="#{informacoesFinanceirasMB.contasReceberParcela.nossoNumero}" />
+
+					</p:panelGrid>
+
+
+
+					<div class="modal-footer">
+						<p:commandButton value="Salvar"
+							actionListener="#{informacoesFinanceirasMB.salvarParcela()}"
+							styleClass="ui-priority-primary"
+							update=":dlgInformacao :frmModalSalvar" />
+
+						<p:commandButton value="Cancelar"
+							onclick="PF('dlgAlterarParcela').hide();" alt="Cancelar" />
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- FIM DO DIALOG DE ALTERAR PARCELA -->
+
+
+			<!-- DIALOG VISUALIZAR CONTINUAR -->
+			<p:dialog header="IMPRIMIR o Contrato"
+				widgetVar="dlgVisualizarContinuar" modal="true" responsive="true"
+				width="80%" id="dlgVisualizarContinuar" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+
+
+				<h:form id="frmVisualizarContinuar">
+					<p:tabView id="tabViewVisualizarContinuar">
+
+						<p:tab title="Dados Gerais">
+							<p:commandButton alt="Imprimir Contrato"
+								value="Imprimir Contrato" icon="ui-icon-print"
+								title="Imprimir Contrato" styleClass="ui-priority-primary"
+								onclick="this.form.target='_blank'" ajax="false"
+								actionListener="#{informacoesFinanceirasMB.imprimirContrato(null)}" />
+							<h2>
+								<u>Dados Financeiros</u>
+							</h2>
+
+							<div class="ui-fluid">
+
+								<div class="col-md-12">
+									<label>Código Atual do Contrato</label>
+									<p:inputText title="Código Atual do Contrato" disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.codigoContratoAtual}" />
+								</div>
+
+								<div class="col-md-12">
+									<label>Cliente: *</label>
+									<p:inputText
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.cliente.nomeRazaoSocialNomeFantasia}"
+										disabled="true" />
+
+								</div>
+
+								<div class="col-md-12">
+									<h:panelGrid columns="2">
+										<h:outputLabel style="margin-top:10px; margin-bottom:10px"
+											value="Contrato Gerado pelo Cliente? *&nbsp;&nbsp;" />
+
+										<p:selectOneRadio disabled="true"
+											value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.contratoGeradoPeloCliente}">
+											<f:selectItem itemLabel="Sim" itemValue="true" />
+											<f:selectItem itemLabel="Não" itemValue="false" />
+										</p:selectOneRadio>
+
+										<h:outputLabel style="margin-top:0px; margin-bottom:20px"
+											value="Gerar um documento de Contrato com estes dados? *&nbsp;&nbsp;" />
+										<p:selectOneRadio disabled="true"
+											value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.gerarContratoParaEstaInformacao}">
+											<f:selectItem itemLabel="Sim" itemValue="true" />
+											<f:selectItem itemLabel="Não" itemValue="false" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</div>
+
+
+								<div class="col-md-6">
+									<label>Data Emissão do Contrato: * </label>
+									<p:calendar required="false" disabled="true"
+										requiredMessage="Data Obrigatória!!"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.dataEmissaoContrato}"
+										mask="99/99/9999" pattern="dd/MM/yyyy" />
+								</div>
+
+								<div class="col-md-6">
+									<label>Início da Vigência do Contrato: * </label>
+									<p:calendar required="true" disabled="true"
+										requiredMessage="Data Início da Vigência do Contrato Obrigatória!!"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.dataInicial}"
+										mask="99/99/9999" pattern="dd/MM/yyyy" />
+								</div>
+
+								<div class="col-md-4">
+									<label>Data Primeiro Pagamento: *</label>
+									<p:calendar required="true" disabled="true"
+										requiredMessage="Data Data Primeiro Pagamento Obrigatória!!"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.dataPrimeiroPagamento}"
+										mask="99/99/9999" pattern="dd/MM/yyyy">
+									</p:calendar>
+								</div>
+
+
+
+								<div class="col-md-4">
+									<label>Quantidade de Meses do Contrato *</label>
+									<p:inputText required="true" disabled="true"
+										requiredMessage="Quantidade de Meses Obrigatória!!"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.quantidadeMesesContrato}">
+									</p:inputText>
+								</div>
+
+								<div class="col-md-4">
+									<label>Forma de Pagamento: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.formaPagamento}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Mensal" itemValue="Mensal" />
+										<f:selectItem itemLabel="Bimestral" itemValue="Bimestral" />
+										<f:selectItem itemLabel="Trimestral" itemValue="Trimestral" />
+										<f:selectItem itemLabel="Semestral" itemValue="Semestral" />
+										<f:selectItem itemLabel="Anual" itemValue="Anual" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-12">
+									<label>Fechamento em data diferente? *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.fechamentoDataDiferente}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Não" itemValue="false" />
+										<f:selectItem itemLabel="Sim" itemValue="true" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-12">
+									<label>Dia do Fechamento: *</label>
+									<p:inputText id="inputDiaFechamento" disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.diaFechamento}" />
+								</div>
+
+								<div class="col-md-12">
+									<label>Existe um Valor Fixo Mensal?: *</label>
+									<p:selectOneMenu id="console" disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.existeValorFixoMensal}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Não" itemValue="Não" />
+										<f:selectItem itemLabel="Mensal por Ponto"
+											itemValue="Mensal por Ponto" />
+										<f:selectItem itemLabel="Mensal para todos Pontos"
+											itemValue="Mensal para todos Pontos" />
+									</p:selectOneMenu>
+								</div>
+
+
+								<div class="col-md-6">
+									<label>Valor Fixo Mensal Pontos: *</label>
+									<p:inputNumber decimalPlaces="2" thousandSeparator="."
+										decimalSeparator="," title="Valor Fixo Mensal Ponto"
+										id="inputFixoMensalPonto"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.valorFixoMensalPonto}"
+										disabled="true">
+									</p:inputNumber>
+								</div>
+
+								<div class="col-md-6">
+									<label>Valor Fixo Mensal Total: *</label>
+									<p:inputNumber decimalPlaces="2" thousandSeparator="."
+										decimalSeparator="," title="Valor Fixo Mensal Total"
+										id="inputFixoMensalTotal"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.valorFixoMensalTotal}"
+										disabled="true">
+									</p:inputNumber>
+								</div>
+
+								<br />
+
+								<div class="col-md-12">
+									<label>Cobra Valor Excedente: *&nbsp;&nbsp;<small>Somente
+											para aqueles grupos que o valor está embutido no contrato!</small></label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.cobraExcedente}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Não" itemValue="Não" />
+										<f:selectItem itemLabel="Excedente por Ponto"
+											itemValue="Excedente por Ponto" />
+										<f:selectItem itemLabel="Excedente para todos os Pontos"
+											itemValue="Excedente para todos os Pontos" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-6">
+									<label>Peso Mensal: *</label>
+									<p:inputNumber decimalPlaces="2" thousandSeparator="."
+										decimalSeparator="," title="Peso Mensal" id="inputPesoMensal"
+										disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.pesoMensal}" />
+								</div>
+								<div class="col-md-6">
+									<label>Valor do Excedente: *</label>
+									<p:inputNumber decimalPlaces="2" thousandSeparator="."
+										decimalSeparator="," title="Valor do Excedente"
+										id="inputValorExcedente" disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.valorExcedente}" />
+								</div>
+
+								<div class="col-md-12">
+									<h:panelGrid columns="2">
+										<h:outputLabel style="margin-top:10px; margin-bottom:10px"
+											value="Cobrado por Quilo? *&nbsp;&nbsp;" />
+										<p:selectOneRadio disabled="true"
+											value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.cobradoPorQuilo}">
+											<p:ajax update="inputCobradoQuilo"
+												listener="#{informacoesFinanceirasMB.zerarCobradoPorQuilo()}" />
+											<f:selectItem itemLabel="Sim" itemValue="true" />
+											<f:selectItem itemLabel="Não" itemValue="false" />
+										</p:selectOneRadio>
+									</h:panelGrid>
+								</div>
+
+								<div class="col-md-6">
+									<label>Valor do Quilo: *</label>
+									<p:inputNumber decimalPlaces="2" thousandSeparator="."
+										decimalSeparator="," id="inputCobradoQuilo" disabled="true"
+										title="Valor do Quilo"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.valorPorQuilo}" />
+								</div>
+
+
+
+								<div class="col-md-6">
+									<label>Comunicar Fechamento por e-mail?: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.comunicarEmail}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Não" itemValue="false" />
+										<f:selectItem itemLabel="Sim" itemValue="true" />
+
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-12">
+									<label>Periodicidade das Coletas</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.periodicidadeColeta}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Semanal" itemValue="Semanal" />
+										<f:selectItem itemLabel="Quinzenal" itemValue="Quinzenal" />
+										<f:selectItem itemLabel="Mensal" itemValue="Mensal" />
+										<f:selectItem itemLabel="Bimestral" itemValue="Bimestral" />
+										<f:selectItem itemLabel="Semestral" itemValue="Semestral" />
+
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-6">
+									<label>Dia do Vencimento da Fatura: *</label>
+									<p:inputNumber id="inputVencimentoFatura" decimalPlaces="0"
+										disabled="true" maxValue="31"
+										title="Dia do Vencimento da Fatura"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.diaVencimentoFatura}" />
+								</div>
+
+								<div class="col-md-6">
+									<label>Forma de Cobrança (Boleto ou Depósito: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.formaCobranca}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Mensal" itemValue="Mensal" />
+										<f:selectItem itemLabel="Anual" itemValue="Anual" />
+
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-6">
+									<label>Forma de Recebimento: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.recebimentoBoletoDeposito}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Boleto" itemValue="Boleto" />
+										<f:selectItem itemLabel="Depósito" itemValue="Depósito" />
+
+									</p:selectOneMenu>
+								</div>
+
+
+
+								<div class="col-md-6">
+									<label>Banco: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.banco}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Sicoob" itemValue="Sicoob" />
+										<f:selectItem itemLabel="Bradesco" itemValue="Bradesco" />
+										<f:selectItem itemLabel="Sicredi" itemValue="Sicredi" />
+										<f:selectItem itemLabel="Banco do Brasil"
+											itemValue="Banco do Brasil" />
+										<f:selectItem itemLabel="Caixa Econômica"
+											itemValue="Caixa Econômica" />
+										<f:selectItem itemLabel="Cresol" itemValue="Cresol" />
+										<f:selectItem itemLabel="Itaú" itemValue="Itaú" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-6">
+									<label>Agência</label>
+									<p:inputText disabled="true"
+										onkeyup="value=value.toUpperCase()"
+										onblur="value=value.toUpperCase()" title="Agência"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.agencia}" />
+								</div>
+
+								<div class="col-md-6">
+									<label>Conta</label>
+									<p:inputText disabled="true"
+										onkeyup="value=value.toUpperCase()"
+										onblur="value=value.toUpperCase()" title="Agência"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.conta}" />
+								</div>
+
+								<div class="col-md-12">
+									<label>Gerar o Romaneio e/ou Contrato com Dados do: *</label>
+									<p:selectOneMenu disabled="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.romaneioContratoComDadosDo}"
+										style="margin-bottom:10px">
+										<f:selectItem itemLabel="Cliente" itemValue="Cliente" />
+										<f:selectItem itemLabel="Ponto de Coleta"
+											itemValue="Ponto de Coleta" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-12">
+									<label>Ponto Coleta para Gerar Romaneio e/ou Contrato:*</label>
+									<p:autoComplete id="completePontoColeta" disabled="true"
+										dropdown="true"
+										value="#{informacoesFinanceirasMB.informacoesFinanceirasRenovada.pontoColetaGerarContrato}"
+										scrollHeight="170" completeMethod="#{pontoColetaMB.completar}"
+										forceSelection="true" converter="#{converterPontoColeta}"
+										var="cur" itemLabel="#{cur.nomeRazaoSocialNomeFantasia}"
+										itemValue="#{cur}">
+									</p:autoComplete>
+								</div>
+
+
+								<div class="col-md-12"></div>
+							</div>
+
+
+
+
+
+
+
+
+
+						</p:tab>
+
+					</p:tabView>
+
+
+
+
+					<div class="modal-footer">
+						<p:commandButton alt="Imprimir Contrato" value="Imprimir Contrato"
+							icon="ui-icon-print" title="Imprimir Contrato"
+							styleClass="ui-priority-primary"
+							onclick="this.form.target='_blank'" ajax="false"
+							actionListener="#{informacoesFinanceirasMB.imprimirContrato(null)}" />
+
+					</div>
+
+
+				</h:form>
+			</p:dialog>
+			<!-- FIM DO DIALOG VISUALIZAR CONTINUAR -->
+
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

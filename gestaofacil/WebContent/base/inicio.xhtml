@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+			<!-- ══════════════════════════════════
+			     HERO BANNER
+			══════════════════════════════════ -->
+			<div class="gf-hero">
+				<div>
+					<h2><i class="fa fa-tachometer" style="margin-right:10px;"></i>Painel de Controle</h2>
+					<p><ui:fragment rendered="#{not empty usuarioSessaoMB.usuario.nome}">Bem-vindo, #{usuarioSessaoMB.usuario.nome}</ui:fragment><ui:fragment rendered="#{empty usuarioSessaoMB.usuario.nome}">Bem-vindo ao GestãoFácil</ui:fragment> — acompanhe os indicadores do dia</p>
+				</div>
+
+				<!-- Acesso rápido -->
+				<div class="quick-access">
+					<a href="painelExecutivo.jsf" class="qa-card">
+						<i class="fa fa-dashboard"></i>
+						<span>Painel Executivo</span>
+					</a>
+					<a href="coletaApp.jsf" class="qa-card">
+						<i class="fa fa-mobile"></i>
+						<span>Coletas App</span>
+					</a>
+					<a href="cobranca.jsf" class="qa-card">
+						<i class="fa fa-money"></i>
+						<span>Cobrança</span>
+					</a>
+					<a href="dadosContratos.jsf" class="qa-card">
+						<i class="fa fa-database"></i>
+						<span>Dados Contratos</span>
+					</a>
+					<a href="fechamentoMes.jsf" class="qa-card">
+						<i class="fa fa-calendar-check-o"></i>
+						<span>Fechamento Mês</span>
+					</a>
+					<a href="painelVeiculos.jsf" class="qa-card">
+						<i class="fa fa-truck"></i>
+						<span>Painel da Frota</span>
+					</a>
+					<a href="clientes.jsf" class="qa-card">
+						<i class="fa fa-users"></i>
+						<span>Clientes</span>
+					</a>
+					<a class="qa-card qa-card-external" href="https://dsresiduos.com.br/base/documentos.php" target="_blank" title="Abre em uma nova aba, fora do sistema">
+						<i class="fa fa-globe"></i>
+						<span>Alteração do Site</span>
+						<i class="fa fa-external-link qa-external-icon"></i>
+					</a>
+					<a href="avaliacaoNPS.jsf" class="qa-card">
+						<i class="fa fa-star" style="color:#f9a825;"></i>
+						<span>Pesquisa NPS</span>
+					</a>
+				</div>
+			</div>
+
+
+			<!-- ══════════════════════════════════
+			     CARDS DE RESUMO
+			══════════════════════════════════ -->
+			<div class="row stat-cards stat-cards-5">
+				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<div class="stat-card sc-danger">
+						<div class="sc-icon"><i class="fa fa-exclamation-triangle"></i></div>
+						<div>
+							<div class="sc-label">Contratos Vencidos</div>
+							<div class="sc-value">#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencidas.size()}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<div class="stat-card sc-warning">
+						<div class="sc-icon"><i class="fa fa-clock-o"></i></div>
+						<div>
+							<div class="sc-label">Contratos a Vencer</div>
+							<div class="sc-value">#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencer.size()}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<div class="stat-card sc-info">
+						<div class="sc-icon"><i class="fa fa-envelope"></i></div>
+						<div>
+							<div class="sc-label">Atualizações de E-mail</div>
+							<div class="sc-value">#{informacoesFinanceirasPaginaInicioMB.mensagensAtualizarEmail.size()}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<div class="stat-card sc-success">
+						<div class="sc-icon"><i class="fa fa-comments"></i></div>
+						<div>
+							<div class="sc-label">Mensagens do Site</div>
+							<div class="sc-value">#{informacoesFinanceirasPaginaInicioMB.listaMensagemSite.size()}</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<a href="excedentesAbertos.jsf" class="stat-card sc-purple" title="Contratos Ativos e Renovados. Clique para ver o detalhamento.">
+						<div class="sc-icon"><i class="fa fa-usd"></i></div>
+						<div>
+							<div class="sc-label">Excedentes/Faturamentos Abertos</div>
+							<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.totalExcedentesAbertos)}</div>
+						</div>
+					</a>
+				</div>
+			</div>
+
+			<!-- ══════════════════════════════════
+			     TABELAS PRINCIPAIS
+			══════════════════════════════════ -->
+			<section class="content">
+
+			<!-- ── ROW 1: Contracts expired + about to expire ── -->
+			<div class="row">
+
+				<div class="col-md-6">
+					<div class="data-card dch-danger">
+						<div class="data-card-header">
+							<i class="fa fa-exclamation-triangle" style="color:#c62828;"></i>
+							<h3>Contratos Vencidos</h3>
+							<span class="badge-count" style="background:#ffebee;color:#c62828;">#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencidas.size()}</span>
+						</div>
+						<div class="data-card-body">
+							<div class="table-responsive">
+								<h:form id="frmTabela">
+									<p:dataTable id="tabela"
+										value="#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencidas}"
+										resizableColumns="true" reflow="true" var="list" rows="10"
+										paginator="true" paginatorPosition="bottom"
+										emptyMessage="Nenhum Contrato Vencido!"
+										rowsPerPageTemplate="5,10,15,30,50,100">
+
+										<p:column headerText="Cliente"
+											style="white-space:normal !important;">
+											<h:outputText value="#{list.cliente.nomeRazaoSocial}" />
+										</p:column>
+
+										<p:column headerText="Vencimento">
+											<h:outputText
+												value="#{formataDataMB.formatarData(list.dataFinal)}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+										</p:column>
+
+									</p:dataTable>
+
+								</h:form>
+							</div><!-- /.table-responsive -->
+						</div><!-- /.data-card-body -->
+						<div class="data-card-footer">
+							<a href="dadosContratos.jsf"><i class="fa fa-arrow-right" style="margin-right:6px;"></i>Ir para Gerenciamento de Contratos</a>
+						</div>
+					</div><!-- /.data-card -->
+				</div><!-- /.col-md-6 -->
+
+				<div class="col-md-6">
+					<div class="data-card dch-warning">
+						<div class="data-card-header">
+							<i class="fa fa-clock-o" style="color:#e65100;"></i>
+							<h3>Contratos a Vencer</h3>
+							<span class="badge-count" style="background:#fff3e0;color:#e65100;">
+								#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencer.size()} até #{formataDataMB.formatarData(informacoesFinanceirasPaginaInicioMB.dataContratosVencer)}
+							</span>
+						</div>
+						<div class="data-card-body">
+							<div class="table-responsive">
+								<h:form id="frmTabelas">
+									<p:dataTable id="tabela"
+										value="#{informacoesFinanceirasPaginaInicioMB.listInformacoesFinanceirasVencer}"
+										resizableColumns="true" reflow="true" var="list" rows="10"
+										paginator="true" paginatorPosition="bottom"
+										emptyMessage="Nenhum Contrato para Vencer"
+										rowsPerPageTemplate="5,10,15,30,50,100">
+
+										<p:column headerText="Cliente"
+											style="white-space:normal !important;">
+											<h:outputText value="#{list.cliente.nomeRazaoSocial}" />
+										</p:column>
+
+										<p:column headerText="Vencimento">
+											<h:outputText
+												value="#{formataDataMB.formatarData(list.dataFinal)}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+
+										</p:column>
+
+									</p:dataTable>
+
+								</h:form>
+							</div><!-- /.table-responsive -->
+						</div><!-- /.data-card-body -->
+						<div class="data-card-footer">
+							<a href="dadosContratos.jsf"><i class="fa fa-arrow-right" style="margin-right:6px;"></i>Ir para Gerenciamento de Contratos</a>
+						</div>
+					</div><!-- /.data-card -->
+				</div><!-- /.col-md-6 -->
+
+			</div><!-- /.row 1 -->
+			<!-- ── ROW 2: E-mail updates + Site messages ── -->
+			<div class="row">
+
+				<div class="col-md-6">
+					<div class="data-card dch-info">
+						<div class="data-card-header">
+							<i class="fa fa-envelope" style="color:#1565C0;"></i>
+							<h3>Atualização de E-mail</h3>
+							<span class="badge-count">#{informacoesFinanceirasPaginaInicioMB.mensagensAtualizarEmail.size()}</span>
+						</div>
+						<div class="data-card-body">
+							<div class="table-responsive">
+
+
+
+
+
+								<h:form id="tabelaAtualizarEmail">
+									<p:dataTable
+										value="#{informacoesFinanceirasPaginaInicioMB.mensagensAtualizarEmail}"
+										resizableColumns="true" reflow="true" var="list" rows="5"
+										paginator="true" paginatorPosition="bottom"
+										emptyMessage="Nenhuma atualização!"
+										rowsPerPageTemplate="5,10,15,30,50,100">
+
+										<p:column headerText="Nome - Endereço"
+											style="white-space:normal !important;">
+											<h:outputText
+												value="#{list.nomeRazaoSocial} - #{list.enderecoCompleto}" />
+										</p:column>
+
+										<p:column width="70" headerText="Data">
+											<h:outputText
+												value="#{formataDataMB.formatarData(list.dataMensagem)}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+										</p:column>
+
+										<p:column>
+
+
+											<p:commandButton rendered="#{list.lida==false}"
+												update=":frmModalSalvarCliente, :dlgInformacao"
+												actionListener="#{informacoesFinanceirasPaginaInicioMB.atualizarEmail(list)}"
+												styleClass="ui-priority-primary" value="Atualizar e-mail"
+												oncomplete="PF('dlgCliente').show()" />
+
+											<p:commandButton rendered="#{list.lida==false}"
+												update="@form, :dlgInformacao"
+												actionListener="#{informacoesFinanceirasPaginaInicioMB.cancelarSolicitacao(list)}"
+												styleClass="ui-priority-primary"
+												value="Cancelar Solicitação">
+												<p:confirm header="Confirmação"
+													message="Deseja cancelar esta solicitação?"
+													icon="ui-icon-alert" />
+											</p:commandButton>
+
+											<p:commandButton rendered="#{list.lida==true}"
+												update="frmModalSalvarCliente"
+												actionListener="#{informacoesFinanceirasPaginaInicioMB.atualizarEmail(list)}"
+												styleClass="ui-priority-secondary" value="E-mail atualizado"
+												oncomplete="PF('dlgCliente').show()" />
+
+
+										</p:column>
+
+									</p:dataTable>
+
+
+								</h:form>
+						</div><!-- /.table-responsive -->
+					</div><!-- /.data-card-body -->
+				</div><!-- /.data-card -->
+				</div><!-- /.col-md-6 -->
+
+				<div class="col-md-6">
+					<div class="data-card dch-success">
+						<div class="data-card-header">
+							<i class="fa fa-comments" style="color:#2E7D32;"></i>
+							<h3>Mensagens do Site</h3>
+							<span class="badge-count">#{informacoesFinanceirasPaginaInicioMB.listaMensagemSite.size()}</span>
+						</div>
+						<div class="data-card-body">
+							<div class="table-responsive">
+								<h:form id="frmTabelaMensagemSite">
+									<p:dataTable id="tabelaMensagensSite"
+										value="#{informacoesFinanceirasPaginaInicioMB.listaMensagemSite}"
+										resizableColumns="true" reflow="true" var="list" rows="5"
+										paginator="true" paginatorPosition="bottom"
+										emptyMessage="Nenhum Mensagem!"
+										rowsPerPageTemplate="5,10,15,30,50,100">
+
+										<p:column headerText="Nome"
+											style="white-space:normal !important;">
+											<h:outputText value="#{list.nome}" />
+										</p:column>
+
+										<p:column width="70" headerText="Data">
+											<h:outputText
+												value="#{formataDataMB.formatarData(list.dataMensagem)}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+										</p:column>
+
+										<p:column>
+											<p:commandButton rendered="#{list.lida==false}"
+												update="@form, :frmModalMensagemSite"
+												oncomplete="PF('dlgMensagemSite').show()"
+												actionListener="#{informacoesFinanceirasPaginaInicioMB.lerMensagem(list)}"
+												styleClass="ui-priority-primary" value="Ler Mensagem" />
+
+
+											<p:commandButton rendered="#{list.lida==true}"
+												update="@form, :frmModalMensagemSite"
+												oncomplete="PF('dlgMensagemSite').show()"
+												actionListener="#{informacoesFinanceirasPaginaInicioMB.lerMensagem(list)}"
+												styleClass="ui-priority-secondary" value="Ler Mensagem" />
+
+												<p:button rendered="#{not empty list.telefoneWhatsapp}"
+													href="https://wa.me/#{list.telefoneWhatsapp}"
+													target="_blank" icon="fa fa-whatsapp"
+													styleClass="btn-whatsapp" value="WhatsApp" />
+										</p:column>
+
+									</p:dataTable>
+
+
+								</h:form>
+						</div><!-- /.table-responsive -->
+					</div><!-- /.data-card-body -->
+				</div><!-- /.data-card -->
+				</div><!-- /.col-md-6 -->
+
+			</div><!-- /.row 2 -->
+
+			</section>
+
+			<!-- DIALOG SALVAR CLIENTE-->
+			<p:dialog header="E-mail cliente" widgetVar="dlgCliente" modal="true"
+				position="center" responsive="true" width="60%" id="dlgCliente"
+				closable="true" closeOnEscape="true" resizable="false"
+				draggable="false">
+				<h:form id="frmModalSalvarCliente">
+					<div class="ui-fluid">
+
+						<div class="col-md-12">
+							<h:outputText style="color:red"
+								value="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.nomeRazaoSocialNomeFantasia}" />
+						</div>
+
+						<div class="col-md-12">
+							<br />
+						</div>
+						<p:panel
+							rendered="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.id!=null}">
+
+							<div class="col-md-12">
+								<label>E-mail 1: <span style="color: red">Antigo:
+										#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.emailAntigo}</span></label>
+								<p:inputText
+									value="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.email}" />
+							</div>
+							<div class="col-md-12">
+								<br />
+							</div>
+
+							<div class="col-md-12">
+								<label>E-mail 2: <span style="color: red">Antigo:
+										#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.email2Antigo}</span></label>
+								<p:inputText
+									value="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.email2}" />
+							</div>
+
+							<div class="col-md-12">
+								<label>Telefone 1: <span style="color: red">Antigo:
+										#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.telefone1Antigo}</span></label>
+								<p:inputText
+									value="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.telefone1}" />
+							</div>
+							<div class="col-md-12">
+								<label>Telefone 2: <span style="color: red">Antigo:
+										#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.telefone2Antigo}</span></label>
+								<p:inputText
+									value="#{informacoesFinanceirasPaginaInicioMB.clienteSelecionado.telefone2}" />
+							</div>
+						</p:panel>
+
+
+					</div>
+					<div class="modal-footer">
+						<p:commandButton value="Salvar"
+							actionListener="#{informacoesFinanceirasPaginaInicioMB.salvarCliente()}"
+							styleClass="ui-priority-primary"
+							update=":dlgInformacao :tabelaAtualizarEmail" />
+
+						<p:commandButton value="Cancelar"
+							onclick="PF('dlgCliente').hide();" alt="Cancelar" />
+					</div>
+				</h:form>
+			</p:dialog>
+			<!-- FIM DO DIALOG SALVAR CLIENTE-->
+
+			<!-- DIALOG SALVAR -->
+			<p:dialog header="Mensagem" widgetVar="dlgMensagemSite" modal="true"
+				responsive="true" width="60%" id="dlgEstado" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalMensagemSite">
+					<div class="ui-fluid">
+						<div class="col-md-12">
+							<label>Nome:&nbsp;&nbsp;</label>
+							<h:outputText
+								value="#{informacoesFinanceirasPaginaInicioMB.mensagemSite.nome}" />
+						</div>
+						<div class="col-md-12">
+							<label>E-mail:&nbsp;&nbsp;</label>
+							<h:outputText
+								value="#{informacoesFinanceirasPaginaInicioMB.mensagemSite.email}" />
+						</div>
+
+						<div class="col-md-12">
+							<label>Telefone:&nbsp;&nbsp;</label>
+							<h:outputText
+								value="#{informacoesFinanceirasPaginaInicioMB.mensagemSite.telefones}" />
+									
+							<h:outputText
+								value="#{informacoesFinanceirasPaginaInicioMB.mensagemSite.mensagem}" />
+						</div>
+
+
+					</div>
+					<div class="modal-footer">
+						<p:button rendered="#{not empty informacoesFinanceirasPaginaInicioMB.mensagemSite.telefoneWhatsapp}"
+										href="https://wa.me/#{informacoesFinanceirasPaginaInicioMB.mensagemSite.telefoneWhatsapp}"
+										target="_blank" icon="fa fa-whatsapp" value="WhatsApp"
+										styleClass="btn-whatsapp" style="margin-left:10px;" />
+						<p:commandButton value="Fechar"
+							oncomplete="PF('dlgMensagemSite').hide()"
+							styleClass="ui-priority-primary" />
+
+
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- FIM TITULO -->
+		</div><!-- /.gf-page -->
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+		<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+			resizable="false" showHeader="false" styleClass="gf-loading-dialog">
+			<span class="gf-loading-text">Aguarde, calculando indicadores...</span>
+			<p:graphicImage name="img/aguarde.gif" />
+		</p:dialog>
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-bar-chart" style="margin-right:10px;"></i>Relatórios de Veículos</h2>
+					<p>Custo, consumo, postos, categorias, oficinas e manutenção da frota</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Filtro ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-filter icon-blue"></i>
+					<div>
+						<h4>Filtro</h4>
+						<small>Veículo (opcional) e período</small>
+					</div>
+				</div>
+				<h:form id="frmFiltro">
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo</label>
+							<p:autoComplete style="width:100%" dropdown="true"
+								value="#{relatorioVeiculoMB.veiculo}" scrollHeight="170"
+								completeMethod="#{relatorioVeiculoMB.completarVeiculo}"
+								forceSelection="true" converter="#{converterVeiculo}" var="cur"
+								itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Início</label>
+							<p:calendar style="width:100%" value="#{relatorioVeiculoMB.dataInicio}"
+								pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Fim</label>
+							<p:calendar style="width:100%" value="#{relatorioVeiculoMB.dataFim}"
+								pattern="dd/MM/yyyy" />
+						</div>
+					</div>
+
+					<div class="gf-modal-footer" style="justify-content:flex-start;">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Buscar" icon="fa fa-search"
+								actionListener="#{relatorioVeiculoMB.buscar()}" update=":frmResultados" />
+						</span>
+					</div>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Resultados ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-list-alt icon-teal"></i>
+					<div>
+						<h4>Resultados</h4>
+						<small>Clique em Buscar para calcular</small>
+					</div>
+				</div>
+				<h:form id="frmResultados">
+					<p:tabView>
+
+						<!-- RF19/RF20/RF27 -->
+						<p:tab title="Custo e Ranking">
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaCusto" fileName="custo_por_veiculo" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaCusto" value="#{relatorioVeiculoMB.listCusto}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum lançamento no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Veículo">
+									<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+								</p:column>
+								<p:column headerText="Custo Total">
+									<h:outputText value="#{list.custoTotal}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Km Rodado">
+									<h:outputText value="#{list.kmRodado}" />
+								</p:column>
+								<p:column headerText="Custo/Km">
+									<h:outputText value="#{list.custoPorKm}">
+										<f:convertNumber type="currency" currencySymbol="R$ " maxFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+						<!-- RF21 -->
+						<p:tab title="Consumo (km/l)">
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaConsumo" fileName="consumo_por_veiculo" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaConsumo" value="#{relatorioVeiculoMB.listConsumo}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum abastecimento no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Veículo">
+									<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+								</p:column>
+								<p:column headerText="Km Rodado">
+									<h:outputText value="#{list.kmRodado}" />
+								</p:column>
+								<p:column headerText="Litros">
+									<h:outputText value="#{list.litrosTotal}" />
+								</p:column>
+								<p:column headerText="Km/l">
+									<h:outputText value="#{list.kmPorLitro}">
+										<f:convertNumber maxFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+						<!-- RF21 (por posto) / RF22 -->
+						<p:tab title="Postos">
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaPosto" fileName="comparativo_postos" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaPosto" value="#{relatorioVeiculoMB.listPosto}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum abastecimento no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Posto">
+									<h:outputText value="#{list.nome}" />
+								</p:column>
+								<p:column headerText="Bandeira">
+									<h:outputText value="#{list.bandeira}" />
+								</p:column>
+								<p:column headerText="Abastecimentos">
+									<h:outputText value="#{list.quantidadeAbastecimentos}" />
+								</p:column>
+								<p:column headerText="Km/l Médio">
+									<h:outputText value="#{list.kmPorLitroMedio}">
+										<f:convertNumber maxFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Preço Médio/Litro">
+									<h:outputText value="#{list.precoMedioLitro}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+						<!-- RF24 -->
+						<p:tab title="Despesas por Categoria">
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaCategoria" fileName="despesas_por_categoria" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaCategoria" value="#{relatorioVeiculoMB.listCategoria}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum lançamento no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Categoria">
+									<h:outputText value="#{list.categoria}" />
+								</p:column>
+								<p:column headerText="Valor Total">
+									<h:outputText value="#{list.valorTotal}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="% do Total">
+									<h:outputText value="#{list.percentual}">
+										<f:convertNumber pattern="#,##0.0'%'" />
+									</h:outputText>
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+						<!-- RF23 -->
+						<p:tab title="Oficinas">
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaOficina" fileName="comparativo_oficinas" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaOficina" value="#{relatorioVeiculoMB.listOficina}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum serviço no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Oficina">
+									<h:outputText value="#{list.nome}" />
+								</p:column>
+								<p:column headerText="Serviços">
+									<h:outputText value="#{list.quantidadeServicos}" />
+								</p:column>
+								<p:column headerText="Custo Médio">
+									<h:outputText value="#{list.custoMedio}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Avaliação">
+									<p:rating value="#{list.avaliacaoEstrelas}" readonly="true" stars="5" />
+									<h:outputText value=" (" rendered="#{list.avaliacao != null}" />
+									<h:outputText value="#{list.avaliacao}" rendered="#{list.avaliacao != null}">
+										<f:convertNumber pattern="0.0" />
+									</h:outputText>
+									<h:outputText value=")" rendered="#{list.avaliacao != null}" />
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+						<!-- RF25/RF26 -->
+						<p:tab title="Manutenção">
+							<div class="row stat-cards" style="margin-bottom:12px;">
+								<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+									<div class="stat-card sc-success">
+										<div class="sc-icon"><i class="fa fa-shield"></i></div>
+										<div>
+											<div class="sc-label">Preventiva</div>
+											<div class="sc-value" style="font-size:24px;">
+												<h:outputText value="#{relatorioVeiculoMB.percentualPreventiva}">
+													<f:convertNumber pattern="#,##0.0'%'" />
+												</h:outputText>
+												<h:outputText value="—" rendered="#{relatorioVeiculoMB.percentualPreventiva == null}" />
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+									<div class="stat-card sc-warning">
+										<div class="sc-icon"><i class="fa fa-wrench"></i></div>
+										<div>
+											<div class="sc-label">Corretiva</div>
+											<div class="sc-value" style="font-size:24px;">
+												<h:outputText value="#{relatorioVeiculoMB.percentualCorretiva}">
+													<f:convertNumber pattern="#,##0.0'%'" />
+												</h:outputText>
+												<h:outputText value="—" rendered="#{relatorioVeiculoMB.percentualCorretiva == null}" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div style="margin-bottom:8px;">
+								<span class="btn-secondary-modern">
+									<p:commandButton value="  CSV" icon="fa fa-file-text-o" ajax="false">
+										<p:dataExporter type="csv" target="tabelaManutencao" fileName="manutencoes" />
+									</p:commandButton>
+								</span>
+							</div>
+							<p:dataTable id="tabelaManutencao" value="#{relatorioVeiculoMB.listManutencao}"
+								var="list" rows="15" paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum serviço no período" resizableColumns="true" reflow="true">
+								<p:column headerText="Veículo">
+									<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+								</p:column>
+								<p:column headerText="Tipo">
+									<h:outputText value="#{list.tipoManutencao}" />
+								</p:column>
+								<p:column headerText="Entrada">
+									<h:outputText value="#{list.dataEntrada}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Saída">
+									<h:outputText value="#{list.dataSaida}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Downtime (dias)">
+									<h:outputText value="#{list.downtimeDias}" />
+								</p:column>
+							</p:dataTable>
+						</p:tab>
+
+					</p:tabView>
+				</h:form>
+			</div>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

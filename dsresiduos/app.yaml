@@ -1,0 +1,8 @@
+runtime: php83
+
+handlers:
+- url: /
+  script: auto
+- url: /(.*)
+  static_files: www/\1
+  upload: www/(.*)

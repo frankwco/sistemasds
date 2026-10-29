@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="coleta_periodo_cidade" pageWidth="595" pageHeight="842" whenNoDataType="NoPages" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="e7eebaa4-068b-407f-bf7a-d4c2e72a1292">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GestaoFacil"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="197"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="796"/>
+	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<style name="Title" fontName="Arial" fontSize="26" isBold="true"/>
+	<style name="SubTitle" forecolor="#666666" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<parameter name="DATA_INICIAL" class="java.lang.String"/>
+	<parameter name="DATA_FINAL" class="java.lang.String"/>
+	<parameter name="DATA_INICIAL_MOSTRAR" class="java.lang.String"/>
+	<parameter name="DATA_FINAL_MOSTRAR" class="java.lang.String"/>
+	<parameter name="CIDADE_ID" class="java.lang.Long"/>
+	<parameter name="CIDADE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1]]>
+	</queryString>
+	<field name="1" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="1"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="233" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="555" height="233" uuid="5580f4b3-cb01-4a15-8232-d3a78e1cdd64"/>
+				<imageExpression><![CDATA["laudos_jpg_tudo.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="102" splitType="Stretch">
+			<staticText>
+				<reportElement x="310" y="0" width="244" height="20" uuid="9c00b7b3-4203-4db3-a38b-3610c5b04e94"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[LICENÇA DE OPERAÇÃO Nº 138193-R1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="-1" y="0" width="244" height="20" uuid="2a25ac24-a8ba-4748-9fd0-31b139d88e26"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[www.dsresiduos.com.br]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="72" width="370" height="30" uuid="a72c2183-95f7-4a94-8203-723c3ae729fc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="84a9406f-a6e1-4027-a174-50054742654c"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[     Classe]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="3" y="29" width="510" height="17" uuid="07876ae0-7841-4ff0-af16-8775ef84b4bb"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Período da consulta: "+$P{DATA_INICIAL_MOSTRAR}+" até "+$P{DATA_FINAL_MOSTRAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="72" width="180" height="30" uuid="9897fc84-313d-4e28-aaa2-9a47a16b3afc"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Quantidade Coletada"+"&nbsp;&nbsp;&nbsp;&nbsp;"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="3" y="50" width="510" height="17" uuid="e47e7841-9b76-46cd-89bc-3533a0e65ac8"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Cidade: "+$P{CIDADE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="43" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="40" uuid="c831b798-80c0-48db-a167-c9e59e6d1350"/>
+				<subreportParameter name="DATA_INICIAL">
+					<subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DATA_FINAL">
+					<subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="CIDADE_ID">
+					<subreportParameterExpression><![CDATA[$P{CIDADE_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["coleta_periodo_cidade_sub.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="1" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement style="Column header" x="433" y="0" width="80" height="20" uuid="6f13e17d-4b46-4ede-ab63-9d2685ec9c16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement style="Column header" x="513" y="0" width="40" height="20" uuid="6857db7e-824a-4cda-b8dc-fe5c95aca145"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="168" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement style="Column header" x="-1" y="19" width="271" height="20" forecolor="#030303" uuid="ef9fc35f-c45f-4ec6-a5cc-ec2020109ea7"/>
+				<textElement>
+					<font fontName="SansSerif" size="14" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nova Esperança - PR, "+new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="126" width="281" height="40" uuid="c326a448-8208-4f37-a5d0-c1d0be923eb8"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" D. SORTI & SORTI LTDA (DS TRANSPORTES) <br/>Daniel Sorti / Diretor"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="291" y="126" width="263" height="40" uuid="ab2eb6bb-f7ec-4568-9229-9da6e72f4da5"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" DANIEL SORTI - CFQ: 193596 <br/>Técnico em Meio Ambiente"]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="35" y="74" width="210" height="51" uuid="88727dc5-6ae1-4bf4-9fae-4b42a67f34c4"/>
+				<imageExpression><![CDATA["assinaturaDS.png"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="311" y="74" width="210" height="51" uuid="94f30621-9196-4836-8d5f-c02ba07240c2"/>
+				<imageExpression><![CDATA["assinaturaDS.png"]]></imageExpression>
+			</image>
+		</band>
+	</summary>
+</jasperReport>

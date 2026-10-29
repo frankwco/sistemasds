@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body>
+	<ui:composition template="../resources/template/template-cliente.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-file-text-o" style="margin-right:10px;"></i>Contratos Ativos</h2>
+					<p>Consulte as informações financeiras e contratuais dos seus contratos ativos</p>
+				</div>
+				<i class="fa fa-file-text hero-icon"></i>
+			</div>
+
+			<!-- ═══ LOADING STATUS ═══ -->
+			<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+				closable="false" resizable="false" showHeader="false"
+				styleClass="gf-loading-dialog">
+				<span class="gf-loading-text">Aguarde, carregando...</span>
+				<p:graphicImage name="img/aguarde.gif" />
+			</p:dialog>
+
+			<!-- ═══ CONTRATOS ATIVOS (CARDS) ═══ -->
+			<h:form id="frmTabela">
+				<!-- Auto-load: dispara uma vez no carregamento inicial da página -->
+				<p:remoteCommand name="carregarContratos"
+					action="#{informacoesFinanceirasMB.buscarDadosContratoCliente}"
+					update="tabela"
+					onstart="PF('statusDialog').show()"
+					oncomplete="PF('statusDialog').hide()" />
+				<script type="text/javascript">$(document).ready(function(){ carregarContratos(); });</script>
+
+				<h:panelGroup layout="block" id="tabela">
+
+					<h:panelGroup layout="block" styleClass="gf-info-empty"
+						rendered="#{empty informacoesFinanceirasMB.listInformacoesFinanceirasCliente}">
+						<i class="fa fa-file-text-o"></i>
+						<p>Nenhum contrato ativo encontrado.</p>
+					</h:panelGroup>
+
+					<div class="gf-info-grid">
+						<ui:repeat value="#{informacoesFinanceirasMB.listInformacoesFinanceirasCliente}" var="list">
+							<div class="gf-info-card">
+								<div class="gf-info-card-header">
+									<div class="gf-info-card-icon nc-blue"><i class="fa fa-file-text-o"></i></div>
+									<div>
+										<h4>
+											<h:outputText value="Contrato Nº #{list.codigoContratoAtual}" rendered="#{list.codigoContratoAtual gt 0}" />
+											<h:outputText value="Contrato" rendered="#{list.codigoContratoAtual le 0}" />
+										</h4>
+										<span class="gf-status-badge success">#{list.situacaoContrato}</span>
+									</div>
+								</div>
+
+								<div class="gf-info-card-body">
+									<div class="gf-info-item">
+										<i class="fa fa-calendar"></i>
+										<div>
+											<small>Vigência</small>
+											<strong>#{formataDataMB.formatarData(list.dataInicial)} a #{formataDataMB.formatarData(list.dataFinal)}</strong>
+										</div>
+									</div>
+
+									<div class="gf-info-item">
+										<i class="fa fa-refresh"></i>
+										<div>
+											<small>Periodicidade de Coleta</small>
+											<strong>#{list.periodicidadeColeta}</strong>
+										</div>
+									</div>
+
+									<div class="gf-info-item">
+										<i class="fa fa-clock-o"></i>
+										<div>
+											<small>Duração</small>
+											<strong>#{list.quantidadeMesesContrato} meses</strong>
+										</div>
+									</div>
+
+									<div class="gf-info-item">
+										<i class="fa fa-money"></i>
+										<div>
+											<small>Valor</small>
+											<strong>
+												<h:outputText value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFixoMensalTotal)} /mês" rendered="#{list.existeValorFixoMensal == 'Mensal para todos Pontos'}" />
+												<h:outputText value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFixoMensalPonto)} /mês por ponto" rendered="#{list.existeValorFixoMensal == 'Mensal por Ponto'}" />
+												<h:outputText value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(list.valorPorQuilo)} /kg coletado" rendered="#{list.existeValorFixoMensal == 'Não' and list.cobradoPorQuilo}" />
+												<h:outputText value="Consulte o contrato" rendered="#{list.existeValorFixoMensal == 'Não' and !list.cobradoPorQuilo}" />
+											</strong>
+										</div>
+									</div>
+								</div>
+
+								<div class="gf-info-card-footer">
+									<span class="btn-primary-modern btn-full">
+										<p:commandButton value=" Imprimir"
+											icon="fa fa-print"
+											title="Imprimir Contrato"
+											onclick="this.form.target='_blank'" ajax="false"
+											actionListener="#{informacoesFinanceirasMB.imprimirContrato(list)}" />
+									</span>
+								</div>
+							</div>
+						</ui:repeat>
+					</div>
+
+				</h:panelGroup>
+			</h:form>
+
+		</div>
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

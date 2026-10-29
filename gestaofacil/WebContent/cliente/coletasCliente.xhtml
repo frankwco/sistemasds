@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition template="../resources/template/template-cliente.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-truck" style="margin-right:10px;"></i>Coletas Realizadas</h2>
+					<p>Histórico de coletas registradas a partir de 02/08/2021</p>
+				</div>
+				<i class="fa fa-recycle hero-icon"></i>
+			</div>
+
+			<!-- ═══ LOADING STATUS ═══ -->
+			<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+				closable="false" resizable="false" showHeader="false"
+				styleClass="gf-loading-dialog">
+				<span class="gf-loading-text">Aguarde, carregando...</span>
+				<p:graphicImage name="img/aguarde.gif" />
+			</p:dialog>
+			<script type="text/javascript">
+				$(document).ready(function(){ PF('statusDialog').show(); });
+				$(window).on('load', function(){ PF('statusDialog').hide(); });
+			</script>
+
+			<!-- ═══ TABELA DE COLETAS ═══ -->
+			<h:form id="frmTabela">
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-list icon-blue"></i>
+						<div>
+							<h4>Registro de Coletas</h4>
+							<small>Ponto de coleta, data e quantidades coletadas por classe</small>
+						</div>
+					</div>
+
+					<!-- ═══ AVISO ═══ -->
+					<div class="gf-alert warning">
+						<i class="fa fa-info-circle"></i>
+						<span><strong>Atenção:</strong> O peso no sistema do MTR/SINIR deve ser informado com 4 casas após a vírgula.</span>
+					</div>
+
+					<p:dataTable id="tabela"
+						value="#{coletasPaginaClienteMB.listaColetaApp}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma coleta encontrada."
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column style="white-space:normal !important;" 
+							headerText="Ponto de Coleta"
+							filterBy="#{list.pontoColetaSelecionado.nomeRazaoSocialNomeFantasiaEndereco}"
+							sortBy="#{list.pontoColetaSelecionado.nomeRazaoSocialNomeFantasiaEndereco}"
+							filterMatchMode="contains">
+							<h:outputText
+								value="#{list.pontoColetaSelecionado.nomeRazaoSocialNomeFantasiaEndereco}" />
+						</p:column>
+
+						<p:column filterBy="#{list.soData}" sortBy="#{list.soData}"
+							filterMatchMode="contains" headerText="Data da Coleta"
+							style="white-space:normal !important;" width="150">
+							<h:outputText escape="false" value="#{list.soData}" />
+						</p:column>
+
+						<p:column headerText="Quantidades por Classe" style="white-space:normal !important;">
+							<div class="gf-qtd-chips">
+								<ui:fragment rendered="#{list.a gt 0}">
+									<div class="gf-qtd-chip">
+										<span class="badge-classe badge-a">A</span>
+										<span>
+											<span class="gf-qtd-kg">#{formatarMB.formatarNumeroTresCasasDecimais(list.a)} kg</span>
+											<span class="gf-qtd-sinir">MTR/SINIR: #{formatarMB.formatarNumeroQuatroCasasDecimais(list.a)}</span>
+										</span>
+									</div>
+								</ui:fragment>
+								<ui:fragment rendered="#{list.e gt 0}">
+									<div class="gf-qtd-chip">
+										<span class="badge-classe badge-e">E</span>
+										<span>
+											<span class="gf-qtd-kg">#{formatarMB.formatarNumeroTresCasasDecimais(list.e)} kg</span>
+											<span class="gf-qtd-sinir">MTR/SINIR: #{formatarMB.formatarNumeroQuatroCasasDecimais(list.e)}</span>
+										</span>
+									</div>
+								</ui:fragment>
+								<ui:fragment rendered="#{list.b gt 0}">
+									<div class="gf-qtd-chip">
+										<span class="badge-classe badge-b">B</span>
+										<span>
+											<span class="gf-qtd-kg">#{formatarMB.formatarNumeroTresCasasDecimais(list.b)} kg</span>
+											<span class="gf-qtd-sinir">MTR/SINIR: #{formatarMB.formatarNumeroQuatroCasasDecimais(list.b)}</span>
+										</span>
+									</div>
+								</ui:fragment>
+								<ui:fragment rendered="#{list.a2 gt 0}">
+									<div class="gf-qtd-chip">
+										<span class="badge-classe badge-a2">A2</span>
+										<span>
+											<span class="gf-qtd-kg">#{formatarMB.formatarNumeroTresCasasDecimais(list.a2)} kg</span>
+											<span class="gf-qtd-sinir">MTR/SINIR: #{formatarMB.formatarNumeroQuatroCasasDecimais(list.a2)}</span>
+										</span>
+									</div>
+								</ui:fragment>
+								<ui:fragment rendered="#{list.a3 gt 0}">
+									<div class="gf-qtd-chip">
+										<span class="badge-classe badge-a3">A3</span>
+										<span>
+											<span class="gf-qtd-kg">#{formatarMB.formatarNumeroTresCasasDecimais(list.a3)} kg</span>
+											<span class="gf-qtd-sinir">MTR/SINIR: #{formatarMB.formatarNumeroQuatroCasasDecimais(list.a3)}</span>
+										</span>
+									</div>
+								</ui:fragment>
+								<ui:fragment rendered="#{list.a le 0 and list.e le 0 and list.b le 0 and list.a2 le 0 and list.a3 le 0}">
+									<span class="gf-qtd-empty">Nenhuma quantidade registrada</span>
+								</ui:fragment>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</div>
+			</h:form>
+
+		</div>
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

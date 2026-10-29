@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="utf-8"></meta>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+	<title>Gestão Empresarial - DS Transportes</title>
+	<meta
+		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+		name="viewport"></meta>
+
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/img/favicon.png" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/bootstrap/css/bootstrap.min.css" />
+
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/gf-public.css" />
+
+	<style>
+		/* ── Estilos específicos de index (comuns via gf-public.css) ── */
+
+		/* ── Logo area (below navbar) ── */
+		.idx-logo-area {
+			text-align: center;
+			padding: 24px 24px 8px;
+		}
+		.idx-logo-area a { display: inline-block; }
+		.idx-logo-area img {
+			height: 60px; width: auto; border-radius: 12px;
+			transition: transform .2s;
+		}
+		.idx-logo-area img:hover { transform: scale(1.03); }
+
+		/* ── Hero Section ── */
+		.idx-hero {
+			max-width: 1140px; margin: 0 auto; padding: 16px 24px 24px;
+		}
+		.idx-hero-banner {
+			background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 40%, #43A047 80%, #66BB6A 100%);
+			border-radius: 18px;
+			padding: 32px 44px;
+			color: #fff;
+			box-shadow: 0 8px 32px rgba(27,94,32,.30);
+			display: flex; align-items: center; justify-content: space-between;
+			flex-wrap: wrap; gap: 24px;
+			position: relative; overflow: hidden;
+		}
+		.idx-hero-banner::before {
+			content: '';
+			position: absolute; top: -60px; right: -60px;
+			width: 220px; height: 220px;
+			background: rgba(255,255,255,.06);
+			border-radius: 50%;
+		}
+		.idx-hero-banner::after {
+			content: '';
+			position: absolute; bottom: -40px; left: 30%;
+			width: 160px; height: 160px;
+			background: rgba(255,255,255,.04);
+			border-radius: 50%;
+		}
+		.idx-hero-text { position: relative; z-index: 1; flex: 1; min-width: 280px; }
+		.idx-hero-text h1 {
+			font-size: 30px; font-weight: 700; margin: 0 0 10px; color: #fff;
+			line-height: 1.2;
+		}
+		.idx-hero-text p {
+			font-size: 15px; margin: 0; opacity: .9;
+			line-height: 1.7; color: #e8f5e9; max-width: 640px;
+		}
+		.idx-hero-icon {
+			font-size: 72px; opacity: .18; position: relative; z-index: 1;
+		}
+
+		/* ── Cards Section ── */
+		.idx-cards-section {
+			max-width: 1140px; margin: 0 auto;
+			padding: 32px 24px 60px;
+		}
+		.idx-section-title {
+			text-align: center; margin-bottom: 36px;
+		}
+		.idx-section-title h2 {
+			font-size: 22px; font-weight: 700; color: #1a2744; margin: 0 0 6px;
+		}
+		.idx-section-title p {
+			font-size: 14px; color: #78909c; margin: 0;
+		}
+
+		.idx-cards-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 24px;
+		}
+
+		.idx-card {
+			background: #fff;
+			border-radius: 16px;
+			border: 1px solid #e0e6ed;
+			box-shadow: 0 2px 16px rgba(0,0,0,.06);
+			padding: 0;
+			transition: all .3s cubic-bezier(.4,0,.2,1);
+			overflow: hidden;
+			text-decoration: none;
+			display: flex; flex-direction: column;
+			position: relative;
+			cursor: pointer;
+		}
+		.idx-card:hover {
+			transform: translateY(-6px);
+			box-shadow: 0 12px 36px rgba(46,125,50,.18);
+			border-color: rgba(46,125,50,.25);
+		}
+		.idx-card-accent {
+			height: 5px; width: 100%;
+		}
+		.accent-green  { background: linear-gradient(90deg, #1B5E20, #43A047, #66BB6A); }
+		.accent-teal   { background: linear-gradient(90deg, #00695C, #26A69A, #80CBC4); }
+		.accent-lime   { background: linear-gradient(90deg, #33691E, #689F38, #9CCC65); }
+
+		.idx-card-body {
+			padding: 28px 28px 32px;
+			display: flex; flex-direction: column; align-items: center;
+			text-align: center; flex: 1;
+		}
+		.idx-card-icon {
+			width: 64px; height: 64px; border-radius: 16px;
+			display: flex; align-items: center; justify-content: center;
+			font-size: 26px; color: #fff; margin-bottom: 20px;
+			box-shadow: 0 4px 14px rgba(0,0,0,.15);
+			flex-shrink: 0;
+		}
+		.icon-bg-green { background: linear-gradient(135deg, #1B5E20, #43A047); }
+		.icon-bg-teal  { background: linear-gradient(135deg, #00695C, #26A69A); }
+		.icon-bg-lime  { background: linear-gradient(135deg, #33691E, #689F38); }
+
+		.idx-card-body h3 {
+			font-size: 19px; font-weight: 700; color: #1a2744;
+			margin: 0 0 10px;
+		}
+		.idx-card-body p {
+			font-size: 14px; color: #607d8b; line-height: 1.6;
+			margin: 0 0 20px;
+		}
+		.idx-card-link {
+			display: inline-flex; align-items: center; gap: 6px;
+			font-size: 13px; font-weight: 600;
+			color: #2E7D32; text-decoration: none;
+			padding: 8px 20px; border-radius: 8px;
+			background: rgba(46,125,50,.08);
+			transition: all .2s;
+			margin-top: auto;
+		}
+		.idx-card:hover .idx-card-link {
+			background: linear-gradient(135deg, #2E7D32, #43A047);
+			color: #fff;
+			box-shadow: 0 4px 14px rgba(46,125,50,.30);
+		}
+
+		/* ── Responsive ── */
+		@media (max-width: 768px) {
+			.idx-hero-banner {
+				padding: 32px 24px;
+				text-align: center;
+				justify-content: center;
+			}
+			.idx-hero-text h1 { font-size: 24px; }
+			.idx-hero-text p { font-size: 14px; }
+			.idx-hero-icon { display: none; }
+			.idx-cards-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+
+</h:head>
+<h:body>
+
+	<!-- ── Top Bar ── -->
+	<nav class="gf-navbar">
+		<div class="gf-navbar-inner">
+			<a class="nav-left" target="_blank" href="https://dsresiduos.com.br/">
+				<img src="#{request.contextPath}/resources/img/logo_nova.png" alt="DS Transportes" />
+			</a>
+			<span class="nav-badge">Sistema de Gestão</span>
+		</div>
+	</nav>
+
+	<!-- ── Hero Banner ── -->
+	<section class="idx-hero">
+		<div class="idx-hero-banner anim-fade-up">
+			<div class="idx-hero-text">
+				<h1>Bem-vindo ao Sistema de Gestão</h1>
+				<p>
+					Aqui você terá acesso a diversas informações importantes, como seu contrato
+					conosco e histórico de coletas realizadas. Nosso sistema foi desenvolvido para
+					oferecer mais praticidade e agilidade, permitindo que você tenha tudo o que
+					precisa em um único lugar.
+				</p>
+			</div>
+			<i class="fa fa-recycle idx-hero-icon"></i>
+		</div>
+	</section>
+
+	<!-- ── Cards ── -->
+	<section class="idx-cards-section">
+		<div class="idx-section-title anim-fade-up">
+			<h2>Como deseja acessar o sistema?</h2>
+			<p>Selecione a opção que melhor se aplica a você</p>
+		</div>
+
+		<div class="idx-cards-grid">
+
+			<!-- Card 1 - Gestor -->
+			<a href="#{request.contextPath}/base/inicio.jsf"
+			   class="idx-card anim-fade-up anim-delay-1">
+				<div class="idx-card-accent accent-green"></div>
+				<div class="idx-card-body">
+					<div class="idx-card-icon icon-bg-green">
+						<i class="fa fa-briefcase"></i>
+					</div>
+					<h3>Gestor da DS</h3>
+					<p>Se você é colaborador da DS Transportes, clique aqui para acessar o painel de gestão completo.</p>
+					<span class="idx-card-link">
+						Acessar painel <i class="fa fa-arrow-right"></i>
+					</span>
+				</div>
+			</a>
+
+			<!-- Card 2 - Cliente -->
+			<a href="#{request.contextPath}/cliente/inicio.jsf"
+			   class="idx-card anim-fade-up anim-delay-2">
+				<div class="idx-card-accent accent-teal"></div>
+				<div class="idx-card-body">
+					<div class="idx-card-icon icon-bg-teal">
+						<i class="fa fa-user"></i>
+					</div>
+					<h3>Área do Cliente</h3>
+					<p>Acesse seu contrato, histórico de coletas e todas as informações do seu relacionamento conosco.</p>
+					<span class="idx-card-link">
+						Acessar área <i class="fa fa-arrow-right"></i>
+					</span>
+				</div>
+			</a>
+
+			<!-- Card 3 - Autenticidade -->
+			<a href="#{request.contextPath}/autenticidade/inicio.jsf"
+			   class="idx-card anim-fade-up anim-delay-3">
+				<div class="idx-card-accent accent-lime"></div>
+				<div class="idx-card-body">
+					<div class="idx-card-icon icon-bg-lime">
+						<i class="fa fa-shield"></i>
+					</div>
+					<h3>Autenticidade de Laudos</h3>
+					<p>Utilize esta opção para verificar a autenticidade e validade de um laudo emitido.</p>
+					<span class="idx-card-link">
+						Verificar laudo <i class="fa fa-arrow-right"></i>
+					</span>
+				</div>
+			</a>
+
+		</div>
+	</section>
+
+	<!-- ── Footer ── -->
+	<footer class="gf-footer">
+		<p>© 2026 <a href="https://dsresiduos.com.br/" target="_blank">DS Transportes</a> — Sistema de Gestão Empresarial</p>
+	</footer>
+
+</h:body>
+</html>
+
+
+
+
+
+

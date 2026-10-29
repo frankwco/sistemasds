@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-building-o" style="margin-right:10px;"></i>Cidades</h2>
+					<p>Cadastre e gerencie as cidades atendidas</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+						<span class="gf-new-btn">
+							<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+								update=":frmModalSalvar"
+								actionListener="#{cidadeMB.criarNovoObjeto()}"
+								onclick="PF('dlgCidade').show(); PF('dlgCidade').content.scrollTop('0')"
+								title="Cadastrar Cidade" />
+						</span>
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Buscar Todas as Cidades" icon="fa fa-list"
+								update=":frmTabela"
+								actionListener="#{cidadeMB.buscarCidades('tudo')}" />
+						</span>
+						<span class="btn-teal-modern">
+							<p:commandButton value="  Buscar Cidades Selecionadas" icon="fa fa-check-square-o"
+								update=":frmTabela"
+								actionListener="#{cidadeMB.buscarCidades('selecionadas')}" />
+						</span>
+					</div>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{cidadeMB.listCidade}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma cidade cadastrada"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Nome" filterBy="#{list.nome}"
+							sortBy="#{list.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.nome}" />
+						</p:column>
+
+						<p:column headerText="Estado" filterBy="#{list.estado.nome}"
+							sortBy="#{list.estado.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.estado.nome}-#{list.estado.sigla}" />
+						</p:column>
+
+						<p:column headerText="Selecionada?">
+							<h:outputText rendered="#{list.selecionada==true}" value="Sim" />
+							<h:outputText rendered="#{list.selecionada==false}" value="Não" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgCidade').show();"
+										actionListener="#{cidadeMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{cidadeMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Cidade" widgetVar="dlgCidade" modal="true"
+				responsive="true" width="60%" id="dlgCidade" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div class="gf-form-group" style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-tag" style="margin-right:6px;color:#1565C0;"></i>Nome *</label>
+							<p:inputText style="width:100%" onkeyup="value=value.toUpperCase()"
+								required="true" requiredMessage="Nome é obrigatório"
+								title="Nome" value="#{cidadeMB.cidade.nome}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-map-marker" style="margin-right:6px;color:#1565C0;"></i>Estado *</label>
+							<p:autoComplete required="true" requiredMessage="Selecione o Estado"
+								dropdown="true"
+								value="#{cidadeMB.cidade.estado}" scrollHeight="170"
+								completeMethod="#{estadoMB.completar}" forceSelection="true"
+								converter="#{converterEstado}" var="cur"
+								itemLabel="#{cur.nome}-#{cur.sigla}" itemValue="#{cur}">
+							</p:autoComplete>
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-check-square-o" style="margin-right:6px;color:#1565C0;"></i>Selecionar Cidade?</label>
+							<p:selectOneMenu style="width:100%" value="#{cidadeMB.cidade.selecionada}">
+								<f:selectItem itemLabel="Não" itemValue="false" />
+								<f:selectItem itemLabel="Sim" itemValue="true" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{cidadeMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgCidade').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

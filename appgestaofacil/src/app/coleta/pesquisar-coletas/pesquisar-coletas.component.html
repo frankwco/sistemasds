@@ -1,0 +1,58 @@
+<ion-header>
+    <ion-toolbar>
+
+        <ion-buttons slot="start" (click)="fechar()">
+            <ion-button>
+                <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+
+        <ion-title>Pesquisar Coletas</ion-title>
+
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <div *ngIf="excluindo" class="gf-overlay">
+        <div class="gf-spinner"></div>
+        <p>Excluindo coleta...</p>
+    </div>
+
+    <ion-searchbar type="text" placeholder="Pesquisar coleta" debounce="200" (ionInput)="getItems($event)"></ion-searchbar>
+
+    <div *ngIf="carregando" class="ion-text-center ion-padding">
+        <div class="gf-spinner"></div>
+        <p><ion-text color="medium">Carregando coletas...</ion-text></p>
+    </div>
+
+    <p *ngIf="!carregando && total === 0" class="ion-text-center ion-padding">
+        <ion-text color="medium">Nenhuma coleta encontrada</ion-text>
+    </p>
+
+    <ion-list *ngIf="isItemAvailable && !carregando">
+
+        <ion-item (click)="confirmarExcluir(item,idx)" *ngFor="let item of visiveis; let idx = index; trackBy: trackByColeta">
+            <ion-label class="ion-text-wrap" [class.highlight]="idx === currentSelected">
+                <h3 class="coleta-titulo">
+                    {{ item.titulo }}
+                    <ion-icon class="coleta-status" *ngIf="item.sincronizado" color="primary" name="checkmark-done-circle"></ion-icon>
+                    <ion-icon class="coleta-status" *ngIf="!item.sincronizado" color="danger" name="close-circle"></ion-icon>
+                </h3>
+
+                <div class="coleta-grupos">
+                    <div class="coleta-grupo" *ngFor="let g of item.grupos" [style.background-color]="g.cor" [style.color]="g.texto">
+                        <small>{{ g.nome }}</small>
+                        <small>{{ g.valor }}</small>
+                    </div>
+                </div>
+
+                <p class="coleta-total">Total: {{ item.total }} - {{ item.data }}</p>
+            </ion-label>
+        </ion-item>
+
+    </ion-list>
+
+    <ion-infinite-scroll threshold="200px" (ionInfinite)="carregarMais($event)" [disabled]="!temMais">
+        <ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+</ion-content>

@@ -1,0 +1,104 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar color="primary" class="t2-toolbar">
+    <ion-title>Todas as Coletas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="t2-content">
+
+  <!-- Vehicle filter card (admin only) -->
+  <div class="vehicle-card" *ngIf="usuario.acessoTotal">
+    <div class="vehicle-icon-badge">
+      <ion-icon name="car-outline"></ion-icon>
+    </div>
+    <div class="vehicle-info">
+      <span class="vehicle-name">{{veiculoSelecionado.descricao}}</span>
+      <span class="vehicle-plate" *ngIf="veiculoSelecionado.placa">{{veiculoSelecionado.placa}}</span>
+    </div>
+    <button class="vehicle-search-btn" (click)="pesquisarVeiculo()">
+      <ion-icon name="search-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Counter badge -->
+  <div class="counter-row">
+    <span class="counter-badge">{{total}} coleta{{total !== 1 ? 's' : ''}}</span>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="carregando">
+    <div class="gf-spinner"></div>
+    <p>Carregando coletas...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!carregando && total === 0">
+    <div class="empty-icon">
+      <ion-icon name="document-text-outline"></ion-icon>
+    </div>
+    <p>Nenhuma coleta encontrada</p>
+  </div>
+
+  <!-- Coleta cards -->
+  <div class="coleta-card" *ngFor="let item of visiveis; let idx = index; trackBy: trackByColeta" [class.selected]="idx === currentSelected">
+    <!-- Header -->
+    <div class="coleta-header">
+      <div class="coleta-title">
+        {{ item.titulo }}
+        <span class="coleta-subtitle" *ngIf="item.fantasia"> - {{ item.fantasia }}</span>
+        <span class="coleta-subtitle" *ngIf="item.apelido"> - {{ item.apelido }}</span>
+      </div>
+      <div class="sync-badge synced" *ngIf="item.sincronizado">
+        <ion-icon name="checkmark-done-circle"></ion-icon>
+      </div>
+      <div class="sync-badge not-synced" *ngIf="!item.sincronizado">
+        <ion-icon name="close-circle"></ion-icon>
+      </div>
+    </div>
+
+    <!-- City -->
+    <div class="coleta-city" *ngIf="item.cidade">
+      <ion-icon name="location-outline"></ion-icon>
+      {{item.cidade}}
+    </div>
+
+    <!-- Groups grid -->
+    <div class="groups-grid">
+      <div class="group-cell" [ngClass]="'group-' + g.nome.toLowerCase()" *ngFor="let g of item.grupos">
+        <span class="group-label">{{g.nome}}</span>
+        <span class="group-value">{{g.valor}}</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="coleta-footer">
+      <div class="footer-left">
+        <span class="total-badge">
+          <ion-icon name="cube-outline"></ion-icon>
+          {{item.total}}
+        </span>
+        <span class="date-badge">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ item.data }}
+        </span>
+      </div>
+    </div>
+
+    <!-- User/Vehicle info -->
+    <div class="coleta-meta">
+      <span class="meta-item" *ngIf="item.email">
+        <ion-icon name="person-outline"></ion-icon>
+        {{item.email}}
+      </span>
+      <span class="meta-item" *ngIf="item.veiculo">
+        <ion-icon name="car-outline"></ion-icon>
+        {{item.veiculo}}
+      </span>
+    </div>
+  </div>
+
+  <ion-infinite-scroll threshold="200px" (ionInfinite)="carregarMais($event)" [disabled]="!temMais">
+    <ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+</ion-content>

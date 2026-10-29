@@ -1,0 +1,38 @@
+
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-buttons slot="end">
+      <!-- <ion-button color="light" expand="full" [disabled]="isCanvasBlank()" (click)="save()"> Save</ion-button> -->
+<ion-back-button></ion-back-button>
+      <ion-button color="light" expand="full" (click)="undo()"> <ion-icon name="arrow-undo-outline"></ion-icon></ion-button>
+      <ion-button color="light" expand="full" (click)="clear()"> <ion-icon name="trash-outline" ></ion-icon></ion-button>
+    </ion-buttons>
+    <ion-title>
+    Assinar e Finalizar
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+<p>De um lado CARE SERVICOS ADMINISTRATIVOS LTDA - ME, pessoa jurídica de direito privado inscrito(a) no
+CNPJ sob nº 13.935.866/0001-36, com o ramo de atividade CLINICA MEDICA (CARE SERVICOS INTEGRADOS -
+ELLA CARE), sediado à AV EUCLIDES DA CUNHA , Nº 1718, ZPNA 05 - CEP: 87015-180 - MARINGA, estado do
+PARANA. Telefone: (44)99706-3702, E-mail: ricardo@ellacare.com.br, doravante denominado simplesmente
+CONTRATANTE, representado por ELIZA DO CARMO LOPES, inscrito no CPF: 051.114.699-07, RG: 8.888.513-9 ,
+residente e domiciliado na cidade de MARINGA-PARANA, adiante firmado...</p>
+    <ion-card>
+        <ion-card-header>
+            <ion-card-title>Assinatura</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <canvas class="signature-pad-canvas" #canvas width="500" height="250" style="touch-action: none;"></canvas>
+      </ion-card-content>
+    </ion-card>
+
+<br/>
+    <ion-button color="success" (click)="fechar()"  size="large" expand="full" shape="round">Finalizar</ion-button>
+<br/>
+<br/>
+
+
+
+</ion-content>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="utf-8"></meta>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+	<title>Gestão Empresarial Fácil - DS Transportes</title>
+	<meta
+		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+		name="viewport"></meta>
+
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/img/favicon.png" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/style-index.css" />
+
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/bootstrap/css/bootstrap.min.css" />
+
+
+	<link rel="stylesheet"
+		href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+
+
+	<style>
+.bs-docs-header {
+	position: relative;
+	margin-top: 15%;
+	padding: 10px 10px 10px 10px;
+	text-align: center;
+}
+
+body {
+	
+}
+</style>
+
+</h:head>
+<h:body class="hold-transition skin-blue sidebar-mini">
+
+
+	<div id="mensagem">
+		<ui:insert name="mensagem">
+		</ui:insert>
+	</div>
+
+	<header>
+		<div class="top">
+			<div class="container">
+				<div class="row"></div>
+			</div>
+		</div>
+
+		<div class="navbar navbar-default navbar-static-top">
+			<div class="container">
+
+				<div class="row"  >
+
+					<div class="col-lg-3" style="height:103px">
+						<div class="navbar-header">
+
+							<a class="navbar-brand" target="_blank" href="https://dsresiduos.com.br/"><img
+								src="https://dsresiduos.com.br/img/logo_original.png" alt=""
+								width="280" height="82" /></a>
+						</div>
+					</div>
+
+					<div class="col-lg-9" style="margin-top: 30px">
+						<div class="navbar-header">
+							
+								<div class="alert alert-info"
+									style="background-color: #fff6ce52; border: none" role="alert">
+									<p class="formatacao-cards-inicial">Bem-vindo ao sistema de
+										gestão da DS Transportes! Aqui, você terá acesso a diversas
+										informações importantes, como seu contrato conosco e histórico
+										de coletas realizadas. Nosso sistema foi desenvolvido para
+										oferecer mais praticidade e agilidade aos nossos clientes,
+										permitindo que você tenha todas as informações necessárias em
+										um único lugar.</p>
+
+								</div>
+							
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</header>
+
+	<div>
+		<div class="row">
+			<h:form>
+				<!-- Main content -->
+				<section class="content">
+					<div>
+						<div id="wrapper">
+
+
+							<section id="featured">
+								<!-- start slider -->
+
+								<!-- start slider -->
+								<div class="container" style="padding-top: 1px;">
+
+									<div class="row">
+										<br />
+										
+
+										<div class="col-lg-4 d-flex align-items-stretch">
+											<a target="_blank" href="https://alcsistemas.com.br/gestaofacil/base/inicio.jsf"
+												style="text-decoration: none;">
+												<div class="alert alert-info"
+													style="background-color: #9ad2ae1a; border: none; height: 166px;"
+													role="alert">
+													<h3 style="text-align: center; color: black;">GESTOR
+														DA DS?</h3>
+													<p class="formatacao-cards-inicial">Se você é
+														colaborador da DS Transportes clique aqui para acessar o
+														sistema.</p>
+
+												</div>
+											</a>
+										</div>
+
+										<div class="col-lg-4 d-flex align-items-stretch">
+											<a target="_blank"
+												href="https://alcsistemas.com.br/gestaofacil/cliente/inicio.jsf"
+												style="text-decoration: none;">
+												<div class="alert alert-info"
+													style="background-color: #9ad2ae1a; border: none; height: 166px;"
+													role="alert">
+													<h3 style="text-align: center; color: black;">É
+														CLIENTE?</h3>
+													<p class="formatacao-cards-inicial">Clique para acessar
+														nosso sistema de gestão.<br/></p>
+
+												</div>
+											</a>
+										</div>
+
+										<div class="col-lg-4 d-flex align-items-stretch">
+											<a target="_blank"
+												href="https://alcsistemas.com.br/gestaofacil/autenticidade/inicio.jsf"
+												style="text-decoration: none;">
+												<div class="alert alert-info"
+													style="background-color: #9ad2ae1a; border: none; height: 166px;"
+													role="alert">
+													<h3 style="text-align: center; color: black;">AUTENTICIDADE
+														DE LAUDOS</h3>
+													<p class="formatacao-cards-inicial">Utilize esta opção
+														para verificar a autenticidade de um laudo.</p>
+
+												</div>
+											</a>
+										</div>
+
+
+										
+
+
+										
+
+
+									</div>
+								</div>
+
+							</section>
+						</div>
+						
+
+
+
+					</div>
+				</section>
+			</h:form>
+		</div>
+	</div>
+
+
+	<div class="control-sidebar-bg"></div>
+
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/plugins/fastclick/fastclick.js"></script>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/dist/js/app.min.js"></script>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/dist/js/demo.js"></script>
+</h:body>
+</html>
+
+
+
+
+
+

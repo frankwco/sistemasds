@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body>
+	<ui:composition template="../resources/template/template-cliente.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-lock" style="margin-right:10px;"></i>Alterar Senha</h2>
+					<p>Defina uma nova senha de acesso à sua área do cliente</p>
+				</div>
+				<i class="fa fa-key hero-icon"></i>
+			</div>
+
+			<h:form id="frmSenha">
+				<div class="gf-card" style="max-width:480px; margin:0 auto;">
+					<div class="gf-card-header">
+						<i class="fa fa-lock icon-blue"></i>
+						<div>
+							<h4>Nova Senha</h4>
+							<small>Informe a senha atual e a nova senha desejada</small>
+						</div>
+					</div>
+
+					<div class="gf-alert info">
+						<i class="fa fa-info-circle"></i>
+						<span>A nova senha deve ter pelo menos 6 caracteres.</span>
+					</div>
+
+					<div class="gf-form-item" style="margin-bottom:16px;">
+						<label>Senha Atual</label>
+						<p:password value="#{alterarSenhaClienteMB.senhaAtual}"
+							feedback="false" redisplay="true"
+							required="true" requiredMessage="Informe a senha atual!" />
+					</div>
+
+					<div class="gf-form-item" style="margin-bottom:16px;">
+						<label>Nova Senha</label>
+						<p:password value="#{alterarSenhaClienteMB.novaSenha}"
+							feedback="false" redisplay="true"
+							required="true" requiredMessage="Informe a nova senha!" />
+					</div>
+
+					<div class="gf-form-item" style="margin-bottom:20px;">
+						<label>Confirmar Nova Senha</label>
+						<p:password value="#{alterarSenhaClienteMB.confirmarNovaSenha}"
+							feedback="false" redisplay="true"
+							required="true" requiredMessage="Confirme a nova senha!" />
+					</div>
+
+					<span class="btn-primary-modern">
+						<p:commandButton value=" Salvar Nova Senha"
+							icon="fa fa-check"
+							update="@form :dlgInformacao"
+							action="#{alterarSenhaClienteMB.alterarSenha}" />
+					</span>
+				</div>
+			</h:form>
+
+		</div>
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

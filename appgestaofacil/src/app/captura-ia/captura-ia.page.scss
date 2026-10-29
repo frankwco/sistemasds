@@ -1,0 +1,379 @@
+.texto-bruto {
+  white-space: pre-wrap;
+  font-style: italic;
+  color: var(--ion-color-medium);
+  padding: 4px 12px 0;
+  margin: 0;
+  font-size: 13px;
+}
+
+.acoes-wrapper {
+  padding: 16px;
+}
+
+.confirmar-btn {
+  --background: linear-gradient(135deg, #2dd36f 0%, #1a9e54 100%);
+  --border-radius: 28px;
+  --box-shadow: 0 4px 14px rgba(45, 211, 111, 0.35);
+  height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.aviso-obrigatorio {
+  color: var(--ion-color-danger);
+}
+
+// ── Content ──
+
+.captura-content {
+  --background: #f0f4fa;
+}
+
+// ── Card Veículo/Motorista ──
+
+.selection-card {
+  margin: 16px 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.selection-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selection-row-spaced {
+  margin-top: 10px;
+}
+
+.selection-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 19px;
+  flex-shrink: 0;
+
+  &.badge-blue {
+    background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  }
+
+  &.badge-green {
+    background: linear-gradient(135deg, #2dd36f, #1a9e54);
+  }
+}
+
+.selection-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.selection-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selection-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-top: 2px;
+  word-wrap: break-word;
+
+  &.aviso-obrigatorio {
+    color: var(--ion-color-danger);
+  }
+}
+
+// ── Card Aviso de Duplicidade ──
+
+.aviso-card {
+  margin: 0 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  border-left: 4px solid #ffc409;
+  overflow: hidden;
+}
+
+.aviso-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #4a5568;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 18px;
+    color: #e0a800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ── Card de Revisão ──
+
+.form-card {
+  margin: 0 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.form-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3dc2ff, #2b9cd4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.confianca-texto {
+  font-size: 12px;
+  color: #718096;
+  margin: 2px 0 0;
+}
+
+// ── Inputs ──
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.input-group {
+  margin-bottom: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.input-group-half {
+  flex: 1;
+}
+
+.input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.form-item {
+  --background: #f4f6fb;
+  --border-radius: 12px;
+  --padding-start: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.nota-sugestao {
+  display: block;
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.texto-bruto-toggle {
+  --background: #f4f6fb;
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+// ═══ Chat de captura (mesmo esquema da tela administrativa) ═══
+.chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 4px;
+}
+
+.chat-mensagens {
+  min-height: 140px;
+  max-height: 45vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 4px;
+}
+
+.chat-vazio {
+  margin: auto;
+  text-align: center;
+  color: var(--ion-color-medium);
+  font-style: italic;
+  padding: 0 20px;
+}
+
+.bolha {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+}
+
+.bolha-enviada {
+  align-self: flex-end;
+  background: var(--ion-color-primary-tint, #cde4ff);
+  color: var(--ion-color-dark, #1a1a1a);
+  border-bottom-right-radius: 2px;
+}
+
+.bolha-recebida {
+  align-self: flex-start;
+  background: var(--ion-color-light, #f2f2f2);
+  border-bottom-left-radius: 2px;
+}
+
+.bolha-pendente {
+  opacity: .8;
+  border: 1px dashed var(--ion-color-primary);
+
+  a {
+    margin-left: 8px;
+    font-size: 12px;
+    text-decoration: underline;
+  }
+}
+
+.bolha-status {
+  font-style: italic;
+  color: var(--ion-color-medium);
+}
+
+.chat-compor {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 0;
+  border-top: 1px solid var(--ion-color-light-shade, #e0e0e0);
+}
+
+.botao-redondo {
+  --border-radius: 50%;
+  --padding-start: 0;
+  --padding-end: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+}
+
+.chat-input {
+  flex: 1;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  background: var(--ion-color-light, #f2f2f2);
+  border-radius: 20px;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.botao-enviar {
+  color: var(--ion-color-success);
+}
+
+.chat-ajuda {
+  display: block;
+  color: var(--ion-color-medium);
+  padding: 4px 4px 8px;
+  font-size: 11px;
+}
+
+// anel pulsando ao redor do microfone enquanto ouve
+.botao-mic-ativo {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(235, 68, 90, 0.5);
+    animation: pulso-mic 1.4s ease-out infinite;
+  }
+}
+
+@keyframes pulso-mic {
+  0% { box-shadow: 0 0 0 0 rgba(235, 68, 90, 0.5); }
+  100% { box-shadow: 0 0 0 14px rgba(235, 68, 90, 0); }
+}
+
+// barrinhas animadas tipo "gravando áudio" (WhatsApp), no lugar do campo
+// de texto enquanto ouvindo — a transcrição só fica pronta ao parar
+.ondas-audio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 44px;
+  background: var(--ion-color-light, #f2f2f2);
+  border-radius: 20px;
+  padding: 0 16px;
+}
+
+.onda {
+  width: 3px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ion-color-danger, #eb445a);
+  animation: onda-audio 1s ease-in-out infinite;
+
+  @for $i from 1 through 7 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i % 4) * 0.12}s;
+    }
+  }
+}
+
+@keyframes onda-audio {
+  0%, 100% { height: 8px; }
+  50% { height: 26px; }
+}

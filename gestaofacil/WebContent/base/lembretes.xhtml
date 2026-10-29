@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-bell-o" style="margin-right:10px;"></i>Lembretes</h2>
+					<p>Lembretes avulsos por data ou por km, ex.: "trocar óleo em 5.000 km"</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{lembreteMB.criarNovoObjeto()}"
+							onclick="PF('dlgLembrete').show(); PF('dlgLembrete').content.scrollTop('0')"
+							title="Cadastrar Lembrete" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{lembreteMB.listLembrete}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum lembrete em aberto"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Descrição" filterBy="#{list.descricao}"
+							sortBy="#{list.descricao}" filterMatchMode="contains">
+							<h:outputText value="#{list.descricao}" />
+						</p:column>
+
+						<p:column headerText="Veículo">
+							<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})"
+								rendered="#{list.veiculo != null}" />
+						</p:column>
+
+						<p:column headerText="Motorista">
+							<h:outputText value="#{list.motorista.nome}" rendered="#{list.motorista != null}" />
+						</p:column>
+
+						<p:column headerText="Alvo">
+							<h:outputText value="#{list.dataAlvo}" rendered="#{list.alvoTipo == 'Data'}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+							<h:outputText value="#{list.kmAlvo} km" rendered="#{list.alvoTipo == 'Km'}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="260">
+							<div class="action-btn-group">
+								<span class="btn-success-modern">
+									<p:commandButton icon="fa fa-check" value=" Concluir"
+										actionListener="#{lembreteMB.concluir(list)}" title="Concluir"
+										update=":frmTabela :dlgInformacao">
+										<p:confirm header="Confirmação" message="Marcar como concluído?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-teal-modern">
+									<p:commandButton icon="fa fa-wrench" value=" Concluir e Gerar Serviço"
+										actionListener="#{lembreteMB.concluirEGerarServico(list)}"
+										title="Concluir e gerar um Serviço em aberto no veículo"
+										rendered="#{list.veiculo != null}"
+										update=":frmTabela :dlgInformacao">
+										<p:confirm header="Confirmação"
+											message="Marcar como concluído e gerar um Serviço em aberto para este veículo?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil" value=" Alterar"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgLembrete').show();"
+										actionListener="#{lembreteMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o" value=" Excluir"
+										actionListener="#{lembreteMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Lembrete" widgetVar="dlgLembrete" modal="true"
+				responsive="true" width="60%" id="dlgLembrete" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-file-text-o" style="margin-right:6px;color:#1565C0;"></i>Descrição *</label>
+							<p:inputText style="width:100%" required="true"
+								requiredMessage="Descrição é obrigatória"
+								value="#{lembreteMB.lembrete.descricao}" />
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{lembreteMB.lembrete.veiculo}" scrollHeight="170"
+									completeMethod="#{lembreteMB.completarVeiculo}"
+									forceSelection="true" converter="#{converterVeiculo}" var="cur"
+									itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-badge" style="margin-right:6px;color:#1565C0;"></i>Motorista</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{lembreteMB.lembrete.motorista}" scrollHeight="170"
+									completeMethod="#{usuarioMB.completarMotorista}"
+									forceSelection="true" converter="#{converterUsuario}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-crosshairs" style="margin-right:6px;color:#1565C0;"></i>Alvo por *</label>
+								<p:selectOneMenu style="width:100%" value="#{lembreteMB.lembrete.alvoTipo}">
+									<f:selectItem itemLabel="Data" itemValue="Data" />
+									<f:selectItem itemLabel="Km" itemValue="Km" />
+									<p:ajax update=":frmModalSalvar:pnlAlvo" />
+								</p:selectOneMenu>
+							</div>
+
+							<p:outputPanel id="pnlAlvo">
+								<h:panelGroup layout="block" styleClass="gf-form-item" rendered="#{lembreteMB.lembrete.alvoTipo == 'Data'}">
+									<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Alvo *</label>
+									<p:calendar style="width:100%" value="#{lembreteMB.lembrete.dataAlvo}"
+										pattern="dd/MM/yyyy" />
+								</h:panelGroup>
+
+								<h:panelGroup layout="block" styleClass="gf-form-item" rendered="#{lembreteMB.lembrete.alvoTipo == 'Km'}">
+									<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km Alvo *</label>
+									<p:inputNumber style="width:100%" decimalPlaces="0" thousandSeparator="."
+										value="#{lembreteMB.lembrete.kmAlvo}" />
+								</h:panelGroup>
+							</p:outputPanel>
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{lembreteMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgLembrete').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /docs/
+Disallow: /base/
+Disallow: /ajax/
+Disallow: /Documentation/
+Disallow: /plugins/
+Disallow: /bodybg/
+Disallow: /skins/
+Disallow: /submeter.php
+Disallow: /submeter_contato.php
+Disallow: /emergencial.php
+
+Sitemap: https://www.dsresiduos.com.br/sitemap.xml

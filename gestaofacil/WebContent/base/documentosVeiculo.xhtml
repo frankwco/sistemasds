@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-file-text" style="margin-right:10px;"></i>Documentos do Veículo</h2>
+					<p>Licenciamento, seguro, IPVA, vistoria e demais documentos com vencimento</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{documentoVeiculoMB.criarNovoObjeto()}"
+							onclick="PF('dlgDocumentoVeiculo').show(); PF('dlgDocumentoVeiculo').content.scrollTop('0')"
+							title="Cadastrar Documento" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{documentoVeiculoMB.listDocumento}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum documento cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Veículo" filterBy="#{list.veiculo.descricao}"
+							sortBy="#{list.veiculo.descricao}" filterMatchMode="contains">
+							<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipoDocumento.nome}"
+							sortBy="#{list.tipoDocumento.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.tipoDocumento.nome}" />
+						</p:column>
+
+						<p:column headerText="Número">
+							<h:outputText value="#{list.numero}" />
+						</p:column>
+
+						<p:column headerText="Vencimento" sortBy="#{list.dataVencimento}">
+							<h:outputText value="#{list.dataVencimento}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgDocumentoVeiculo').show();"
+										actionListener="#{documentoVeiculoMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{documentoVeiculoMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Documento do Veículo" widgetVar="dlgDocumentoVeiculo" modal="true"
+				responsive="true" width="60%" id="dlgDocumentoVeiculo" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+								requiredMessage="Veículo é obrigatório"
+								value="#{documentoVeiculoMB.documento.veiculo}" scrollHeight="170"
+								completeMethod="#{documentoVeiculoMB.completarVeiculo}"
+								forceSelection="true" converter="#{converterVeiculo}" var="cur"
+								itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo de Documento *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+								requiredMessage="Tipo de documento é obrigatório"
+								value="#{documentoVeiculoMB.documento.tipoDocumento}" scrollHeight="170"
+								completeMethod="#{documentoVeiculoMB.completarTipoDocumento}"
+								forceSelection="true" converter="#{converterTipoDocumento}" var="cur"
+								itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-hashtag" style="margin-right:6px;color:#1565C0;"></i>Número</label>
+								<p:inputText style="width:100%" value="#{documentoVeiculoMB.documento.numero}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data de Emissão</label>
+								<p:calendar style="width:100%" value="#{documentoVeiculoMB.documento.dataEmissao}"
+								pattern="dd/MM/yyyy" />
+							</div>
+
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar-times-o" style="margin-right:6px;color:#1565C0;"></i>Data de Vencimento *</label>
+								<p:calendar style="width:100%" required="true"
+								requiredMessage="Data de vencimento é obrigatória"
+								value="#{documentoVeiculoMB.documento.dataVencimento}" pattern="dd/MM/yyyy" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-comment-o" style="margin-right:6px;color:#1565C0;"></i>Observação</label>
+								<p:inputText style="width:100%" value="#{documentoVeiculoMB.documento.observacao}" />
+							</div>
+
+						</div>
+
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{documentoVeiculoMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgDocumentoVeiculo').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

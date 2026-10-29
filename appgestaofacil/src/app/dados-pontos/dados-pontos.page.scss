@@ -1,0 +1,211 @@
+// ── Content ──
+
+.dp-content {
+  --background: #f0f4fa;
+}
+
+// ── Selection Cards ──
+
+.selection-card {
+  margin: 16px 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.selection-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selection-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+
+  &.badge-orange {
+    background: linear-gradient(135deg, #ffc409, #e0a800);
+  }
+
+  &.badge-blue {
+    background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  }
+}
+
+.selection-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.selection-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selection-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-top: 2px;
+  word-wrap: break-word;
+}
+
+.selection-detail {
+  font-size: 12px;
+  font-weight: 500;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.selection-address,
+.selection-email {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 4px;
+
+  ion-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+}
+
+.selection-email {
+  color: #3880ff;
+}
+
+.selection-arrow {
+  font-size: 18px;
+  color: #cbd5e0;
+  flex-shrink: 0;
+}
+
+// ── Dates Card ──
+
+.dates-card {
+  margin: 0 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.dates-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.dates-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3dc2ff, #2b9cd4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.dates-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.dates-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf2f7;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.date-next {
+    .date-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a9e54;
+      background: linear-gradient(135deg, #ebf8ee, #d4edda);
+      padding: 4px 12px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.date-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  ion-icon {
+    font-size: 18px;
+    color: #718096;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+  }
+}
+
+.date-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+// ── Actions Area ──
+
+.actions-area {
+  display: flex;
+  gap: 10px;
+  padding: 6px 16px 32px;
+}
+
+.action-btn {
+  flex: 1;
+  --border-radius: 14px;
+  height: 48px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+
+  &.btn-coletas {
+    --border-color: #3880ff;
+    --color: #3880ff;
+    --background-hover: rgba(56, 128, 255, 0.08);
+  }
+
+  &.btn-fones {
+    --border-color: #2dd36f;
+    --color: #1a9e54;
+    --background-hover: rgba(45, 211, 111, 0.08);
+  }
+}

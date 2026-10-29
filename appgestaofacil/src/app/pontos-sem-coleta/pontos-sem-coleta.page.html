@@ -1,0 +1,82 @@
+<ion-header class="psc-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pontos sem Coleta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="psc-content">
+
+  <!-- Card informativo -->
+  <ion-card class="info-card">
+    <ion-card-header class="info-header">
+      <div class="info-icon-badge">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
+      <div>
+        <ion-card-title class="info-title">Pontos Pendentes</ion-card-title>
+        <ion-card-subtitle class="info-subtitle">Mais de 10 dias sem coleta</ion-card-subtitle>
+      </div>
+    </ion-card-header>
+
+    <ion-card-content *ngIf="!buscando && itens.length > 0">
+      <div class="counter-badge">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{ itens.length }} ponto{{ itens.length > 1 ? 's' : '' }} encontrado{{ itens.length > 1 ? 's' : '' }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div class="loading-area" *ngIf="buscando">
+    <ion-card class="loading-card">
+      <ion-card-content>
+        <p>Buscando pontos...</p>
+        <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!buscando && itens.length === 0">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <p>Nenhum ponto pendente!</p>
+    <span>Todos os pontos estão em dia.</span>
+  </div>
+
+  <!-- Lista de pontos -->
+  <div class="points-list" *ngIf="!buscando && itens.length > 0">
+    <ion-card class="point-card" *ngFor="let item of itens">
+      <ion-card-content>
+
+        <div class="point-top">
+          <div class="point-icon-badge">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <div class="point-info">
+            <span class="point-name">{{ item.nomeRazaoSocial }}</span>
+            <span class="point-fantasy" *ngIf="item.nomeFantasia">{{ item.nomeFantasia }}</span>
+          </div>
+          <div class="days-badge" [class.danger]="item.diasSemColeta >= 30" [class.warning]="item.diasSemColeta < 30">
+            <span class="days-number">{{ item.diasSemColeta }}</span>
+            <span class="days-text">dias</span>
+          </div>
+        </div>
+
+        <div class="point-address">
+          <ion-icon name="map-outline"></ion-icon>
+          <span>{{ item.enderecoCompleto }} {{ item.numero }} - {{ item.nomeCidade }}</span>
+        </div>
+
+        <ion-button expand="block" fill="outline" class="coletas-btn" (click)="pesquisarColetasPonto(item.id)">
+          <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+          Ver Coletas
+        </ion-button>
+
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

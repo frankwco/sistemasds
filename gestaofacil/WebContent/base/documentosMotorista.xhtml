@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-id-card-o" style="margin-right:10px;"></i>Documentos do Motorista</h2>
+					<p>CNH, treinamentos (NR-32) e demais certificações com vencimento</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{documentoMotoristaMB.criarNovoObjeto()}"
+							onclick="PF('dlgDocumentoMotorista').show(); PF('dlgDocumentoMotorista').content.scrollTop('0')"
+							title="Cadastrar Documento" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{documentoMotoristaMB.listDocumento}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum documento cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Motorista" filterBy="#{list.motorista.nome}"
+							sortBy="#{list.motorista.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.motorista.nome}" />
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipoDocumento.nome}"
+							sortBy="#{list.tipoDocumento.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.tipoDocumento.nome}" />
+						</p:column>
+
+						<p:column headerText="Número">
+							<h:outputText value="#{list.numero}" />
+						</p:column>
+
+						<p:column headerText="Vencimento" sortBy="#{list.dataVencimento}">
+							<h:outputText value="#{list.dataVencimento}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgDocumentoMotorista').show();"
+										actionListener="#{documentoMotoristaMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{documentoMotoristaMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Documento do Motorista" widgetVar="dlgDocumentoMotorista" modal="true"
+				responsive="true" width="60%" id="dlgDocumentoMotorista" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-badge" style="margin-right:6px;color:#1565C0;"></i>Motorista *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+									requiredMessage="Motorista é obrigatório"
+									value="#{documentoMotoristaMB.documento.motorista}" scrollHeight="170"
+									completeMethod="#{usuarioMB.completarMotorista}"
+									forceSelection="true" converter="#{converterUsuario}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo de Documento *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+									requiredMessage="Tipo de documento é obrigatório"
+									value="#{documentoMotoristaMB.documento.tipoDocumento}" scrollHeight="170"
+									completeMethod="#{documentoMotoristaMB.completarTipoDocumento}"
+									forceSelection="true" converter="#{converterTipoDocumento}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-hashtag" style="margin-right:6px;color:#1565C0;"></i>Número</label>
+								<p:inputText style="width:100%" value="#{documentoMotoristaMB.documento.numero}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data de Emissão</label>
+								<p:calendar style="width:100%" value="#{documentoMotoristaMB.documento.dataEmissao}"
+									pattern="dd/MM/yyyy" />
+							</div>
+
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar-times-o" style="margin-right:6px;color:#1565C0;"></i>Data de Vencimento *</label>
+								<p:calendar style="width:100%" required="true"
+									requiredMessage="Data de vencimento é obrigatória"
+									value="#{documentoMotoristaMB.documento.dataVencimento}" pattern="dd/MM/yyyy" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-comment-o" style="margin-right:6px;color:#1565C0;"></i>Observação</label>
+								<p:inputText style="width:100%" value="#{documentoMotoristaMB.documento.observacao}" />
+							</div>
+
+						</div>
+
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{documentoMotoristaMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgDocumentoMotorista').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,136 @@
+<!-- ===== DS RESÍDUOS — CABEÇALHO MODERNO 2026 ===== -->
+
+<!-- Top Bar -->
+<div class="ds-topbar d-none d-md-block">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="topbar-left">
+                    <a href="mailto:contato@dsresiduos.com.br">
+                        <i class="fas fa-envelope"></i> contato@dsresiduos.com.br
+                    </a>
+                    <span style="color:rgba(255,255,255,.3)">|</span>
+                    <a href="tel:4499323410">
+                        <i class="fas fa-phone"></i> (44) 9.9932-3410
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="topbar-items">
+                    <a href="https://api.whatsapp.com/send?phone=5544999323410&text=Se quiser orçamento para coletas, informe:%0ASua cidade:%0ARamo de atividade:%0AJá possui alguma outra empresa que já te presta esse serviço?%0A%0ASe for outro assunto,%0Aqual seria?" target="_blank" rel="noopener">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Comercial
+                    </a>
+                    <a href="https://alcsistemas.com.br/gestaofacil" target="_blank" rel="noopener">
+                        <i class="fas fa-user-circle"></i> Área do Cliente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg ds-navbar" id="dsNavbar" aria-label="Navegação principal">
+    <div class="container">
+        <a class="navbar-brand" href="index.php">
+            <img src="img/logo_nova.png" alt="DS Resíduos — Gestão de Resíduos de Saúde" loading="eager" />
+        </a>
+
+        <button class="navbar-toggler" type="button" id="navToggler"
+            aria-controls="navbarMain" aria-expanded="false" aria-label="Abrir menu de navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="empresa.php">Empresa</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="coleta.php" role="button" data-bs-toggle="dropdown" aria-expanded="false">Coleta</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="coleta.php"><i class="fas fa-truck-medical fa-xs me-1"></i> Coleta de RSS</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="coleta-residuos-veterinarios.php"><i class="fas fa-paw fa-xs me-1"></i> Clínicas Veterinárias</a></li>
+                        <li><a class="dropdown-item" href="coleta-residuos-tatuagem.php"><i class="fas fa-syringe fa-xs me-1"></i> Tatuagem e Piercing</a></li>
+                        <li><a class="dropdown-item" href="coleta-residuos-farmacia.php"><i class="fas fa-pills fa-xs me-1"></i> Farmácias e Drogarias</a></li>
+                        <li><a class="dropdown-item" href="coleta-residuos-agropecuarios.php"><i class="fas fa-tractor fa-xs me-1"></i> Fazendas e Agropecuária</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="solucoes.php">Soluções</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="meio-ambiente.php">Meio Ambiente</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="mtr-sinir.php">MTR / SINIR</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="licencas-modelos.php">Licenças</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="blog.php">Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="faq.php">FAQ</a>
+                </li>
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-ds-primary" href="contato.php">
+                        <i class="fas fa-clipboard-list"></i> Solicitar Orçamento
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+(function(){
+    var nav = document.getElementById('dsNavbar');
+    if(!nav) return;
+
+    // Scroll effect
+    window.addEventListener('scroll', function(){
+        nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, {passive: true});
+
+    // Active nav link
+    var links = nav.querySelectorAll('.nav-link');
+    var current = window.location.pathname.split('/').pop() || 'index.php';
+    links.forEach(function(l){
+        if(l.getAttribute('href') === current) l.classList.add('active');
+    });
+
+    // Mobile menu toggle (pure JS – does not depend on Bootstrap bundle)
+    var toggler = document.getElementById('navToggler');
+    var menu    = document.getElementById('navbarMain');
+    if (toggler && menu) {
+        toggler.addEventListener('click', function() {
+            var open = menu.classList.contains('show');
+            menu.classList.toggle('show', !open);
+            toggler.setAttribute('aria-expanded', String(!open));
+        });
+        // Close menu when a link is clicked on mobile
+        menu.querySelectorAll('.nav-link').forEach(function(l){
+            l.addEventListener('click', function(){
+                if (window.innerWidth < 992) {
+                    menu.classList.remove('show');
+                    toggler.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e){
+            if (!nav.contains(e.target) && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                toggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+})();
+</script>
+<!-- ===== fim do cabeçalho ===== -->

@@ -1,0 +1,257 @@
+// ── Content ──
+
+.psc-content {
+  --background: #f0f4fa;
+}
+
+// ── Info Card ──
+
+.info-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.info-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffc409, #e0a800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.info-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.info-subtitle {
+  font-size: 13px;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.counter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #edf2f7;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+
+  ion-icon {
+    font-size: 16px;
+    color: #3880ff;
+  }
+}
+
+// ── Loading ──
+
+.loading-area {
+  padding: 0 16px;
+}
+
+.loading-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+
+  p {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #718096;
+    margin-bottom: 10px;
+  }
+}
+
+// ── Empty State ──
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    color: #2dd36f;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 4px;
+  }
+
+  span {
+    font-size: 14px;
+    color: #718096;
+  }
+}
+
+// ── Points List ──
+
+.points-list {
+  padding: 0 16px 24px;
+}
+
+.point-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.point-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.point-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.point-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.point-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.point-fantasy {
+  font-size: 12px;
+  font-weight: 500;
+  color: #718096;
+  margin-top: 2px;
+}
+
+// ── Days Badge ──
+
+.days-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  flex-shrink: 0;
+
+  &.warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border: 2px solid #ffc409;
+  }
+
+  &.danger {
+    background: linear-gradient(135deg, #fce4ec, #ffcdd2);
+    border: 2px solid #eb445a;
+  }
+}
+
+.days-number {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+
+  .warning & {
+    color: #e0a800;
+  }
+
+  .danger & {
+    color: #eb445a;
+  }
+}
+
+.days-text {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .warning & {
+    color: #c49800;
+  }
+
+  .danger & {
+    color: #cf3c4f;
+  }
+}
+
+// ── Address ──
+
+.point-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f4f6fb;
+  border-radius: 10px;
+  margin-bottom: 12px;
+
+  ion-icon {
+    font-size: 16px;
+    color: #718096;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 13px;
+    color: #4a5568;
+    line-height: 1.4;
+  }
+}
+
+// ── Coletas Button ──
+
+.coletas-btn {
+  --border-radius: 12px;
+  --border-color: #3880ff;
+  --color: #3880ff;
+  --background-hover: rgba(56, 128, 255, 0.08);
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+}

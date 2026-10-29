@@ -1,0 +1,160 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Abastecimento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="abastecimento-content">
+
+  <!-- Card Veículo/Motorista -->
+  <ion-card class="selection-card">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-blue">
+          <ion-icon name="car-sport-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Veículo</span>
+          <span class="selection-value">{{ veiculoSelecionado.descricao || 'Nenhum selecionado' }} {{ veiculoSelecionado.placa }}</span>
+        </div>
+      </div>
+      <div class="selection-row selection-row-spaced">
+        <div class="selection-icon-badge badge-green">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Motorista</span>
+          <span class="selection-value" [class.aviso-obrigatorio]="!motoristaSelecionado.nome">
+            {{ motoristaSelecionado.nome || 'Nenhum selecionado (obrigatório)' }}
+          </span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Formulário -->
+  <ion-card class="form-card">
+    <ion-card-header class="form-header">
+      <div class="form-icon-badge">
+        <ion-icon name="water-outline"></ion-icon>
+      </div>
+      <ion-card-title class="form-title">Dados do Abastecimento</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="input-group">
+        <label class="input-label">Data</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
+          <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="data"></ion-datetime>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Km do Odômetro *</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="speedometer-outline" slot="start" color="primary"></ion-icon>
+          <ion-input type="number" inputmode="numeric" [(ngModel)]="km" placeholder="0"></ion-input>
+        </ion-item>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group input-group-half">
+          <label class="input-label">Litros *</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="flask-outline" slot="start" color="primary"></ion-icon>
+            <ion-input type="number" inputmode="decimal" [(ngModel)]="litros" placeholder="0,00"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group input-group-half">
+          <label class="input-label">Valor/Litro (R$) *</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="pricetag-outline" slot="start" color="primary"></ion-icon>
+            <ion-input type="number" inputmode="decimal" [(ngModel)]="valorLitro" placeholder="0,00"></ion-input>
+          </ion-item>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Combustível *</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="flame-outline" slot="start" color="primary"></ion-icon>
+          <ion-select [(ngModel)]="combustivel" placeholder="Selecione">
+            <ion-select-option *ngFor="let c of combustiveis" [value]="c">{{ c }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Posto</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+          <ion-select [(ngModel)]="fornecedor" placeholder="Selecione" [compareWith]="compareFornecedor" [disabled]="carregandoPostos">
+            <ion-select-option *ngFor="let p of postos" [value]="p">{{ p.nome }}</ion-select-option>
+          </ion-select>
+          <ion-spinner *ngIf="carregandoPostos" slot="end" name="dots"></ion-spinner>
+          <ion-button *ngIf="!carregandoPostos" fill="clear" slot="end" (click)="cadastrarNovoPosto()" title="Cadastrar novo posto">
+            <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Observação</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+          <ion-textarea [(ngModel)]="observacao" placeholder="Opcional" rows="2"></ion-textarea>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Valor Total -->
+  <ion-card class="total-card" *ngIf="valorTotal">
+    <ion-card-content>
+      <div class="total-row">
+        <div class="total-icon-badge">
+          <ion-icon name="cash-outline"></ion-icon>
+        </div>
+        <div class="total-info">
+          <span class="total-label">Valor Total</span>
+          <span class="total-value">R$ {{ valorTotal }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Comprovante -->
+  <ion-card class="foto-card">
+    <ion-card-content>
+      <ion-button expand="block" shape="round" fill="outline" class="foto-btn" (click)="tirarFoto()" *ngIf="!fotoBase64">
+        <ion-icon slot="start" name="camera-outline"></ion-icon>
+        Fotografar comprovante
+      </ion-button>
+
+      <div *ngIf="fotoBase64" class="foto-preview">
+        <img [src]="'data:image/jpeg;base64,' + fotoBase64" />
+        <ion-button fill="clear" color="danger" (click)="removerFoto()">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="action-area">
+    <ion-button expand="block" shape="round" class="salvar-btn" (click)="salvar()" [disabled]="salvando">
+      <ion-spinner *ngIf="salvando" name="dots"></ion-spinner>
+      <ng-container *ngIf="!salvando">
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        Salvar
+      </ng-container>
+    </ion-button>
+  </div>
+
+</ion-content>

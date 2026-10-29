@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="resources/template/template-padrao.xhtml">
+	<ui:define name="conteudo">
+		<p:ajaxStatus onstart="PF('statusDialog').show()"
+			onsuccess="PF('statusDialog').hide()" />
+
+		<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+			closable="false" resizable="false" showHeader="false">
+			<h:outputText style="font-weight:bold"
+				value="Aguarde, realizando operação...." />
+			<br />
+			<center>
+				<p:graphicImage name="img/aguarde.gif" />
+			</center>
+		</p:dialog>
+
+
+		<div class="bs-docs-header" style="margin-top: 5px">
+			<section class="content">
+
+
+				<!-- Main content -->
+
+				<div class="row">
+
+					<div class="col-lg-12 col-xs-12">
+						<!-- small box -->
+						<div class="small-box bg-yellow">
+							<div class="inner">
+								<h2>Atualize seu e-mail para receber as informações das
+									coletas da DS Transportes</h2>
+							</div>
+
+
+						</div>
+					</div>
+
+				</div>
+
+				<h:form>
+					<div class="row">
+
+						<div class="col-lg-12 col-xs-12">
+							<p:messages id="messages" showDetail="true" closable="true">
+								<p:autoUpdate />
+							</p:messages>
+						</div>
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="Nome/razão social e Nome Fantasia*" />
+									<br /> <small>Conforme consta no contrato</small>
+									<p:inputText id="nome"
+										value="#{atualizacaoEmailMB.mensagemSite.nomeRazaoSocial}" />
+								</div>
+
+							</div>
+						</div>
+
+
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="CPF ou CNPJ*" />
+									<br /> <small>Conforme o contrato</small>
+									<p:inputText id="cpfCnpj"
+										value="#{atualizacaoEmailMB.mensagemSite.cpfCnpj}" />
+								</div>
+
+							</div>
+						</div>
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="Telefone 1" />
+									<br /> <small>Ou WhatsApp</small>
+									<p:inputMask autoClear="false" mask="(99)99999-9999"
+										value="#{atualizacaoEmailMB.mensagemSite.telefones}" />
+								</div>
+
+							</div>
+						</div>
+						
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="Telefone 2" />
+									<br /> <b>Ou WhatsApp (se for diferente do 1º)</b>
+									<p:inputMask autoClear="false" mask="(99)99999-9999"
+										value="#{atualizacaoEmailMB.mensagemSite.telefones2}" />
+								</div>
+
+							</div>
+						</div>
+								<div class="col-lg-12 col-xs-12">
+						<br/>
+						</div>
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="E-mail 1*" />
+									<br /> <b>Será utilizado para encaminhar as
+										coletas</b>
+										<br /><br />
+									<p:inputText id="email"
+										value="#{atualizacaoEmailMB.mensagemSite.email}" />
+								</div>
+
+							</div>
+						</div>
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel value="E-mail 2" />
+									<br /> <b>NÃO OBRIGATÓRIO - Apenas se quiser receber em 2 emails</b>
+									<p:inputText id="email2"
+										value="#{atualizacaoEmailMB.mensagemSite.email2}" />
+								</div>
+
+							</div>
+						</div>
+
+						<div class="col-lg-3 col-xs-12">
+							<div class="ui-fluid">
+								<div class="p-field">
+									<p:outputLabel style="color:white" value="." />
+									<br /> <small style="color: white">.</small>
+									<p:commandButton value="Enviar"
+										styleClass="ui-priority-primary"
+										actionListener="#{atualizacaoEmailMB.salvar()}"
+										update="@form, messages, mensagemCerto" />
+								</div>
+
+
+							</div>
+						</div>
+
+
+					</div>
+				</h:form>
+				<div class="row">
+					<h:outputText style="color:red; font-size:30px" id="mensagemCerto" value="#{atualizacaoEmailMB.mensagemCerto}" />
+					<br /> <br /> <br /> <br />
+				</div>
+				<div class="row">
+					<a href="https://dsresiduos.com.br/">
+						<div class="col-lg-12 col-xs-12">
+							<!-- small box -->
+							<div class="small-box bg-green">
+								<div class="inner">
+									<h2 style="color: white">Voltar para o site da DS
+										Transportes</h2>
+
+								</div>
+
+
+							</div>
+						</div>
+					</a>
+
+				</div>
+
+
+			</section>
+		</div>
+
+	</ui:define>
+</ui:composition>
+</html>

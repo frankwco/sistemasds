@@ -1,0 +1,54 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+/* Alertas com corpo de mensagem longo (ex: confirmação de exclusão) não podem
+   ter parte do texto escondida atrás de uma rolagem interna do .alert-message —
+   deixa a mensagem crescer livremente e o alerta como um todo rola se precisar. */
+.confirmar-exclusao-alert .alert-message {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Nome de posto/fornecedor/categoria pode ser longo — por padrão o ion-select
+   corta o texto selecionado com "..." depois de poucos caracteres
+   (white-space: nowrap). Deixa quebrar em várias linhas em vez de truncar. */
+ion-select::part(text) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+/* O dialog de opções do ion-select (e qualquer outro ion-alert) usa só
+   270-280px de largura por padrão — bem estreito pra listas com nomes
+   longos de posto/fornecedor/categoria. Usa quase a largura toda da tela
+   em vez do valor fixo padrão. Precisa de !important: o componente define
+   o padrão num ":host" (especificidade de classe), mais específico que um
+   seletor de elemento comum vindo de fora. */
+ion-alert {
+  --width: 94% !important;
+  --max-width: 94vw !important;
+}

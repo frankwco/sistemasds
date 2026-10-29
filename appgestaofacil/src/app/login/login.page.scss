@@ -1,0 +1,138 @@
+.my-custom-class {
+  --background: #e5e5e5;
+}
+
+// ── Login Page Styles ──
+
+.login-content {
+  --background: linear-gradient(135deg, #3880ff 0%, #1a3a6e 100%);
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 32px;
+  color: #fff;
+}
+
+.logo-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.logo-icon {
+  font-size: 48px;
+  color: #fff;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.app-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+// ── Card ──
+
+.login-card {
+  background: #ffffff;
+  margin: 0 20px;
+  border-radius: 20px;
+  padding: 28px 22px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  font-size: 13px;
+  color: #6d4c00;
+
+  ion-icon {
+    font-size: 20px;
+    color: #ff9800;
+    flex-shrink: 0;
+  }
+}
+
+// ── Inputs ──
+
+.input-item {
+  --background: #f4f6fb;
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  ion-icon {
+    margin-top: 14px;
+    font-size: 20px;
+  }
+}
+
+.toggle-item {
+  --background: transparent;
+  --padding-start: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+
+  ion-label {
+    color: #666;
+  }
+}
+
+// ── Button ──
+
+.login-btn {
+  --background: linear-gradient(135deg, #3880ff 0%, #5b5ea6 100%);
+  --border-radius: 28px;
+  --box-shadow: 0 4px 14px rgba(56, 128, 255, 0.4);
+  margin-top: 10px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+// ── Esqueceu senha ──
+
+.forgot-password {
+  text-align: center;
+  margin-top: 18px;
+
+  a {
+    color: #3880ff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="utf-8"></meta>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+	<title>GF - Área do Cliente</title>
+	<meta
+		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+		name="viewport"></meta>
+
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/img/favicon.png" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/dist/css/AdminLTE.min.css" />
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/dist/css/skins/skin-blue.min.css" />
+	<link rel="stylesheet"
+		href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+
+	<!-- CSS compartilhado para páginas do cliente -->
+	<!-- ?v= é bump manual: incremente ao editar gf-admin.css para forçar o
+	     navegador a buscar a versão nova em vez de usar a em cache -->
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/gf-admin.css?v=9" />
+
+	<!-- CSS de layout dos templates (sidebar, navbar, temas) -->
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/gf-template.css" />
+
+	<link type="text/css" rel="stylesheet"
+		href="#{request.contextPath}/css/default.css" />
+	<link type="text/css" rel="stylesheet"
+		href="#{request.contextPath}/css/syntaxhighlighter.css" />
+
+
+</h:head>
+<h:body class="hold-transition skin-blue sidebar-mini cliente-theme">
+
+	<div class="wrapper">
+
+		<!-- ══ HEADER ══ -->
+		<header class="main-header">
+
+			<a href="inicio.jsf" class="logo">
+				<span class="logo-mini"><b>DS</b></span>
+				<span class="logo-lg" style="font-size:24px;"><b>DS Transportes</b></span>
+			</a>
+
+			<nav class="navbar navbar-static-top">
+
+				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</a>
+
+				<div class="navbar-custom-menu">
+					<ul class="nav navbar-nav">
+						<li class="dropdown user user-menu">
+							<a href="" class="dropdown-toggle" data-toggle="dropdown">
+								<span class="hidden-xs">
+									<i class="fa fa-user" aria-hidden="true"></i>
+									<h:outputText value="#{usuarioSessaoMB.usuario.email}" />
+								</span>
+							</a>
+						</li>
+						<li>
+							<a href="../logout">
+								<i class="fa fa-power-off" aria-hidden="true"></i> Sair
+							</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+
+		<!-- ══ SIDEBAR ══ -->
+		<aside class="main-sidebar">
+			<section class="sidebar">
+				<ul class="sidebar-menu">
+
+					<li class="sidebar-section-label">Navegação</li>
+
+					<li><a href="inicio.jsf">
+						<i class="fa fa-home" aria-hidden="true"></i>
+						<span>Início</span>
+					</a></li>
+
+					<li><a href="coletasCliente.jsf">
+						<i class="fa fa-truck" aria-hidden="true"></i>
+						<span>Coletas</span>
+					</a></li>
+
+					<li><a href="emissaoRomaneiosLaudos.jsf">
+						<i class="fa fa-file-text" aria-hidden="true"></i>
+						<span>Romaneios e Certificados</span>
+					</a></li>
+
+					<li><a href="dadosContratos.jsf">
+						<i class="fa fa-file-text-o" aria-hidden="true"></i>
+						<span>Contratos</span>
+					</a></li>
+
+					<li class="sidebar-section-label">Conta</li>
+
+					<li><a href="alterarSenha.jsf">
+						<i class="fa fa-lock" aria-hidden="true"></i>
+						<span>Alterar Senha</span>
+					</a></li>
+
+				</ul>
+			</section>
+		</aside>
+
+		<!-- ══ CONTEÚDO ══ -->
+		<div class="content-wrapper">
+			<section class="content">
+				<div id="mensagem">
+					<ui:insert name="mensagem"></ui:insert>
+				</div>
+				<div id="conteudo">
+					<ui:insert name="conteudo"></ui:insert>
+				</div>
+				<div id="modal-confirmacao">
+					<ui:insert name="modal-confirmacao"></ui:insert>
+				</div>
+			</section>
+		</div>
+
+		<div class="control-sidebar-bg"></div>
+	</div>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/plugins/fastclick/fastclick.js"></script>
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/dist/js/app.min.js"></script>
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/dist/js/demo.js"></script>
+</h:body>
+</html>

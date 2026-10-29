@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="coletas_app" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="ebd2b0cc-8827-4087-be9c-07468241e2b2">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GestaoFacil"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="264"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="728"/>
+	<parameter name="DATA_INICIAL" class="java.lang.String"/>
+	<parameter name="DATA_FINAL" class="java.lang.String"/>
+	<parameter name="DATA_FORMATADA" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT estado.sigla,
+	coleta_app.id AS idColetaApp,
+	coleta_app.a,
+	coleta_app.a2,
+	coleta_app.a3,
+	coleta_app.b,
+	coleta_app.e,
+	coleta_app.`dataUltimaColeta`,
+	DATE_FORMAT(coleta_app.`dataUltimaColeta`, '%Y-%m-%d') as dataFormatada,
+	pessoa.`nomeRazaoSocial`,
+	pessoa.endereco,
+	pessoa.numero,
+	cidade.nome AS nomeCidade,
+	ponto_coleta.status AS statusPontoColeta,
+	coleta_app.status AS statusColetaApp,
+	ponto_coleta.id AS idPontoColeta,
+	pessoa.id AS idPessoa,
+	coleta_app.veiculo_id,
+	coleta_app.`emailUsuario`,
+	veiculo.descricao as descricaoVeiculo
+FROM coleta_app
+	INNER JOIN ponto_coleta ON 
+	 coleta_app.`pontoColetaSelecionado_id` = ponto_coleta.id 
+	INNER JOIN pessoa ON 
+	 ponto_coleta.id = pessoa.id 
+	INNER JOIN cidade ON 
+	 pessoa.cidade_id = cidade.id 
+	INNER JOIN estado ON 
+	 cidade.estado_id = estado.id 
+	INNER JOIN veiculo ON 
+	 coleta_app.veiculo_id = veiculo.id where coleta_app.dataUltimaColeta 
+	 BETWEEN  $P{DATA_INICIAL} AND  $P{DATA_FINAL}  
+	 AND coleta_app.status is true order by veiculo_id, coleta_app.`emailUsuario`, dataFormatada desc]]>
+	</queryString>
+	<field name="sigla" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="sigla"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estado"/>
+	</field>
+	<field name="idColetaApp" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="idColetaApp"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="a" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="a"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="a2" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="a2"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="a3" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="a3"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="b" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="b"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="e" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="e"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="dataUltimaColeta" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="dataUltimaColeta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="dataFormatada" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dataFormatada"/>
+	</field>
+	<field name="nomeRazaoSocial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nomeRazaoSocial"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="endereco" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="endereco"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="numero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numero"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="nomeCidade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nomeCidade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="cidade"/>
+	</field>
+	<field name="statusPontoColeta" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="statusPontoColeta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="ponto_coleta"/>
+	</field>
+	<field name="statusColetaApp" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="statusColetaApp"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="idPontoColeta" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="idPontoColeta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="ponto_coleta"/>
+	</field>
+	<field name="idPessoa" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="idPessoa"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="veiculo_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="veiculo_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="emailUsuario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="emailUsuario"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta_app"/>
+	</field>
+	<field name="descricaoVeiculo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descricaoVeiculo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="veiculo"/>
+	</field>
+	<variable name="TOTALA" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{a}]]></variableExpression>
+	</variable>
+	<variable name="TOTALB" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{b}]]></variableExpression>
+	</variable>
+	<variable name="TOTALE" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{e}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{a2}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA3" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{a3}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA_1" class="java.lang.Double" resetType="Group" resetGroup="Group1" calculation="Sum">
+		<variableExpression><![CDATA[$F{a}]]></variableExpression>
+	</variable>
+	<variable name="TOTALB_1" class="java.lang.Double" resetType="Group" resetGroup="Group1" calculation="Sum">
+		<variableExpression><![CDATA[$F{b}]]></variableExpression>
+	</variable>
+	<variable name="TOTALE_1" class="java.lang.Double" resetType="Group" resetGroup="Group1" calculation="Sum">
+		<variableExpression><![CDATA[$F{e}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA2_1" class="java.lang.Double" resetType="Group" resetGroup="Group1" calculation="Sum">
+		<variableExpression><![CDATA[$F{a2}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA3_1" class="java.lang.Double" resetType="Group" resetGroup="Group1" calculation="Sum">
+		<variableExpression><![CDATA[$F{a3}]]></variableExpression>
+	</variable>
+	<group name="Group1" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{veiculo_id}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yy">
+					<reportElement stretchType="ElementGroupBottom" x="2" y="0" width="208" height="20" isPrintWhenDetailOverflows="true" uuid="d5896137-6dc6-4d22-983b-275c1c935f8d">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb84ded1-3897-4450-b4c8-205318d2e81f"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{descricaoVeiculo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="50">
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="302" y="0" width="50" height="30" uuid="374a0609-4cce-42c6-9e42-3715be04a50c"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALA_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="402" y="0" width="50" height="30" uuid="7b34ba72-cae6-4f01-9b3d-ea28e7cf2a3d"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALB_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="452" y="0" width="50" height="30" uuid="dc77c33a-602d-4d8f-91dc-bce68b3ac104"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALA2_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="352" y="0" width="50" height="30" uuid="d5d86c63-6fdc-4e95-9ca9-ca6996de3a06"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALE_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="502" y="0" width="50" height="30" uuid="8f8bc942-4298-4060-9120-6118a5eaa880"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALA3_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="20" y="0" width="270" height="30" uuid="472bfbfa-bae1-419d-adc1-b72039329088"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL "+$F{descricaoVeiculo}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.000;(#,##0.000-)">
+					<reportElement x="302" y="30" width="250" height="20" uuid="70abbf34-1cdb-4a23-bfe8-208705d87deb"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{TOTALA_1}+$V{TOTALB_1}+$V{TOTALE_1}+$V{TOTALA2_1}+$V{TOTALA3_1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="37" splitType="Stretch">
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="2" y="0" width="550" height="30" forecolor="#030303" uuid="8bc892e1-86bf-4185-aea6-60ea85b0a0d3"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Coletas realizadas pelo APP - "+$P{DATA_FORMATADA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="9" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement x="302" y="0" width="50" height="26" uuid="c3e4bb4d-db62-4f03-a79b-27be5ec86cdf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="0" width="50" height="26" uuid="663b1938-bb5b-44ed-9bc9-484b80879861">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[E]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="0" width="50" height="26" uuid="85f22370-4f46-4702-8c99-0b594b6adbc7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[B]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="452" y="0" width="50" height="26" uuid="531b45a9-f9c9-4770-a067-aebf541ef159">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A2]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="502" y="0" width="50" height="26" uuid="7edd3440-06bd-4e73-ae2e-0326fb4aba05">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A3]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="28" splitType="Stretch">
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement stretchType="ContainerHeight" x="302" y="0" width="50" height="28" uuid="d4193c4b-681d-48f3-91ac-1177d4aa0937">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb84ded1-3897-4450-b4c8-205318d2e81f"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{a}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement stretchType="ContainerHeight" x="352" y="0" width="50" height="28" uuid="80724947-4c77-43b2-9b2d-3c52a16756f8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc8da13e-7735-4495-ba92-1a75ee2205f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{e}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement stretchType="ContainerHeight" x="402" y="0" width="50" height="28" uuid="ec2b20d3-ad5e-4af1-8740-d49f00285066">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fc2a6f7f-ed09-4e95-95e0-f8eb42010723"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{b}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement stretchType="ContainerHeight" x="452" y="0" width="50" height="28" uuid="e7755c70-9031-47a2-9168-50c8d20026d1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77046b23-08d2-4bd3-aa19-577020b0f4b5"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{a2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement stretchType="ContainerHeight" x="502" y="0" width="50" height="28" uuid="32c3fa70-d373-4b2f-8ab2-70c4bbd716a9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4fb93039-0b3e-460a-8a68-cb3172fe2df2"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{a3}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yy">
+				<reportElement stretchType="ContainerHeight" x="260" y="0" width="42" height="28" isPrintWhenDetailOverflows="true" uuid="1efbff95-58b2-43e8-a377-f311692bddf7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb84ded1-3897-4450-b4c8-205318d2e81f"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dataUltimaColeta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="260" height="28" uuid="0952d48d-f1c2-4c66-8a7d-3afca33e6cfb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5d716501-4127-43a1-80ea-6303c984552e"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nomeRazaoSocial}+" - "+$F{endereco}+", "+$F{numero}+" - "+$F{nomeCidade}+"/"+$F{sigla} +" - ("+$F{emailUsuario}+")"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="66" splitType="Stretch">
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="402" y="10" width="50" height="30" uuid="d98d1ada-c74a-408b-88fe-8285084876c7"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALB}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="452" y="10" width="50" height="30" uuid="48e9d615-7e5b-417a-be50-ced2a6a6be48"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="302" y="10" width="50" height="30" uuid="838ea916-2739-4b08-8e70-e13462b939a1"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="200" y="10" width="90" height="30" uuid="4de2564e-7188-4acf-beb1-9a03c9c7c5ab"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TOTAL GERAL"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="352" y="10" width="50" height="30" uuid="7a26e149-7807-434e-9e2b-d8f48650f6ad"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="502" y="10" width="50" height="30" uuid="2ad01529-d4c5-4bc0-a1ec-59296c6644ba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA3}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000;(#,##0.000-)">
+				<reportElement x="302" y="40" width="250" height="20" uuid="fc03f7b5-678d-4ff1-9936-e9d4f0fdce9f"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA}+$V{TOTALB}+$V{TOTALE}+$V{TOTALA2}+$V{TOTALA3}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

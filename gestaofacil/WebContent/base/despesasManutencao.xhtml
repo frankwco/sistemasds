@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-wrench" style="margin-right:10px;"></i>Despesas e Manutenção</h2>
+					<p>Registre despesas gerais e serviços de manutenção da frota</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{despesaManutencaoMB.criarNovoObjeto()}"
+							oncomplete="PF('dlgDespesaManutencao').show(); PF('dlgDespesaManutencao').content.scrollTop('0')"
+							title="Cadastrar Despesa/Manutenção" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{despesaManutencaoMB.listLancamento}"
+						styleClass="gf-fixed-table"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma despesa ou manutenção registrada"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Data" sortBy="#{list.data}" width="50">
+							<h:outputText value="#{list.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipo}"
+							sortBy="#{list.tipo}" filterMatchMode="contains" width="70">
+							<h:outputText value="#{list.tipo}" />
+						</p:column>
+
+						<p:column headerText="Veículo" filterBy="#{list.veiculo.descricao}"
+							sortBy="#{list.veiculo.descricao}" filterMatchMode="contains"
+							style="white-space:normal !important;" width="160">
+							<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+						</p:column>
+
+						<p:column headerText="Categoria" filterBy="#{list.categoriaDespesa.nome}"
+							sortBy="#{list.categoriaDespesa.nome}" filterMatchMode="contains"
+							style="white-space:normal !important;" width="120">
+							<h:outputText value="#{list.categoriaDespesa.nome}" />
+						</p:column>
+
+						<p:column headerText="Fornecedor" filterBy="#{list.fornecedor.nome}"
+							sortBy="#{list.fornecedor.nome}" filterMatchMode="contains"
+							style="white-space:normal !important;" width="150">
+							<h:outputText value="#{list.fornecedor.nome}" />
+						</p:column>
+
+						<p:column headerText="Valor" width="70">
+							<h:outputText value="#{list.valor}">
+								<f:convertNumber type="currency" currencySymbol="R$ " />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Origem" width="35">
+							<i class="fa fa-microphone" title="Lançado por voz (IA)" style="color:#6a1b9a;"
+								rendered="#{list.origemLancamento == 'IA_Voz'}"></i>
+							<i class="fa fa-camera" title="Lançado por foto (IA)" style="color:#6a1b9a;"
+								rendered="#{list.origemLancamento == 'IA_Foto'}"></i>
+						</p:column>
+
+						<p:column headerText="Ações" width="120">
+							<div class="action-btn-icons">
+								<span class="btn-teal-modern">
+									<p:commandButton icon="fa fa-paperclip"
+										update=":frmAnexos" title="Anexos"
+										oncomplete="PF('dlgAnexos').show();"
+										actionListener="#{anexoMB.prepararParaLancamento(list)}" />
+								</span>
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil" title="Alterar"
+										update=":frmModalSalvar"
+										oncomplete="PF('dlgDespesaManutencao').show();"
+										actionListener="#{despesaManutencaoMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{despesaManutencaoMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Despesa/Manutenção" widgetVar="dlgDespesaManutencao" modal="true"
+				responsive="true" width="60%" id="dlgDespesaManutencao" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+									requiredMessage="Veículo é obrigatório"
+									value="#{despesaManutencaoMB.lancamento.veiculo}" scrollHeight="170"
+									completeMethod="#{despesaManutencaoMB.completarVeiculo}"
+									forceSelection="true" converter="#{converterVeiculo}" var="cur"
+									itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-badge" style="margin-right:6px;color:#1565C0;"></i>Motorista</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{despesaManutencaoMB.lancamento.motorista}" scrollHeight="170"
+									completeMethod="#{usuarioMB.completarMotorista}"
+									forceSelection="true" converter="#{converterUsuario}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-tags" style="margin-right:6px;color:#1565C0;"></i>Categoria</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{despesaManutencaoMB.lancamento.categoriaDespesa}" scrollHeight="170"
+									completeMethod="#{despesaManutencaoMB.completarCategoria}"
+									forceSelection="true" converter="#{converterCategoriaDespesa}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-building" style="margin-right:6px;color:#1565C0;"></i>Fornecedor</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{despesaManutencaoMB.lancamento.fornecedor}" scrollHeight="170"
+									completeMethod="#{despesaManutencaoMB.completarFornecedor}"
+									forceSelection="true" converter="#{converterFornecedor}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data *</label>
+								<p:calendar style="width:100%" required="true"
+									requiredMessage="Data é obrigatória"
+									value="#{despesaManutencaoMB.lancamento.data}" pattern="dd/MM/yyyy" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-usd" style="margin-right:6px;color:#1565C0;"></i>Valor *</label>
+								<p:inputNumber style="width:100%" required="true" decimalPlaces="2"
+									requiredMessage="Valor é obrigatório"
+									value="#{despesaManutencaoMB.lancamento.valor}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km do Odômetro</label>
+								<p:inputNumber style="width:100%" decimalPlaces="0"
+									thousandSeparator="." value="#{despesaManutencaoMB.lancamento.km}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-wrench" style="margin-right:6px;color:#1565C0;"></i>É manutenção/serviço?</label>
+								<p:selectBooleanButton value="#{despesaManutencaoMB.manutencao}"
+									onLabel="Sim" offLabel="Não" style="width:60px">
+									<p:ajax update=":frmModalSalvar:pnlManutencao" />
+								</p:selectBooleanButton>
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-comment-o" style="margin-right:6px;color:#1565C0;"></i>Observação</label>
+								<p:inputText style="width:100%" value="#{despesaManutencaoMB.lancamento.observacao}" />
+							</div>
+						</div>
+
+						<p:outputPanel id="pnlManutencao">
+							<h:panelGroup rendered="#{despesaManutencaoMB.manutencao}">
+								<div class="gf-form-group">
+									<div class="gf-form-item">
+										<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo de Manutenção</label>
+										<p:selectOneMenu style="width:100%"
+											value="#{despesaManutencaoMB.lancamento.tipoManutencao}">
+											<f:selectItem itemLabel="Selecione" itemValue="" />
+											<f:selectItem itemLabel="Preventiva" itemValue="Preventiva" />
+											<f:selectItem itemLabel="Corretiva" itemValue="Corretiva" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="gf-form-item">
+										<label><i class="fa fa-sign-in" style="margin-right:6px;color:#1565C0;"></i>Data de Entrada</label>
+										<p:calendar style="width:100%"
+											value="#{despesaManutencaoMB.lancamento.dataEntrada}" pattern="dd/MM/yyyy" />
+									</div>
+								</div>
+
+								<div class="gf-form-group">
+									<div class="gf-form-item">
+										<label><i class="fa fa-sign-out" style="margin-right:6px;color:#1565C0;"></i>Data de Saída</label>
+										<p:calendar style="width:100%"
+											value="#{despesaManutencaoMB.lancamento.dataSaida}" pattern="dd/MM/yyyy" />
+									</div>
+
+									<div class="gf-form-item">
+										<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km da Próxima Revisão</label>
+										<p:inputNumber style="width:100%" decimalPlaces="0" thousandSeparator="."
+											value="#{despesaManutencaoMB.lancamento.kmProximaRevisao}" />
+									</div>
+								</div>
+							</h:panelGroup>
+						</p:outputPanel>
+
+						<h:panelGroup layout="block" styleClass="gf-alert" style="margin-top:16px;"
+							rendered="#{despesaManutencaoMB.lancamento.origemLancamento == 'IA_Voz' or despesaManutencaoMB.lancamento.origemLancamento == 'IA_Foto'}">
+							<strong>
+								<i class="fa fa-#{despesaManutencaoMB.lancamento.origemLancamento == 'IA_Voz' ? 'microphone' : 'camera'}"></i>
+								Lançado por IA (#{despesaManutencaoMB.lancamento.origemLancamento == 'IA_Voz' ? 'voz' : 'foto'}) —
+								confiança: <h:outputText value="#{despesaManutencaoMB.lancamento.confiancaIA}"><f:convertNumber pattern="#0%" /></h:outputText>
+							</strong>
+							<p style="margin:6px 0 0;white-space:pre-wrap;">#{despesaManutencaoMB.lancamento.textoBrutoIA}</p>
+						</h:panelGroup>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{despesaManutencaoMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgDespesaManutencao').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: Anexos ═══ -->
+			<p:dialog header="Anexos" widgetVar="dlgAnexos" modal="true"
+				responsive="true" width="50%" id="dlgAnexos" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmAnexos" enctype="multipart/form-data">
+					<p:fileUpload fileUploadListener="#{anexoMB.upload}" mode="advanced"
+						auto="true" dragDropSupport="true" update=":frmAnexos :dlgInformacao"
+						label="Selecionar arquivo" uploadLabel="Enviar" cancelLabel="Cancelar"
+						invalidFileMessage="Arquivo inválido" />
+
+					<p:dataTable value="#{anexoMB.listAnexo}" var="anx" style="margin-top:12px;"
+						emptyMessage="Nenhum anexo neste lançamento">
+						<p:column headerText="Arquivo">
+							<h:outputLink value="#{anexoMB.urlDownload(anx)}" target="_blank">
+								<h:outputText value="#{anx.nomeArquivo}" />
+							</h:outputLink>
+						</p:column>
+						<p:column headerText="Ações" width="90">
+							<span class="btn-danger-modern">
+								<p:commandButton icon="fa fa-trash-o"
+									actionListener="#{anexoMB.excluir(anx)}" title="Excluir"
+									update=":frmAnexos :dlgInformacao" alt="Excluir">
+									<p:confirm header="Confirmação" message="Deseja excluir este anexo?" />
+								</p:commandButton>
+							</span>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

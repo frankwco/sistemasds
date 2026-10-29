@@ -1,0 +1,15 @@
+<ion-header>
+    <ion-toolbar color="success">
+        <ion-buttons slot="start">
+            <ion-back-button></ion-back-button>
+        </ion-buttons>
+        <ion-title>Selecionar Veículo</ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+
+    <ion-list>
+        <ion-item (click)="fechar(item)" *ngFor="let item of veiculos">{{ item.descricao }}</ion-item>
+    </ion-list>
+
+</ion-content>

@@ -1,0 +1,48 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Central de Alertas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="atualizar()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="vazio" *ngIf="carregando">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Buscando alertas...</p>
+  </div>
+
+  <ion-list *ngIf="!carregando">
+    <ion-item *ngFor="let a of alertas">
+      <ion-icon slot="start" name="alert-circle" color="danger" *ngIf="a.urgencia === 'Vencido'"></ion-icon>
+      <ion-icon slot="start" name="time-outline" color="warning" *ngIf="a.urgencia === 'Próximo'"></ion-icon>
+      <ion-label>
+        <h2>{{ a.descricao }}</h2>
+        <p>{{ a.tipo }}<span *ngIf="a.veiculo"> · {{ a.veiculo }}</span><span *ngIf="a.motorista"> · {{ a.motorista }}</span></p>
+        <p *ngIf="a.dataVencimento">Vencimento: {{ a.dataVencimento | date:'dd/MM/yyyy' }}</p>
+        <p *ngIf="!a.dataVencimento && a.kmAlvo">Km: {{ a.kmAtual }} / {{ a.kmAlvo }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <div class="vazio" *ngIf="!carregando && erro">
+    <ion-icon name="cloud-offline-outline" color="danger"></ion-icon>
+    <p>{{ erro }}</p>
+    <ion-button fill="clear" (click)="atualizar()">Tentar de novo</ion-button>
+  </div>
+
+  <div class="vazio" *ngIf="!carregando && !erro && alertas.length === 0">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <p>Nenhum alerta no momento</p>
+  </div>
+
+</ion-content>

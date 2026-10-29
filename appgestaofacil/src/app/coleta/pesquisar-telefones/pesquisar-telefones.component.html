@@ -1,0 +1,66 @@
+<ion-header class="pt-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="fechar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Telefones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="pt-content">
+
+  <!-- Card do Ponto -->
+  <ion-card class="ponto-card">
+    <ion-card-content>
+      <div class="ponto-row">
+        <div class="ponto-icon-badge">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+        <div class="ponto-info">
+          <span class="ponto-name">{{ selecionado.nomeRazaoSocial }}</span>
+          <span class="ponto-fantasy" *ngIf="selecionado.nomeFantasia">{{ selecionado.nomeFantasia }}
+            <span *ngIf="selecionado.apelido"> - {{ selecionado.apelido }}</span>
+          </span>
+          <span class="ponto-address" *ngIf="selecionado.enderecoCompleto">
+            <ion-icon name="map-outline"></ion-icon> {{ selecionado.enderecoCompleto }}
+          </span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="itens.length === 0">
+    <ion-icon name="call-outline"></ion-icon>
+    <p>Sem telefones</p>
+    <span>Nenhum telefone cadastrado para este ponto.</span>
+  </div>
+
+  <!-- Lista de Telefones -->
+  <div class="phones-list" *ngIf="itens.length > 0">
+    <ion-card class="phone-card" *ngFor="let item of itens; let idx = index">
+      <ion-card-content>
+        <div class="phone-row">
+          <div class="phone-icon-badge">
+            <ion-icon name="call-outline"></ion-icon>
+          </div>
+          <div class="phone-info">
+            <span class="phone-label">Telefone {{ idx + 1 }}</span>
+            <span class="phone-number">{{ item.telefone }}</span>
+          </div>
+          <div class="phone-actions">
+            <a class="phone-btn btn-call" href="tel:{{ item.telefone }}">
+              <ion-icon name="call-outline"></ion-icon>
+            </a>
+            <button class="phone-btn btn-whats" (click)="chamarWhats(item.telefone)">
+              <ion-icon name="logo-whatsapp"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

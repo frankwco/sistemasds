@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+
+
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+
+
+
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<!-- 		<p:blockUI id="blockUI" block=":entirePage" -->
+			<!-- 		trigger="btnBuscarFechamento" /> -->
+
+			<!-- TITULO -->
+			<div class="row">
+				<div class="col-md-12">
+					<h1 class="page-header">Fechamento do Mês Faturados sem
+						Observações</h1>
+
+				</div>
+			</div>
+			<!-- FIM TITULO -->
+
+			<!-- BOTAO DOS BOTÕES -->
+			<h:form id="frmCadastrar">
+
+				<p:ajaxStatus onstart="PF('statusDialog').show()"
+					onsuccess="PF('statusDialog').hide()" />
+
+				<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+					closable="false" resizable="false" showHeader="false">
+					<h:outputText style="font-weight:bold"
+						value="Aguarde, realizando operação...." />
+					<br />
+					<center>
+						<p:graphicImage name="img/aguarde.gif" />
+					</center>
+				</p:dialog>
+
+				<div class="row container-fluid">
+
+					<div class="col-md-12">
+						<p:commandButton value="Buscar Fechamentos Faturados Sem Observações"
+							update="tabela"
+							actionListener="#{fechamentoMesMB.buscarFechamentoFaturadoSemObservacoes()}" />
+					</div>
+					<div class="col-md-12">
+					<br/>
+					</div>
+
+
+					<div class="col-md-12" style="min-height: 700px">
+						<p:dataTable id="tabela"
+							value="#{fechamentoMesMB.listaFechamentoMesFaturadoSemObservacao}"
+							resizableColumns="true" reflow="true" var="list" rows="10"
+							paginator="true" paginatorPosition="bottom"
+							emptyMessage="Nenhum Objeto Cadastrado!!"
+							rowsPerPageTemplate="5,10,15,30,50,100" editable="true"
+							editMode="cell">
+							<p:ajax event="filter" global="false" />
+							<p:column style="white-space:normal !important;" width="300"
+								sortBy="#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+								headerText="Informação Financeira"
+								filterBy="#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+								filterMatchMode="contains">
+								<h:outputText
+									value="#{list.informacaoFinanceira.id}-(#{list.id})#{list.informacaoFinanceira.cliente.id}-#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}" />
+							</p:column>
+
+							<p:column headerText="Mes/Ano" width="50">
+								<h:outputText value="#{list.mes}/#{list.ano}" />
+							</p:column>
+
+							<p:column headerText="Data Fecham." width="80">
+								<h:outputText value="#{list.dataFechamento}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="Valor Final" width="50">
+								<h:outputText
+									value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFinal)}" />
+							</p:column>
+							
+								<p:column headerText="Valor Faturar" width="50">
+								<h:outputText
+									value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFaturar)}" />
+							</p:column>
+					
+							<p:column headerText="Pagamento" width="60"
+								filterBy="#{list.informacaoFinanceira.formaCobrancaRecebimento}"
+								filterMatchMode="contains">
+								<h:outputText
+									value="#{list.informacaoFinanceira.formaCobrancaRecebimento}" />
+							</p:column>
+
+
+
+
+
+						</p:dataTable>
+
+					</div>
+
+
+
+
+
+
+				</div>
+			</h:form>
+
+
+
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>
+

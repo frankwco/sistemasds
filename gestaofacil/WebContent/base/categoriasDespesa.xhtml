@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-tags" style="margin-right:10px;"></i>Categorias de Despesa</h2>
+					<p>Cadastre as categorias usadas para classificar despesas</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{categoriaDespesaMB.criarNovoObjeto()}"
+							onclick="PF('dlgCategoriaDespesa').show(); PF('dlgCategoriaDespesa').content.scrollTop('0')"
+							title="Cadastrar Categoria de Despesa" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{categoriaDespesaMB.listCategoriaDespesa}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma categoria de despesa cadastrada"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Nome" filterBy="#{list.nome}"
+							sortBy="#{list.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.nome}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgCategoriaDespesa').show();"
+										actionListener="#{categoriaDespesaMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{categoriaDespesaMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Categoria de Despesa" widgetVar="dlgCategoriaDespesa" modal="true"
+				responsive="true" width="60%" id="dlgCategoriaDespesa" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div class="gf-form-group" style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-tag" style="margin-right:6px;color:#1565C0;"></i>Nome *</label>
+							<p:inputText style="width:100%" required="true"
+								requiredMessage="Nome é obrigatório"
+								title="Nome" value="#{categoriaDespesaMB.categoriaDespesa.nome}" />
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{categoriaDespesaMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgCategoriaDespesa').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

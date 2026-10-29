@@ -1,0 +1,227 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Captura por IA</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="captura-content">
+
+  <ion-card class="selection-card">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-blue">
+          <ion-icon name="car-sport-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Veículo</span>
+          <span class="selection-value">{{ veiculoSelecionado.descricao || 'Nenhum selecionado' }} {{ veiculoSelecionado.placa }}</span>
+        </div>
+      </div>
+      <div class="selection-row selection-row-spaced" *ngIf="motoristaSelecionado.nome || tipo === 'Abastecimento'">
+        <div class="selection-icon-badge badge-green">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Motorista</span>
+          <span class="selection-value" [class.aviso-obrigatorio]="!motoristaSelecionado.nome">
+            {{ motoristaSelecionado.nome || 'Nenhum selecionado (obrigatório para abastecimento)' }}
+          </span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ═══ Chat de captura ═══ -->
+  <div class="chat-wrapper" *ngIf="!revisando">
+    <div class="chat-mensagens">
+      <p class="chat-vazio" *ngIf="mensagens.length === 0">Anexe uma foto e/ou fale ou digite algo pra começar</p>
+
+      <div *ngFor="let m of mensagens"
+        class="bolha"
+        [ngClass]="{
+          'bolha-enviada': m.tipo === 'enviada',
+          'bolha-recebida': m.tipo === 'recebida',
+          'bolha-pendente': m.pendente,
+          'bolha-status': m.status
+        }">
+        <ion-icon *ngIf="m.icone" [name]="m.icone"></ion-icon>
+        <span>{{ m.texto }}</span>
+        <a href="#" *ngIf="m.pendente" (click)="removerFoto(); $event.preventDefault()">Remover</a>
+      </div>
+    </div>
+
+    <div class="chat-compor">
+      <ion-button fill="clear" class="botao-redondo" (click)="anexarFoto()" [disabled]="enviando || ouvindo || transcrevendo">
+        <ion-icon slot="icon-only" name="attach-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button fill="clear" class="botao-redondo botao-mic" [class.botao-mic-ativo]="ouvindo"
+        [color]="ouvindo ? 'danger' : 'primary'" (click)="alternarGravacao()" [disabled]="enviando || transcrevendo">
+        <ion-spinner *ngIf="transcrevendo" name="dots"></ion-spinner>
+        <ion-icon *ngIf="!transcrevendo" slot="icon-only" [name]="ouvindo ? 'radio-button-on' : 'mic-outline'"></ion-icon>
+      </ion-button>
+
+      <ion-textarea *ngIf="!ouvindo" class="chat-input" [(ngModel)]="textoComplemento"
+        placeholder="Digite ou fale uma mensagem..." rows="4" [autoGrow]="true" [disabled]="enviando || transcrevendo"></ion-textarea>
+
+      <div *ngIf="ouvindo" class="ondas-audio">
+        <span class="onda" *ngFor="let i of [1,2,3,4,5,6,7]"></span>
+      </div>
+
+      <ion-button fill="clear" class="botao-redondo botao-enviar" (click)="enviarParaIA()" [disabled]="enviando || ouvindo || transcrevendo">
+        <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <small class="chat-ajuda" *ngIf="ouvindo">Gravando... toque no microfone de novo pra parar.</small>
+    <small class="chat-ajuda" *ngIf="transcrevendo">{{ mensagemTranscrevendo }}</small>
+    <small class="chat-ajuda" *ngIf="!ouvindo && !transcrevendo">Anexe uma foto ou fale/digite um complemento — pelo menos um dos dois é necessário.</small>
+  </div>
+
+  <!-- ═══ Revisão (RF14) ═══ -->
+  <ng-container *ngIf="revisando">
+
+    <ion-card class="aviso-card" *ngIf="avisoDuplicidade">
+      <ion-card-content>
+        <div class="aviso-row">
+          <ion-icon name="warning-outline"></ion-icon>
+          <span><strong>Possível duplicado:</strong> {{ avisoDuplicidade }}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="form-card">
+      <ion-card-header class="form-header">
+        <div class="form-icon-badge">
+          <ion-icon [name]="origem === 'IA_Voz' ? 'mic-outline' : 'camera-outline'"></ion-icon>
+        </div>
+        <div>
+          <ion-card-title class="form-title">Confira antes de salvar</ion-card-title>
+          <p class="confianca-texto" *ngIf="confianca != null">Confiança da IA: {{ confianca * 100 | number:'1.0-0' }}%</p>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="input-group">
+          <label class="input-label">Tipo</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="albums-outline" slot="start" color="primary"></ion-icon>
+            <ion-select [(ngModel)]="tipo">
+              <ion-select-option value="Abastecimento">Abastecimento</ion-select-option>
+              <ion-select-option value="Despesa">Despesa</ion-select-option>
+              <ion-select-option value="Serviço">Serviço</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="input-group" *ngIf="tipo !== 'Abastecimento'">
+          <label class="input-label">Categoria</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="pricetags-outline" slot="start" color="primary"></ion-icon>
+            <ion-select [(ngModel)]="categoriaDespesa" [compareWith]="compareEntidade" placeholder="Selecione" [disabled]="carregandoCatalogos">
+              <ion-select-option *ngFor="let c of categorias" [value]="c">{{ c.nome }}</ion-select-option>
+            </ion-select>
+            <ion-spinner *ngIf="carregandoCatalogos" slot="end" name="dots"></ion-spinner>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Fornecedor</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+            <ion-select [(ngModel)]="fornecedor" [compareWith]="compareEntidade" placeholder="Selecione" [disabled]="carregandoCatalogos">
+              <ion-select-option *ngFor="let f of fornecedores" [value]="f">{{ f.nome }}</ion-select-option>
+            </ion-select>
+            <ion-button *ngIf="!carregandoCatalogos" fill="clear" slot="end" (click)="cadastrarNovoFornecedor()" title="Cadastrar novo fornecedor">
+              <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-note class="nota-sugestao" *ngIf="!fornecedor && fornecedorSugerido">
+            "{{ fornecedorSugerido }}" será cadastrado automaticamente ao salvar
+          </ion-note>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group input-group-half">
+            <label class="input-label">Valor (R$)</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="cash-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="number" inputmode="decimal" [(ngModel)]="valor" placeholder="0,00" (ionBlur)="recalcularAbastecimento()"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="input-group input-group-half" *ngIf="tipo === 'Abastecimento'">
+            <label class="input-label">Litros *</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="flask-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="number" inputmode="decimal" [(ngModel)]="litros" placeholder="0,00" (ionBlur)="recalcularAbastecimento()"></ion-input>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="input-row" *ngIf="tipo === 'Abastecimento'">
+          <div class="input-group input-group-half">
+            <label class="input-label">Valor/Litro (R$) *</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="pricetag-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="number" inputmode="decimal" [(ngModel)]="valorLitro" placeholder="0,00" (ionBlur)="recalcularAbastecimento()"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="input-group input-group-half">
+            <label class="input-label">Combustível *</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="flame-outline" slot="start" color="primary"></ion-icon>
+              <ion-select [(ngModel)]="combustivel" placeholder="Selecione">
+                <ion-select-option *ngFor="let c of combustiveis" [value]="c">{{ c }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Km do Odômetro<ng-container *ngIf="tipo === 'Abastecimento'"> *</ng-container></label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="speedometer-outline" slot="start" color="primary"></ion-icon>
+            <ion-input type="number" inputmode="numeric" [(ngModel)]="km" placeholder="0"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Observação</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+            <ion-textarea [(ngModel)]="observacao" placeholder="Opcional" rows="2"></ion-textarea>
+          </ion-item>
+        </div>
+
+        <ion-item button lines="none" class="texto-bruto-toggle" (click)="mostrarTextoBruto = !mostrarTextoBruto">
+          <ion-icon slot="start" name="document-text-outline" color="medium"></ion-icon>
+          <ion-label>{{ origem === 'IA_Voz' ? 'Ver transcrição' : 'Ver texto lido na foto' }}</ion-label>
+          <ion-icon slot="end" [name]="mostrarTextoBruto ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+        </ion-item>
+        <p class="texto-bruto" *ngIf="mostrarTextoBruto">{{ textoBruto || 'Nenhum texto retornado.' }}</p>
+      </ion-card-content>
+    </ion-card>
+
+  </ng-container>
+
+  <div class="acoes-wrapper" *ngIf="revisando">
+    <ion-button expand="block" shape="round" class="confirmar-btn" (click)="confirmar()" [disabled]="salvando">
+      <ion-spinner *ngIf="salvando" name="dots"></ion-spinner>
+      <ng-container *ngIf="!salvando">
+        <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+        Confirmar e Salvar
+      </ng-container>
+    </ion-button>
+    <ion-button expand="block" shape="round" fill="clear" color="medium" (click)="descartar()" [disabled]="salvando">
+      Descartar e tentar de novo
+    </ion-button>
+  </div>
+
+</ion-content>

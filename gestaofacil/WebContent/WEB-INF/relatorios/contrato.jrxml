@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="contrato" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="525" leftMargin="40" rightMargin="30" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="42e1508c-3a5c-4891-8509-b4ef6431d5fe">
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="209"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="783"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<parameter name="TEXTO_CONTRATO" class="java.lang.String"/>
+	<parameter name="ID" class="java.lang.Long"/>
+	<parameter name="CABECALHO" class="java.lang.String"/>
+	<parameter name="CONTRATANTE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1]]>
+	</queryString>
+	<field name="1" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="1"/>
+	</field>
+	<background>
+		<band height="757" splitType="Stretch">
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="0" y="115" width="523" height="443" uuid="b37ff927-edf3-4d44-88d7-87df80d8622b"/>
+				<imageExpression><![CDATA["imageedit_7_4650483673.png"]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="32" splitType="Stretch">
+			<printWhenExpression><![CDATA[new Boolean($V{PAGE_NUMBER}.intValue() == 1)]]></printWhenExpression>
+			<staticText>
+				<reportElement x="0" y="1" width="523" height="20" uuid="7d4026cf-92cf-46fc-9d2d-40f3d0be93c9"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DS TRANSPORTES – D. SORTI & SORTI LTDA - ME]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="35" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="523" height="20" uuid="4c4333a3-d226-4260-9dcf-086c1363d80e"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html"/>
+				<textFieldExpression><![CDATA[$P{CABECALHO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField isStretchWithOverflow="true" evaluationTime="Auto">
+				<reportElement x="0" y="0" width="523" height="20" uuid="73325d26-7094-4605-9449-6ad062273820"/>
+				<textElement textAlignment="Justified" markup="html"/>
+				<textFieldExpression><![CDATA[$P{TEXTO_CONTRATO}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="62">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="1" y="31" width="220" height="30" isPrintWhenDetailOverflows="true" uuid="91f2c2f8-8166-4a1e-be1e-048217a73c94"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$P{CONTRATANTE}+"\nCONTRATANTE"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="302" y="31" width="220" height="30" isPrintWhenDetailOverflows="true" uuid="ebb26369-909b-4f23-88f0-d98c00299894"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA["D. SORTI & SORTI LTDA\nCONTRATADA"]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="339" y="-31" width="150" height="60" uuid="520bd1e5-5fa8-428a-8774-1e13482ba069"/>
+				<imageExpression><![CDATA["assinaturaDS.png"]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="71" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="1" width="523" height="52" uuid="4b18424b-055b-4ccb-842a-49211c6859c2"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[DS Transportes – D SORTI & SORTI LTDA – ME
+Rod BR 376, Km 130 - S/Nº - Glb. 
+Patrimonio Capelinha, Lts. 139-A/140-A/141-A-B / 87600-000 Nova Esperança PR
+Fone: (44) 3252-4480 / 99932-3410 
+danielsorti@hotmail.com / dsresiduos.com.br]]></text>
+			</staticText>
+			<image>
+				<reportElement x="3" y="2" width="48" height="48" uuid="6793821f-0d9b-4332-96a4-d049f7e11a35">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA["untitled (13).png"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="489" y="43" width="50" height="28" uuid="697eefad-928b-418c-8ba7-28feb830d4f4">
+					<printWhenExpression><![CDATA[new Boolean(!$V{PAGE_NUMBER}.equals($P{REPORT_PARAMETERS_MAP}.get("LastPageNumber")))]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA["visto_daniel-removebg-preview.png"]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch">
+			<printWhenExpression><![CDATA[new Boolean($P{REPORT_PARAMETERS_MAP}.put("LastPageNumber",$V{PAGE_NUMBER}).equals("dummyPrintWhen"))]]></printWhenExpression>
+		</band>
+	</summary>
+</jasperReport>

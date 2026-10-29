@@ -1,0 +1,176 @@
+<ion-header class="coleta-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Coleta <small>- {{ coleta.dataUltimaColeta | date: 'dd/MM/yyyy' }}</small></ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="pontoColetaSelecionado.id > 0" (click)="mostrar()">
+        <ion-icon name="logo-whatsapp"></ion-icon>
+      </ion-button>
+      <ion-button (click)="pesquisarColetas()">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="coleta-content">
+
+  <!-- Card Cidade -->
+  <ion-card class="selection-card" (click)="pesquisarCidades()">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-orange">
+          <ion-icon name="location-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Cidade</span>
+          <span class="selection-value">{{ cidadeSelecionada.nome }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="selection-arrow"></ion-icon>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Ponto de Coleta -->
+  <ion-card class="selection-card" (click)="pesquisarPontos()" *ngIf="cidadeSelecionada.nome != 'Selecione'">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-blue">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Ponto de Coleta</span>
+          <span class="selection-value">{{ pontoColetaSelecionado.nomeRazaoSocial }}</span>
+          <span class="selection-detail" *ngIf="pontoColetaSelecionado.nomeFantasia">
+            {{ pontoColetaSelecionado.nomeFantasia }}
+            <span *ngIf="pontoColetaSelecionado.apelido"> - {{ pontoColetaSelecionado.apelido }}</span>
+          </span>
+          <span class="selection-address" *ngIf="pontoColetaSelecionado.endereco">
+            <ion-icon name="map-outline"></ion-icon> {{ pontoColetaSelecionado.endereco }}
+          </span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="selection-arrow"></ion-icon>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Aviso -->
+  <ion-card class="warning-card" *ngIf="pontoColetaSelecionado.id > 0 && pontoColetaSelecionado.situacaoAviso">
+    <ion-card-content>
+      <div class="warning-row">
+        <div class="warning-icon-badge">
+          <ion-icon name="warning-outline"></ion-icon>
+        </div>
+        <div class="warning-info">
+          <span class="warning-title">Aviso</span>
+          <span class="warning-text">{{ pontoColetaSelecionado.aviso }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Formulário -->
+  <ion-card class="form-card" *ngIf="pontoColetaSelecionado.gruposColetados.length > 0">
+    <ion-card-header class="form-header">
+      <div class="form-icon-badge">
+        <ion-icon name="clipboard-outline"></ion-icon>
+      </div>
+      <ion-card-title class="form-title">Dados da Coleta</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="todo">
+
+        <!-- Situação -->
+        <div class="input-group">
+          <label class="input-label">Situação</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="flag-outline" slot="start" color="primary"></ion-icon>
+            <ion-select name="situacao" formControlName="situacao" [(ngModel)]="coleta.situacao" interface="action-sheet">
+              <ion-select-option value="Coletado">Coletado</ion-select-option>
+              <ion-select-option value="Fechado">Fechado</ion-select-option>
+              <ion-select-option value="Não Atendeu">Não Atendeu</ion-select-option>
+              <ion-select-option value="Feriado">Feriado</ion-select-option>
+              <ion-select-option value="Cliente Contactado">Cliente Contactado</ion-select-option>
+              <ion-select-option value="Sem Lixo">Sem Lixo</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <!-- Grupos de Coleta -->
+        <div class="groups-section" *ngIf="coleta.situacao == 'Coletado'">
+
+          <ion-item lines="none" class="group-input group-a-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('A;')">
+            <div class="group-tag tag-a" slot="start">A</div>
+            <ion-input name="a" formControlName="a" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.a" placeholder="0,000"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="group-input group-e-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('E;')">
+            <div class="group-tag tag-e" slot="start">E</div>
+            <ion-input name="e" formControlName="e" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.e" placeholder="0,000"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="group-input group-b-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('B;')">
+            <div class="group-tag tag-b" slot="start">B</div>
+            <ion-input name="b" formControlName="b" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.b" placeholder="0,000"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="group-input group-a2-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('A2;')">
+            <div class="group-tag tag-a2" slot="start">A2</div>
+            <ion-input name="a2" formControlName="a2" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.a2" placeholder="0,000"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="group-input group-a3-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('A3;')">
+            <div class="group-tag tag-a3" slot="start">A3</div>
+            <ion-input name="a3" formControlName="a3" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.a3" placeholder="0,000"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="group-input group-a4-input"
+            *ngIf="pontoColetaSelecionado.gruposColetados.includes('A4;')">
+            <div class="group-tag tag-a4" slot="start">A4</div>
+            <ion-input name="a4" formControlName="a4" type="text" pattern="[0-9]*" inputmode="numeric"
+              [brmasker]="{money: true, decimal: 3}" [(ngModel)]="coleta.a4" placeholder="0,000"></ion-input>
+          </ion-item>
+
+        </div>
+
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Total Coletado -->
+  <ion-card class="total-card" *ngIf="pontoColetaSelecionado.id > 0 && coleta.situacao == 'Coletado'">
+    <ion-card-content>
+      <div class="total-row">
+        <div class="total-icon-badge">
+          <ion-icon name="calculator-outline"></ion-icon>
+        </div>
+        <div class="total-info">
+          <span class="total-label">Total Coletado</span>
+          <span class="total-value">{{ (convertString(coleta.a) + convertString(coleta.e) + convertString(coleta.b) + convertString(coleta.a2) + convertString(coleta.a3) + convertString(coleta.a4)) | number:'1.3-3' }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Botão Concluir -->
+  <div class="action-area" *ngIf="pontoColetaSelecionado.id > 0">
+    <ion-button expand="block" shape="round" class="concluir-btn" (click)="finalizarVerificar()">
+      <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+      Concluir / Assinar
+    </ion-button>
+  </div>
+
+</ion-content>

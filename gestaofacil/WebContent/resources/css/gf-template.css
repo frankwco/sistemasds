@@ -1,0 +1,139 @@
+/* ═══════════════════════════════════════════════════════════════
+   GF-TEMPLATE.CSS — CSS compartilhado dos templates de layout
+   Utilizado por: template-administrador.xhtml, template-cliente.xhtml
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* ══════════════════════════════════
+   GLOBAL / OVERRIDES
+══════════════════════════════════ */
+.ui-dialog-content { max-height: 500px !important; }
+.button-spacing { margin-top: 10px; }
+
+.ui-layout-north {
+	z-index: 20 !important;
+	overflow: visible !important;
+}
+.ui-layout-north .ui-layout-unit-content {
+	overflow: visible !important;
+}
+
+/* Fundo da área de conteúdo */
+.content-wrapper {
+	font-family: 'Roboto', sans-serif !important;
+	background: #f0f2f5 !important;
+    min-height: calc(100vh - 50px) !important;
+}
+
+/* ══════════════════════════════════
+   HEADER / LOGO (compartilhado)
+══════════════════════════════════ */
+.main-header .logo {
+	background: #0d1f3c !important;
+	border-bottom: 1px solid rgba(255,255,255,.08) !important;
+	font-family: 'Segoe UI', sans-serif;
+	letter-spacing: 0.5px;
+}
+.main-header .logo:hover { background: #0a1830 !important; }
+.main-header .logo .logo-lg { color: #fff !important; font-size: 17px; font-weight: 700; }
+
+/* Navbar topo */
+.main-header .navbar .nav > li > a { color: rgba(255,255,255,.85) !important; }
+.main-header .navbar .nav > li > a:hover {
+	color: #fff !important;
+	background: rgba(255,255,255,.12) !important;
+}
+.main-header .sidebar-toggle { color: rgba(255,255,255,.85) !important; }
+.main-header .sidebar-toggle:hover { background: rgba(255,255,255,.12) !important; }
+
+/* ══════════════════════════════════
+   SIDEBAR ESTRUTURAL (compartilhada)
+══════════════════════════════════ */
+.sidebar { padding-top: 8px; }
+.main-sidebar hr { border-color: rgba(255,255,255,.12); margin: 4px 16px; }
+
+.sidebar-menu > li > a {
+	color: rgba(220,235,255,.82) !important;
+	font-size: 13.5px !important;
+	font-weight: 400;
+	padding: 11px 18px !important;
+	border-left: 3px solid transparent;
+	transition: all .18s ease;
+	border-radius: 0 6px 6px 0;
+	margin: 1px 8px 1px 0;
+}
+.sidebar-menu > li > a:hover {
+	color: #fff !important;
+	background: rgba(255,255,255,.10) !important;
+}
+.sidebar-menu > li.active > a,
+.sidebar-menu > li > a:focus {
+	color: #fff !important;
+	font-weight: 600;
+}
+.sidebar-menu > li > a > i,
+.sidebar-menu > li > a .fa {
+	width: 22px;
+	font-size: 15px;
+	margin-right: 8px;
+	transition: color .18s;
+}
+.sidebar-menu > li > a:hover > i,
+.sidebar-menu > li > a:hover .fa { color: #fff !important; }
+
+/* Rótulo de seção da sidebar */
+.sidebar-section-label {
+	padding: 14px 18px 6px;
+	font-size: 10.5px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+/* PanelGrid usado como wrapper de renderização condicional — remove borda/bg */
+.sidebar-menu .ui-panelgrid,
+.sidebar-menu .ui-panelgrid-cell {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* ══════════════════════════════════
+   TEMA ADMIN — azul #1565C0
+══════════════════════════════════ */
+.admin-theme .main-sidebar,
+.admin-theme .left-side {
+	background: linear-gradient(180deg, #1a2744 0%, #1e3a5f 60%, #1565C0 100%) !important;
+}
+.admin-theme .main-header .navbar { background: #1565C0 !important; }
+.admin-theme .main-header .logo .logo-mini { color: #64B5F6 !important; }
+.admin-theme .sidebar-menu > li > a:hover { border-left-color: #64B5F6 !important; }
+.admin-theme .sidebar-menu > li.active > a,
+.admin-theme .sidebar-menu > li > a:focus {
+	background: rgba(100,181,246,.18) !important;
+	border-left-color: #64B5F6 !important;
+}
+.admin-theme .sidebar-menu > li > a > i,
+.admin-theme .sidebar-menu > li > a .fa { color: #64B5F6 !important; }
+.admin-theme .sidebar-section-label { color: rgba(100,181,246,.55); }
+
+/* ══════════════════════════════════
+   TEMA CLIENTE — azul índigo #0d47a1
+══════════════════════════════════ */
+.cliente-theme .main-sidebar,
+.cliente-theme .left-side {
+	background: linear-gradient(180deg, #1a2744 0%, #1b3a5a 60%, #0d47a1 100%) !important;
+}
+.cliente-theme .main-header .navbar { background: #0d47a1 !important; }
+.cliente-theme .main-header .logo .logo-mini { color: #90CAF9 !important; }
+.cliente-theme .sidebar-menu > li > a:hover { border-left-color: #90CAF9 !important; }
+.cliente-theme .sidebar-menu > li.active > a,
+.cliente-theme .sidebar-menu > li > a:focus {
+	background: rgba(144,202,249,.18) !important;
+	border-left-color: #90CAF9 !important;
+}
+.cliente-theme .sidebar-menu > li > a > i,
+.cliente-theme .sidebar-menu > li > a .fa { color: #90CAF9 !important; }
+.cliente-theme .sidebar-section-label { color: rgba(144,202,249,.55); }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<p:ajaxStatus onstart="PF('statusDialog').show()"
+				onsuccess="PF('statusDialog').hide()" />
+
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+				closable="false" resizable="false" showHeader="false">
+				<h:outputText style="font-weight:bold"
+					value="Aguarde, realizando operação...." />
+				<br />
+				<center>
+					<p:graphicImage name="img/aguarde.gif" />
+				</center>
+			</p:dialog>
+			<!-- TITULO -->
+			<div class="row">
+				<div class="col-md-12">
+					<h1 class="page-header">Importar dados Firebase</h1>
+
+				</div>
+			</div>
+			<!-- FIM TITULO -->
+
+			<!-- BOTAO CADASTRAR -->
+			<div class="row container-fluid">
+				<div class="col-md-5">
+					<ol class="breadcrumb">
+
+						<h:form>
+						<p:inputText value="#{importarFirebaseMB.dia}" placeholder="DIA"/><br/><br/>
+						<p:inputText value="#{importarFirebaseMB.mes}" placeholder="MÊS"/><br/><br/>
+						<p:inputText value="#{importarFirebaseMB.ano}" placeholder="ANO"/><br/><br/>
+							<p:commandButton value="Importar Firebase"
+								update=":dlgInformacao, :coletas"
+								actionListener="#{importarFirebaseMB.importar()}" />
+						</h:form>
+
+					</ol>
+				</div>
+
+
+			</div>
+			<h:form><p:commandButton value="Teste reinicializar"
+								
+								actionListener="#{importarFirebaseMB.lerDados()}" /></h:form>
+			
+			<h:outputText id="coletas" value="#{importarFirebaseMB.coletasString}" />
+
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

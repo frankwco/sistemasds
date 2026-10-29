@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<style type="text/css">
+				.cobranca-stats-row { display:flex; flex-wrap:wrap; gap:12px; padding:14px 18px 20px; }
+				.cobranca-chip {
+					display:inline-flex; align-items:baseline; gap:8px;
+					background:#f5f7fa; color:#37474f;
+					padding:10px 16px; border-radius:8px; line-height:1.2;
+				}
+				.cobranca-chip .num { font-size:22px; font-weight:700; }
+				.cobranca-chip .lbl { font-size:13.5px; color:#78909c; }
+				.cobranca-chip.chip-success { background:#E8F5E9; }
+				.cobranca-chip.chip-success .num { color:#2E7D32; }
+				.cobranca-chip.chip-success .lbl { color:#2E7D32; opacity:.75; }
+				.cobranca-chip.chip-warning { background:#FFF3E0; }
+				.cobranca-chip.chip-warning .num { color:#E65100; }
+				.cobranca-chip.chip-warning .lbl { color:#E65100; opacity:.75; }
+				.cobranca-chip.chip-total { background:#E3F2FD; }
+				.cobranca-chip.chip-total .num { color:#1565C0; }
+				.cobranca-chip.chip-total .lbl { color:#1565C0; opacity:.75; }
+				.cobranca-chip.chip-danger { background:#FFEBEE; }
+				.cobranca-chip.chip-danger .num { color:#C62828; }
+				.cobranca-chip.chip-danger .lbl { color:#C62828; opacity:.75; }
+				.cobranca-chip.chip-clientes { background:#EDE7F6; }
+				.cobranca-chip.chip-clientes .num { color:#5E35B1; }
+				.cobranca-chip.chip-clientes .lbl { color:#5E35B1; opacity:.75; }
+
+				/* Botão de confirmação de número WhatsApp (verde = confirmado, vermelho = não confirmado) */
+				.gf-whats-confirm-btn {
+					display:inline-flex; align-items:center; justify-content:center;
+					width:30px; height:30px; border-radius:7px; color:#fff !important;
+					font-size:14px; vertical-align:middle; text-decoration:none !important;
+					cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.2);
+					transition:transform .15s, box-shadow .15s;
+				}
+				.gf-whats-confirm-btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.28); }
+				.gf-whats-confirm-btn.confirmado { background:linear-gradient(135deg,#2E7D32,#43A047); }
+				.gf-whats-confirm-btn.nao-confirmado { background:linear-gradient(135deg,#C62828,#E53935); }
+			</style>
+
+			<div class="gf-page">
+
+				<!-- ═══ HERO BANNER ═══ -->
+				<div class="gf-hero">
+					<div>
+						<h2><i class="fa fa-money" style="margin-right:10px;"></i>Cobrança</h2>
+						<p>Suba o relatório de vencidos do banco, revise os casos com dúvida e dispare a cobrança</p>
+					</div>
+					<i class="fa fa-envelope-o hero-icon"></i>
+				</div>
+
+				<p:ajaxStatus onstart="PF('statusDialogCobranca').show()"
+					onsuccess="PF('statusDialogCobranca').hide()" />
+
+				<p:dialog widgetVar="statusDialogCobranca" modal="true" draggable="false"
+					closable="false" resizable="false" showHeader="false"
+					styleClass="gf-loading-dialog">
+					<span class="gf-loading-text">Aguarde, processando...</span>
+					<p:graphicImage name="img/aguarde.gif" />
+				</p:dialog>
+
+				<h:form id="frmUpload" enctype="multipart/form-data">
+					<div class="gf-card" style="padding:20px;margin-top:16px;">
+						<b>1. Envie o relatório de "Vencido" exportado do sicoobnet (.csv)</b>
+						<br /><br />
+						<p:fileUpload mode="advanced" fileLimit="1"
+							fileLimitMessage="Selecione apenas um arquivo por vez"
+							invalidFileMessage="Tipo de arquivo inválido - envie um .csv"
+							fileUploadListener="#{cobrancaMB.uploadRelatorio}"
+							allowTypes="/(\.|\/)(csv)$/" sizeLimit="10000000" multiple="false"
+							invalidSizeMessage="Arquivo muito grande"
+							showButtons="true" update="@form :frmRevisao :frmResultado"
+							dragDropSupport="false" cancelLabel="Cancelar"
+							onstart="PF('statusDialogCobranca').show()"
+							oncomplete="PF('statusDialogCobranca').hide()"
+							uploadLabel="Enviar" label="Selecionar Arquivo CSV" />
+					</div>
+				</h:form>
+
+				<h:form id="frmResultado">
+					<p:remoteCommand name="rcCarregarDadosIniciais" autoRun="true"
+						actionListener="#{cobrancaMB.carregarDadosIniciais()}" update="conteudoResultado" />
+
+					<h:panelGroup id="conteudoResultado" layout="block">
+					<p:panelGrid rendered="#{cobrancaMB.loteAtual != null}" columns="1"
+						style="width:100%;border:none;margin-top:16px;">
+
+						<div class="gf-info-card">
+							<div class="gf-info-card-header">
+								<div class="gf-info-card-icon" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">
+									<i class="fa fa-file-text-o"></i>
+								</div>
+								<div>
+									<h4>Resumo da importação</h4>
+									<small style="color:#90a4ae;font-size:13px;">
+										#{cobrancaMB.loteAtual.nomeArquivoOriginal}#{cobrancaMB.loteAtual.dataCriacaoArquivo != null ? ' ('.concat(cobrancaMB.loteAtual.dataCriacaoArquivoFormatada).concat(')') : ''} · importado em #{cobrancaMB.loteAtual.dataImportacaoFormatada} por #{cobrancaMB.loteAtual.usuario}
+									</small>
+								</div>
+							</div>
+							<div class="cobranca-stats-row">
+								<span class="cobranca-chip">
+									<span class="num">#{cobrancaMB.loteAtual.totalLinhas}</span>
+									<span class="lbl">títulos no arquivo</span>
+								</span>
+								<span class="cobranca-chip chip-success">
+									<span class="num">#{cobrancaMB.loteAtual.totalConfirmados}</span>
+									<span class="lbl">confirmados</span>
+								</span>
+								<span class="cobranca-chip chip-clientes">
+									<span class="num">#{cobrancaMB.gruposConfirmados.size()}</span>
+									<span class="lbl">clientes em atraso</span>
+								</span>
+								<span class="cobranca-chip chip-warning">
+									<span class="num">#{cobrancaMB.loteAtual.totalPendentes}</span>
+									<span class="lbl">pendentes de revisão</span>
+								</span>
+								<span class="cobranca-chip chip-total">
+									<span class="num">#{cobrancaMB.loteAtual.valorTotalFormatado}</span>
+									<span class="lbl">valor total</span>
+								</span>
+								<h:panelGroup layout="block" styleClass="cobranca-chip chip-danger" rendered="#{cobrancaMB.loteAtual.totalLinhasIlegiveis gt 0}">
+									<span class="num">#{cobrancaMB.loteAtual.totalLinhasIlegiveis}</span>
+									<span class="lbl">linha(s) não lidas</span>
+								</h:panelGroup>
+							</div>
+						</div>
+
+						<!-- ═══ PENDENTES ═══ -->
+						<h:panelGroup layout="block" styleClass="gf-card" style="padding:20px;margin-top:16px;" rendered="#{not empty cobrancaMB.itensPendentes}">
+							<b>2. Pendentes de revisão — o código de contrato não identificou um único cliente</b>
+							<p:dataTable value="#{cobrancaMB.itensPendentes}" var="item"
+								style="margin-top:10px;" emptyMessage="Nenhum pendente">
+								<p:column headerText="Nome no relatório do banco">
+									<h:outputText value="#{item.nomeSacadoRelatorio}" />
+								</p:column>
+								<p:column headerText="Seu Número">
+									<h:outputText value="#{item.seuNumero}" />
+								</p:column>
+								<p:column headerText="Vencimento">
+									<h:outputText value="#{item.dataVencimento}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Valor">
+									<h:outputText value="#{item.valor}">
+										<f:convertNumber type="currency" currencySymbol="R$ " />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Candidatos encontrados com esse código">
+									<h:outputText value="#{cobrancaMB.buscarNomesCandidatos(item)}" />
+									<h:outputText value="nenhum — busque manualmente" styleClass="gf-status-badge warning"
+										rendered="#{empty item.candidatosClienteIds}" />
+								</p:column>
+								<p:column headerText="Ações">
+									<span class="btn-primary-modern">
+										<p:commandButton value=" Resolver" icon="fa fa-search"
+											actionListener="#{cobrancaMB.abrirRevisao(item)}"
+											oncomplete="PF('dlgRevisao').show();" update=":frmRevisao" />
+									</span>
+									<span class="btn-secondary-modern" style="margin-left:6px;">
+										<p:commandButton value=" Ignorar" icon="fa fa-ban"
+											actionListener="#{cobrancaMB.ignorar(item)}"
+											update=":frmResultado" />
+									</span>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+
+						<!-- ═══ CONFIRMADOS ═══ -->
+						<h:panelGroup layout="block" styleClass="gf-card" style="padding:20px;margin-top:16px;" rendered="#{not empty cobrancaMB.gruposConfirmados}">
+							<div style="display:flex;align-items:center;justify-content:space-between;">
+								<b>3. Confirmados — selecione quem cobrar (um email por cliente, mesmo com várias parcelas vencidas)</b>
+								<span class="btn-success-modern">
+									<p:commandButton value=" Disparar cobrança por email dos selecionados"
+										icon="fa fa-envelope" actionListener="#{cobrancaMB.iniciarDisparoCobranca()}"
+										disabled="#{cobrancaMB.envioCobrancaEmAndamento}"
+										update="conteudoResultado" />
+								</span>
+							</div>
+
+							<!--
+								Overlay controlado só pelo "rendered" (servidor), sem PF(widget).show()/hide() —
+								depender de JS pra mostrar o modal deu problema de sincronismo algumas vezes
+								(o valor ficava "gravado" de antes da resposta chegar). Aparecendo/sumindo
+								puramente pelo rendered evita esse tipo de problema.
+							-->
+							<h:panelGroup layout="block" rendered="#{cobrancaMB.envioCobrancaEmAndamento or cobrancaMB.envioCobrancaConcluido}"
+								style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;">
+								<div style="background:#fff;border-radius:10px;padding:30px 40px;max-width:420px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3);">
+
+									<h:panelGroup layout="block" rendered="#{cobrancaMB.envioCobrancaEmAndamento}">
+										<p:poll interval="1" global="false" listener="#{cobrancaMB.processarProximoDaFilaCobranca}"
+											update=":frmResultado:conteudoResultado" />
+										<p:graphicImage name="img/aguarde.gif" />
+										<p style="font-weight:700;color:#E65100;margin:10px 0 4px;">Enviando cobranças — não feche nem saia desta tela até terminar.</p>
+										<div style="font-size:28px;font-weight:700;color:#E65100;">
+											#{cobrancaMB.enviadosFilaCobranca} de #{cobrancaMB.totalFilaEnvioCobranca}
+										</div>
+									</h:panelGroup>
+
+									<h:panelGroup layout="block" rendered="#{cobrancaMB.envioCobrancaConcluido}">
+										<i class="fa fa-check-circle" style="font-size:40px;color:#2E7D32;"></i>
+										<p style="font-weight:700;font-size:16px;margin:10px 0 4px;">Envio concluído</p>
+										<p>Enviado com sucesso para <b>#{cobrancaMB.sucessosFilaCobranca}</b> de
+											<b>#{cobrancaMB.totalFilaEnvioCobranca}</b> cliente(s) selecionado(s).</p>
+										<h:panelGroup layout="block" style="color:#c62828;margin-top:8px;font-size:13px;"
+											rendered="#{not empty cobrancaMB.falhasFilaCobranca}">
+											Falhou para: #{cobrancaMB.falhasFilaCobrancaTexto} — tente reenviar pra esses.
+										</h:panelGroup>
+										<span class="btn-secondary-modern" style="display:inline-block;margin-top:16px;">
+											<p:commandButton value="Fechar" actionListener="#{cobrancaMB.fecharDialogEnvioCobranca()}"
+												update="conteudoResultado" />
+										</span>
+									</h:panelGroup>
+								</div>
+							</h:panelGroup>
+
+							<h:panelGroup layout="block">
+								<script type="text/javascript">
+									//<![CDATA[
+									window.__cobrancaEnviando = #{cobrancaMB.envioCobrancaEmAndamento};
+									window.onbeforeunload = function () {
+										if (window.__cobrancaEnviando) {
+											return 'Envio de cobrança em andamento — não feche esta aba.';
+										}
+									};
+
+									function gfCopiarTexto(el, texto) {
+										function feedback() {
+											var original = el.className;
+											el.className = 'fa fa-check gf-copy-icon gf-copy-ok';
+											setTimeout(function () { el.className = original; }, 1200);
+										}
+										if (navigator.clipboard && window.isSecureContext) {
+											navigator.clipboard.writeText(texto).then(feedback);
+										} else {
+											var temp = document.createElement('textarea');
+											temp.value = texto;
+											temp.style.position = 'fixed';
+											temp.style.opacity = '0';
+											document.body.appendChild(temp);
+											temp.select();
+											document.execCommand('copy');
+											document.body.removeChild(temp);
+											feedback();
+										}
+									}
+									//]]>
+								</script>
+							</h:panelGroup>
+
+							<p:dataTable value="#{cobrancaMB.gruposConfirmados}" var="grupo"
+								selection="#{cobrancaMB.gruposSelecionados}" rowKey="#{grupo.cliente.id}"
+								rowSelectMode="checkbox"
+								style="margin-top:10px;" emptyMessage="Nenhum confirmado">
+								<p:column selectionMode="multiple" style="width:40px;text-align:center" />
+								<p:column headerText="Cliente">
+									<h:outputText value="Nome/Razão: #{grupo.cliente.nomeRazaoSocial}" />
+									<h:panelGroup rendered="#{not empty grupo.cliente.cpfCnpj}">
+										<h:outputText value=" CPF/CNPJ: #{grupo.cliente.cpfCnpj}" />
+										<i class="fa fa-files-o gf-copy-icon" title="Copiar CPF/CNPJ"
+											onclick="gfCopiarTexto(this, '#{grupo.cliente.cpfCnpj}')"></i>
+									</h:panelGroup>
+									<br />
+									<h:panelGroup rendered="#{grupo.cliente.cidade != null}">
+										<h:outputText value="Cidade: #{grupo.cliente.cidade.nome}-#{grupo.cliente.cidade.estado.sigla}" />
+										<br />
+									</h:panelGroup>
+									<h:outputText style="font-style:italic;"
+										value="No Banco: #{grupo.nomesSacadoRelatorio}" />
+									<br />
+									<h:outputText styleClass="gf-status-badge danger" style="margin-top:4px;"
+										value="⚠ nome não bate com o cliente — confira o código de contrato"
+										rendered="#{grupo.temNomeDivergente}" />
+								</p:column>
+								<p:column headerText="Contato">
+									<p:remoteCommand name="regEnvioWhats1_#{grupo.cliente.id}"
+										actionListener="#{cobrancaMB.registrarEnvioWhatsapp(grupo, 1)}"
+										update="historicoWrapper" />
+									<p:remoteCommand name="regEnvioWhats2_#{grupo.cliente.id}"
+										actionListener="#{cobrancaMB.registrarEnvioWhatsapp(grupo, 2)}"
+										update="historicoWrapper" />
+									<h:panelGroup id="telefone1Wrapper" layout="block"
+										style="display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-bottom:6px;"
+										rendered="#{not empty grupo.linkWhatsappTelefone1}">
+										<h:outputLink value="#{grupo.linkWhatsappTelefone1}" target="_blank"
+											onclick="regEnvioWhats1_#{grupo.cliente.id}();"
+											style="display:inline-flex;align-items:center;flex-shrink:0;width:fit-content;background:#25D366;color:#fff;text-decoration:none;
+											padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;vertical-align:middle;white-space:nowrap;">
+											<i class="fa fa-whatsapp"></i>&#160;#{grupo.cliente.telefone1}
+										</h:outputLink>
+										<p:commandLink actionListener="#{cobrancaMB.desmarcarTelefone1Whatsapp(grupo)}"
+											update="telefone1Wrapper historicoWrapper"
+											rendered="#{grupo.cliente.telefone1Whatsapp}"
+											styleClass="gf-whats-confirm-btn confirmado"
+											style="flex-shrink:0;"
+											title="Confirmado como WhatsApp — clique para desfazer">
+											<i class="fa fa-check"></i>
+											<p:confirm header="Confirmação" message="Desfazer a confirmação deste número como WhatsApp?" />
+										</p:commandLink>
+										<p:commandLink actionListener="#{cobrancaMB.confirmarTelefone1Whatsapp(grupo)}"
+											update="telefone1Wrapper historicoWrapper"
+											rendered="#{not grupo.cliente.telefone1Whatsapp}"
+											styleClass="gf-whats-confirm-btn nao-confirmado"
+											style="flex-shrink:0;"
+											title="Número não confirmado como WhatsApp — clique para confirmar">
+											<i class="fa fa-question"></i>
+											<p:confirm header="Confirmação" message="Confirmar que este número é WhatsApp?" />
+										</p:commandLink>
+									</h:panelGroup>
+									<h:panelGroup id="telefone2Wrapper" layout="block"
+										style="display:flex;flex-wrap:nowrap;align-items:center;gap:6px;"
+										rendered="#{not empty grupo.linkWhatsappTelefone2}">
+										<h:outputLink value="#{grupo.linkWhatsappTelefone2}" target="_blank"
+											onclick="regEnvioWhats2_#{grupo.cliente.id}();"
+											style="display:inline-flex;align-items:center;flex-shrink:0;width:fit-content;background:#25D366;color:#fff;text-decoration:none;
+											padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;vertical-align:middle;white-space:nowrap;">
+											<i class="fa fa-whatsapp"></i>&#160;#{grupo.cliente.telefone2}
+										</h:outputLink>
+										<p:commandLink actionListener="#{cobrancaMB.desmarcarTelefone2Whatsapp(grupo)}"
+											update="telefone2Wrapper historicoWrapper"
+											rendered="#{grupo.cliente.telefone2Whatsapp}"
+											styleClass="gf-whats-confirm-btn confirmado"
+											style="flex-shrink:0;"
+											title="Confirmado como WhatsApp — clique para desfazer">
+											<i class="fa fa-check"></i>
+											<p:confirm header="Confirmação" message="Desfazer a confirmação deste número como WhatsApp?" />
+										</p:commandLink>
+										<p:commandLink actionListener="#{cobrancaMB.confirmarTelefone2Whatsapp(grupo)}"
+											update="telefone2Wrapper historicoWrapper"
+											rendered="#{not grupo.cliente.telefone2Whatsapp}"
+											styleClass="gf-whats-confirm-btn nao-confirmado"
+											style="flex-shrink:0;"
+											title="Número não confirmado como WhatsApp — clique para confirmar">
+											<i class="fa fa-question"></i>
+											<p:confirm header="Confirmação" message="Confirmar que este número é WhatsApp?" />
+										</p:commandLink>
+									</h:panelGroup>
+								</p:column>
+								<p:column headerText="Parcelas vencidas">
+									<ui:repeat value="#{grupo.parcelasFormatadas}" var="parcela">
+										<div style="padding:4px 0;">#{parcela}</div>
+									</ui:repeat>
+								</p:column>
+								<p:column headerText="Valor total">
+									<h:outputText value="#{grupo.valorTotalFormatado}" style="font-weight:700;" />
+								</p:column>
+								<p:column headerText="Histórico de cobrança">
+									<h:panelGroup id="historicoWrapper" layout="block">
+										<ui:repeat value="#{grupo.cliente.historicoCobrancaLinhasAtuais}" var="linha">
+											<div style="font-size:12px;margin-bottom:2px;">
+												<i class="fa #{linha.whatsapp ? 'fa-whatsapp' : 'fa-envelope-o'}"
+													style="color:#{linha.whatsapp ? '#25D366' : '#1565C0'};width:14px;"
+													title="#{linha.whatsapp ? 'WhatsApp' : 'Email'}"></i>
+												#{linha.texto}
+											</div>
+										</ui:repeat>
+										<h:outputText styleClass="gf-status-badge info" style="margin-top:0;" value="Nunca notificado"
+											rendered="#{empty grupo.cliente.historicoCobrancaLinhasAtuais}" />
+
+										<h:panelGroup layout="block" style="margin-top:6px;"
+											rendered="#{not empty grupo.cliente.historicoCobrancaLinhasAnteriores}">
+											<a href="#" onclick="var el=this.nextElementSibling; el.style.display = (el.style.display === 'none' ? 'block' : 'none'); return false;"
+												style="font-size:11px;color:#757575;text-decoration:underline;">
+												Ver anteriores (#{grupo.cliente.historicoCobrancaLinhasAnteriores.size()})
+											</a>
+											<div style="display:none;margin-top:4px;padding-left:4px;border-left:2px solid #e0e0e0;">
+												<ui:repeat value="#{grupo.cliente.historicoCobrancaLinhasAnteriores}" var="linha">
+													<div style="font-size:12px;margin-bottom:2px;opacity:.6;">
+														<i class="fa #{linha.whatsapp ? 'fa-whatsapp' : 'fa-envelope-o'}"
+															style="color:#{linha.whatsapp ? '#25D366' : '#1565C0'};width:14px;"
+															title="#{linha.whatsapp ? 'WhatsApp' : 'Email'}"></i>
+														#{linha.texto}
+													</div>
+												</ui:repeat>
+											</div>
+										</h:panelGroup>
+									</h:panelGroup>
+								</p:column>
+							</p:dataTable>
+						</h:panelGroup>
+
+					</p:panelGrid>
+					</h:panelGroup>
+				</h:form>
+
+				<!-- ═══ DIALOG DE REVISÃO ═══ -->
+				<h:form id="frmRevisao">
+					<p:dialog widgetVar="dlgRevisao" header="Resolver título pendente" modal="true"
+						width="600" closable="true">
+						<p:panelGrid columns="1" style="width:100%;border:none;" rendered="#{cobrancaMB.itemEmRevisao != null}">
+
+							<div>
+								Nome no relatório do banco: <b>#{cobrancaMB.itemEmRevisao.nomeSacadoRelatorio}</b><br />
+								Seu Número: <b>#{cobrancaMB.itemEmRevisao.seuNumero}</b> —
+								Valor: <b><h:outputText value="#{cobrancaMB.itemEmRevisao.valor}"><f:convertNumber type="currency" currencySymbol="R$ "/></h:outputText></b>
+							</div>
+
+							<p:panelGrid columns="1" style="border:none;" rendered="#{not empty cobrancaMB.candidatosDoItemEmRevisao}">
+								<b>Candidatos (mesmo código de contrato já foi usado por estes clientes):</b>
+								<p:selectOneRadio value="#{cobrancaMB.clienteEscolhidoManualmente}" layout="pageDirection">
+									<f:selectItems value="#{cobrancaMB.candidatosDoItemEmRevisao}" var="c"
+										itemLabel="#{c.nomeRazaoSocialCpfCnpj}" itemValue="#{c.id}" />
+								</p:selectOneRadio>
+							</p:panelGrid>
+
+							<p:panelGrid columns="1" style="border:none;margin-top:10px;">
+								<b>Ou busque o cliente pelo nome/CNPJ:</b>
+								<div style="display:flex;gap:8px;">
+									<p:inputText value="#{cobrancaMB.buscaClienteManual}" placeholder="Nome, razão social ou CNPJ" style="flex:1;" />
+									<span class="btn-primary-modern">
+										<p:commandButton value=" Buscar" icon="fa fa-search"
+											actionListener="#{cobrancaMB.buscarClienteManualmente()}" update="@form" />
+									</span>
+								</div>
+								<p:selectOneRadio value="#{cobrancaMB.clienteEscolhidoManualmente}" layout="pageDirection"
+									rendered="#{not empty cobrancaMB.resultadoBuscaClienteManual}">
+									<f:selectItems value="#{cobrancaMB.resultadoBuscaClienteManual}" var="c"
+										itemLabel="#{c.nomeRazaoSocialCpfCnpj}" itemValue="#{c.id}" />
+								</p:selectOneRadio>
+							</p:panelGrid>
+
+							<div style="margin-top:16px;text-align:right;">
+								<span class="btn-success-modern">
+									<p:commandButton value=" Confirmar" icon="fa fa-check"
+										actionListener="#{cobrancaMB.confirmarResolucaoManual()}"
+										oncomplete="if (!args.validationFailed) { PF('dlgRevisao').hide(); }"
+										update=":frmResultado:conteudoResultado :frmRevisao" />
+								</span>
+							</div>
+
+						</p:panelGrid>
+					</p:dialog>
+				</h:form>
+
+			</div>
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

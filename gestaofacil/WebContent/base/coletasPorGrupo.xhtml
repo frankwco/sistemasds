@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<div class="gf-page">
+
+				<!-- ═══ HERO BANNER ═══ -->
+				<div class="gf-hero hero-compact">
+					<div>
+						<h2><i class="fa fa-recycle" style="margin-right:10px;"></i>Coletas por Grupo</h2>
+						<p>Peso coletado por grupo de resíduo, mês a mês, com crescimento em relação ao ano anterior</p>
+					</div>
+					<i class="fa fa-bar-chart hero-icon"></i>
+				</div>
+
+				<!-- ═══ FORM PRINCIPAL ═══ -->
+				<h:form id="frmColetasPorGrupo">
+
+					<p:ajaxStatus onstart="PF('statusDialog').show()"
+						onsuccess="PF('statusDialog').hide()" />
+
+					<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+						closable="false" resizable="false" showHeader="false"
+						styleClass="gf-loading-dialog">
+						<span class="gf-loading-text">Aguarde, buscando dados...</span>
+						<p:graphicImage name="img/aguarde.gif" />
+					</p:dialog>
+
+					<!-- ── Card: Filtro ── -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-filter icon-blue"></i>
+							<div>
+								<h4>Selecionar Ano</h4>
+								<small>Compara com o ano anterior automaticamente</small>
+							</div>
+						</div>
+
+						<div class="gf-filter-bar">
+							<label><i class="fa fa-calendar" style="margin-right:6px;"></i>Ano:</label>
+							<p:selectOneMenu style="width:130px"
+								value="#{coletasPorGrupoMB.ano}">
+								<f:selectItems value="#{coletasPorGrupoMB.anosDisponiveis}" />
+							</p:selectOneMenu>
+
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Buscar" icon="fa fa-search"
+									actionListener="#{coletasPorGrupoMB.buscar}"
+									update=":painelResultado" />
+							</span>
+						</div>
+					</div>
+
+				</h:form>
+
+				<h:panelGroup id="painelResultado" layout="block">
+
+					<!-- ═══ CARDS DE RESUMO ═══ -->
+					<div class="row stat-cards">
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card sc-info">
+								<div class="sc-icon"><i class="fa fa-balance-scale"></i></div>
+								<div>
+									<div class="sc-label">Total Coletado em #{coletasPorGrupoMB.ano} (kg)</div>
+									<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(coletasPorGrupoMB.totalAno)}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card sc-warning">
+								<div class="sc-icon"><i class="fa fa-history"></i></div>
+								<div>
+									<div class="sc-label">Total Coletado no Ano Anterior (kg)</div>
+									<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(coletasPorGrupoMB.totalAnoAnterior)}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card #{coletasPorGrupoMB.crescimentoGeralStatCard}">
+								<div class="sc-icon"><i class="fa fa-line-chart"></i></div>
+								<div>
+									<div class="sc-label">Crescimento vs Ano Anterior</div>
+									<div class="sc-value">
+										<h:outputText rendered="#{coletasPorGrupoMB.crescimentoGeralPercentual != null}"
+											value="#{formatarMB.formatarNumeroUmaCasaDecimal(coletasPorGrupoMB.crescimentoGeralPercentual)}%" />
+										<h:outputText rendered="#{coletasPorGrupoMB.crescimentoGeralPercentual == null}"
+											value="-" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card sc-success">
+								<div class="sc-icon"><i class="fa fa-trophy"></i></div>
+								<div>
+									<div class="sc-label">Maior Volume no Ano</div>
+									<div class="sc-value" style="font-size:18px;">
+										<h:outputText value="#{coletasPorGrupoMB.grupoMaiorVolume.grupo.descricao}" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- ═══ TABELA ═══ -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-table icon-green"></i>
+							<div>
+								<h4>Peso Coletado por Grupo e Mês (kg)</h4>
+								<small>Role a tabela para o lado para ver todos os meses</small>
+							</div>
+						</div>
+
+						<p:dataTable value="#{coletasPorGrupoMB.linhas}" var="list"
+							resizableColumns="true" reflow="true"
+							emptyMessage="Nenhum grupo de resíduo cadastrado.">
+
+							<p:column headerText="Grupo" sortBy="#{list.grupo.descricao}"
+								style="white-space:normal !important;">
+								<h:outputText value="#{list.grupo.descricao}" />
+							</p:column>
+
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[0]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[0])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[1]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[1])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[2]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[2])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[3]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[3])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[4]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[4])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[5]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[5])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[6]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[6])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[7]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[7])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[8]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[8])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[9]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[9])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[10]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[10])}" />
+							</p:column>
+							<p:column headerText="#{coletasPorGrupoMB.nomesMeses[11]}" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.pesoPorMes[11])}" />
+							</p:column>
+
+							<p:column headerText="Total do Ano" style="text-align:right;font-weight:bold">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.totalAno)}" />
+							</p:column>
+
+							<p:column headerText="Total Ano Anterior" style="text-align:right">
+								<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.totalAnoAnterior)}" />
+							</p:column>
+
+							<p:column headerText="Crescimento" style="text-align:right">
+								<h:outputText rendered="#{list.crescimentoPercentual != null}"
+									style="color:#{list.crescimentoCor};font-weight:bold"
+									value="#{formatarMB.formatarNumeroUmaCasaDecimal(list.crescimentoPercentual)}%" />
+								<h:outputText rendered="#{list.crescimentoPercentual == null}"
+									value="-" />
+							</p:column>
+
+						</p:dataTable>
+					</div>
+
+				</h:panelGroup>
+
+			</div>
+
+		</ui:define>
+
+	</ui:composition>
+
+</h:body>
+</html>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-tachometer" style="margin-right:10px;"></i>Odômetro</h2>
+					<p>Registre leituras avulsas de odômetro, sem precisar lançar uma despesa junto</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{leituraOdometroMB.criarNovoObjeto()}"
+							onclick="PF('dlgLeituraOdometro').show(); PF('dlgLeituraOdometro').content.scrollTop('0')"
+							title="Cadastrar Leitura" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{leituraOdometroMB.listLeitura}"
+						resizableColumns="true" reflow="true" var="list" rows="15"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma leitura registrada"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Data" sortBy="#{list.data}">
+							<h:outputText value="#{list.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Veículo" filterBy="#{list.veiculo.descricao}"
+							sortBy="#{list.veiculo.descricao}" filterMatchMode="contains">
+							<h:outputText value="#{list.veiculo.descricao} (#{list.veiculo.placa})" />
+						</p:column>
+
+						<p:column headerText="Km">
+							<h:outputText value="#{list.km}" />
+						</p:column>
+
+						<p:column headerText="Origem">
+							<h:outputText value="#{list.origem}" />
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar ═══ -->
+			<p:dialog header="Leitura de Odômetro" widgetVar="dlgLeituraOdometro" modal="true"
+				responsive="true" width="50%" id="dlgLeituraOdometro" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div class="gf-form-group" style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo *</label>
+							<p:autoComplete style="width:100%" dropdown="true" required="true"
+								requiredMessage="Veículo é obrigatório"
+								value="#{leituraOdometroMB.leitura.veiculo}" scrollHeight="170"
+								completeMethod="#{leituraOdometroMB.completarVeiculo}"
+								forceSelection="true" converter="#{converterVeiculo}" var="cur"
+								itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km *</label>
+							<p:inputNumber style="width:100%" required="true" decimalPlaces="0"
+								requiredMessage="Km é obrigatório"
+								thousandSeparator="." value="#{leituraOdometroMB.leitura.km}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data *</label>
+							<p:calendar style="width:100%" required="true"
+								requiredMessage="Data é obrigatória"
+								value="#{leituraOdometroMB.leitura.data}" pattern="dd/MM/yyyy" />
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{leituraOdometroMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgLeituraOdometro').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

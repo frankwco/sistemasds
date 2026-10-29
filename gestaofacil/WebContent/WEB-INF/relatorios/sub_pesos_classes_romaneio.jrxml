@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_pesos_classes_romaneio" pageWidth="595" pageHeight="100" columnWidth="594" leftMargin="0" rightMargin="1" topMargin="5" bottomMargin="5" isIgnorePagination="true" uuid="fad7f853-c3ba-4c15-a1a2-a7902f70b0f7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GestaoFacil"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="234"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="758"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="ID_FECHAMENTO_MES" class="java.lang.Long"/>
+	<queryString>
+		<![CDATA[SELECT gestaofacil.coleta.`dataColeta`,
+	gestaofacil.coleta.observacao,
+	gestaofacil.pessoa.`nomeRazaoSocial`,
+	gestaofacil.pessoa.`nomeFantasia`,
+	gestaofacil.coleta.`fechamentoMes_id`,
+	gestaofacil.coleta.id,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'A' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeA,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'E' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeE,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'B' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeB,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'A2' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeA2,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'A3' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeA3,
+	(SELECT sum( gestaofacil.itens_coleta.quantidadeColetada)
+FROM gestaofacil.itens_coleta
+	INNER JOIN gestaofacil.coleta ON 
+	 gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id 
+	INNER JOIN gestaofacil.grupo_residuos ON 
+	 gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+	 AND gestaofacil.grupo_residuos.descricao = 'A4' 
+	 AND gestaofacil.grupo_residuos.status = 'NULL' 
+	 AND gestaofacil.coleta.`pontoColeta_id` = 'NULL' ) AS quantidadeA4,
+	 
+    (SELECT GROUP_CONCAT(DISTINCT gestaofacil.grupo_residuos.descricao ORDER BY gestaofacil.grupo_residuos.descricao ASC SEPARATOR ', ')
+     FROM gestaofacil.itens_coleta
+     INNER JOIN gestaofacil.grupo_residuos 
+         ON gestaofacil.itens_coleta.`grupoResiduo_id` = gestaofacil.grupo_residuos.id
+     INNER JOIN gestaofacil.coleta 
+         ON gestaofacil.itens_coleta.coleta_id = gestaofacil.coleta.id
+     WHERE 
+         gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES}) AS gruposResiduos
+         
+FROM gestaofacil.coleta
+	INNER JOIN gestaofacil.ponto_coleta ON 
+	 gestaofacil.coleta.`pontoColeta_id` = gestaofacil.ponto_coleta.id 
+	INNER JOIN gestaofacil.pessoa ON 
+	 gestaofacil.ponto_coleta.id = gestaofacil.pessoa.id 
+WHERE 
+	 gestaofacil.coleta.`fechamentoMes_id` = $P{ID_FECHAMENTO_MES} 
+GROUP BY gestaofacil.ponto_coleta.id]]>
+	</queryString>
+	<field name="dataColeta" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="dataColeta"/>
+		<property name="com.jaspersoft.studio.field.label" value="dataColeta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta"/>
+	</field>
+	<field name="observacao" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="observacao"/>
+		<property name="com.jaspersoft.studio.field.label" value="observacao"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta"/>
+	</field>
+	<field name="nomeRazaoSocial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nomeRazaoSocial"/>
+		<property name="com.jaspersoft.studio.field.label" value="nomeRazaoSocial"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="nomeFantasia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nomeFantasia"/>
+		<property name="com.jaspersoft.studio.field.label" value="nomeFantasia"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="fechamentoMes_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="fechamentoMes_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechamentoMes_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta"/>
+	</field>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="coleta"/>
+	</field>
+	<field name="quantidadeA" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA"/>
+	</field>
+	<field name="quantidadeE" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeE"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeE"/>
+	</field>
+	<field name="quantidadeB" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeB"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeB"/>
+	</field>
+	<field name="quantidadeA2" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA2"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA2"/>
+	</field>
+	<field name="quantidadeA3" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA3"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA3"/>
+	</field>
+	<field name="quantidadeA4" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA4"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA4"/>
+	</field>
+	<field name="gruposResiduos" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="gruposResiduos"/>
+		<property name="com.jaspersoft.studio.field.label" value="gruposResiduos"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="260" y="0" width="45" height="20" uuid="d62d237d-c46f-476e-a509-b67ebc9e2402">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="305" y="0" width="45" height="20" uuid="5bbcb41c-d249-490b-96a3-ccc1de262c94">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[E]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="0" width="45" height="20" uuid="4f0bbfaf-febd-4672-9686-7d7b1a616bec">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[B]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="395" y="0" width="45" height="20" uuid="76587ce6-c951-4ae4-8bb7-6a73951c98e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A2]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="260" height="20" uuid="4955ddec-1b10-4807-a7e9-106046916eb5"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Total Coletado por Ponto]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="440" y="0" width="44" height="20" uuid="853beba8-f1d4-4c0a-a633-ea0849cdddf2"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["A3"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="484" y="0" width="44" height="20" uuid="7ea66683-bc10-4129-9955-ebd3c1f7dfc2"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["A4"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField>
+				<reportElement x="0" y="0" width="260" height="15" uuid="5b232003-110a-4c2d-bd86-ccdcb5f68a7c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d16ecd99-f22e-4d52-85e0-ee24d195c9c9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nomeRazaoSocial} +"/"+$F{nomeFantasia}+" "+$F{gruposResiduos}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="260" y="0" width="45" height="15" uuid="90c8ac17-6e22-494e-a7b6-4bc6011939c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeA}== null ?  0:$F{quantidadeA})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="305" y="0" width="45" height="15" uuid="83ef12c3-1458-441a-a5a8-5c2efb5edd7d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeE}== null ?  0:$F{quantidadeE})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="350" y="0" width="45" height="15" uuid="a7f96970-94e5-4ebb-bd74-c3667945e7d9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeB}== null ?  0:$F{quantidadeB})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="395" y="0" width="45" height="15" uuid="6069ac8d-3f1a-4718-b73f-25941d64c2e4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeA2}== null ?  0:$F{quantidadeA2})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="440" y="0" width="44" height="15" uuid="9419b987-7881-45b7-aff5-2565ef27cdde">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeA3}== null ?  0:$F{quantidadeA3})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="484" y="0" width="44" height="15" uuid="6a26b9f1-a111-4777-b3f6-d4664d84be3e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="144f7c23-5f46-4a63-86de-efb9483a961d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(($F{quantidadeA4}== null ?  0:$F{quantidadeA4})).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

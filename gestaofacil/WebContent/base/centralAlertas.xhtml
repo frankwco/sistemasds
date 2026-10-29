@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-exclamation-triangle" style="margin-right:10px;"></i>Central de Alertas</h2>
+					<p>Documentos a vencer, manutenções programadas e lembretes, tudo num só lugar</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-list-alt icon-teal"></i>
+					<div>
+						<h4>Alertas</h4>
+						<small>Vencidos e próximos dos próximos 30 dias / 500 km</small>
+					</div>
+				</div>
+				<h:form id="frmTabela">
+					<span class="gf-new-btn" style="margin-bottom:12px;display:inline-block;">
+						<p:commandButton value="  Atualizar" icon="fa fa-refresh"
+							actionListener="#{centralAlertasMB.carregarLista()}" update=":frmTabela" />
+					</span>
+
+					<p:dataTable id="tabela" value="#{centralAlertasMB.listAlerta}"
+						resizableColumns="true" reflow="true" var="list" rows="15"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum alerta no momento"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Urgência" width="120" sortBy="#{list.urgencia}">
+							<h:panelGroup rendered="#{list.urgencia == 'Vencido'}">
+								<i class="fa fa-exclamation-circle" style="color:#c62828;margin-right:6px;"></i>
+							</h:panelGroup>
+							<h:panelGroup rendered="#{list.urgencia == 'Próximo'}">
+								<i class="fa fa-clock-o" style="color:#ef6c00;margin-right:6px;"></i>
+							</h:panelGroup>
+							<h:outputText value="#{list.urgencia}" />
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipo}"
+							sortBy="#{list.tipo}" filterMatchMode="contains">
+							<h:outputText value="#{list.tipo}" />
+						</p:column>
+
+						<p:column headerText="Descrição">
+							<h:outputText value="#{list.descricao}" />
+						</p:column>
+
+						<p:column headerText="Veículo">
+							<h:outputText value="#{list.veiculo}" />
+						</p:column>
+
+						<p:column headerText="Motorista">
+							<h:outputText value="#{list.motorista}" />
+						</p:column>
+
+						<p:column headerText="Vencimento/Km">
+							<h:outputText value="#{list.dataVencimento}" rendered="#{list.dataVencimento != null}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+							<h:outputText value="#{list.kmAtual} / #{list.kmAlvo} km"
+								rendered="#{list.dataVencimento == null and list.kmAlvo != null}" />
+						</p:column>
+
+						<p:column headerText="Ação" width="110">
+							<span class="btn-primary-modern">
+								<p:commandButton icon="fa fa-wrench" value="  Resolver"
+									update=":frmResolver" title="Resolver este alerta"
+									oncomplete="PF('dlgResolverAlerta').show();"
+									actionListener="#{centralAlertasMB.abrirResolver(list)}" />
+							</span>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Resolver Alerta ═══ -->
+			<p:dialog header="Resolver Alerta" widgetVar="dlgResolverAlerta" modal="true"
+				responsive="true" width="45%" id="dlgResolverAlerta" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmResolver">
+					<p style="margin-top:0;">
+						<strong>#{centralAlertasMB.alertaSelecionado.tipo}</strong> —
+						#{centralAlertasMB.alertaSelecionado.descricao}
+						<h:outputText value=" (#{centralAlertasMB.alertaSelecionado.veiculo})"
+							rendered="#{not empty centralAlertasMB.alertaSelecionado.veiculo}" />
+						<h:outputText value=" (#{centralAlertasMB.alertaSelecionado.motorista})"
+							rendered="#{not empty centralAlertasMB.alertaSelecionado.motorista}" />
+					</p>
+
+					<!-- Documento Veículo / Documento Motorista: renovar -->
+					<h:panelGroup
+						rendered="#{centralAlertasMB.alertaSelecionado.tipo == 'Documento Veículo' or centralAlertasMB.alertaSelecionado.tipo == 'Documento Motorista'}">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar-times-o" style="margin-right:6px;color:#1565C0;"></i>Nova data de vencimento *</label>
+								<p:calendar style="width:100%" required="true"
+									requiredMessage="Nova data de vencimento é obrigatória"
+									value="#{centralAlertasMB.novaDataVencimento}" pattern="dd/MM/yyyy" />
+							</div>
+						</div>
+						<small>Campos obrigatórios *</small>
+						<div class="gf-modal-footer">
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Salvar" icon="fa fa-save"
+									actionListener="#{centralAlertasMB.resolverDocumento()}"
+									update=":dlgInformacao :frmTabela :frmResolver" />
+							</span>
+							<span class="btn-warning-modern">
+								<p:commandButton value="  Não é mais necessário" icon="fa fa-ban"
+									title="Ex.: veículo vendido, motorista desligado, documento não é mais obrigatório"
+									process="@this" actionListener="#{centralAlertasMB.ignorarDocumento()}"
+									update=":dlgInformacao :frmTabela :frmResolver">
+									<p:confirm header="Confirmação"
+										message="Este documento deixa de ser controlado e não vai gerar mais alerta. Confirma?" />
+								</p:commandButton>
+							</span>
+							<span class="btn-secondary-modern">
+								<p:commandButton value="  Cancelar" icon="fa fa-times"
+									onclick="PF('dlgResolverAlerta').hide();" alt="Cancelar" />
+							</span>
+						</div>
+					</h:panelGroup>
+
+					<!-- Lembrete: concluir -->
+					<h:panelGroup rendered="#{centralAlertasMB.alertaSelecionado.tipo == 'Lembrete'}">
+						<div class="gf-modal-footer">
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Concluir" icon="fa fa-check"
+									actionListener="#{centralAlertasMB.concluirLembrete()}"
+									update=":dlgInformacao :frmTabela :frmResolver" />
+							</span>
+							<span class="btn-teal-modern">
+								<p:commandButton value="  Concluir e Gerar Serviço" icon="fa fa-wrench"
+									rendered="#{not empty centralAlertasMB.alertaSelecionado.veiculo}"
+									actionListener="#{centralAlertasMB.concluirLembreteEGerarServico()}"
+									update=":dlgInformacao :frmTabela :frmResolver" />
+							</span>
+							<span class="btn-secondary-modern">
+								<p:commandButton value="  Cancelar" icon="fa fa-times"
+									onclick="PF('dlgResolverAlerta').hide();" alt="Cancelar" />
+							</span>
+						</div>
+					</h:panelGroup>
+
+					<!-- Manutenção Programada: agendar nova revisão -->
+					<h:panelGroup rendered="#{centralAlertasMB.alertaSelecionado.tipo == 'Manutenção Programada'}">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data do serviço</label>
+								<p:calendar style="width:100%" value="#{centralAlertasMB.novaData}" pattern="dd/MM/yyyy" />
+							</div>
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo de Manutenção</label>
+								<p:selectOneMenu style="width:100%" value="#{centralAlertasMB.novoTipoManutencao}">
+									<f:selectItem itemLabel="Selecione" itemValue="" />
+									<f:selectItem itemLabel="Preventiva" itemValue="Preventiva" />
+									<f:selectItem itemLabel="Corretiva" itemValue="Corretiva" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km da Próxima Revisão *</label>
+								<p:inputNumber style="width:100%" decimalPlaces="0" thousandSeparator="." required="true"
+									requiredMessage="Km da próxima revisão é obrigatório"
+									value="#{centralAlertasMB.novoKmProximaRevisao}" />
+							</div>
+						</div>
+						<small>Campos obrigatórios * — registra um novo serviço para o veículo e reagenda a próxima revisão. Complete valor/oficina depois em Despesas e Manutenção.</small>
+						<div class="gf-modal-footer">
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Salvar" icon="fa fa-save"
+									actionListener="#{centralAlertasMB.resolverManutencao()}"
+									update=":dlgInformacao :frmTabela :frmResolver" />
+							</span>
+							<span class="btn-warning-modern">
+								<p:commandButton value="  Não é mais necessário" icon="fa fa-ban"
+									title="Ex.: veículo vendido, revisão programada cancelada"
+									process="@this" actionListener="#{centralAlertasMB.ignorarManutencao()}"
+									update=":dlgInformacao :frmTabela :frmResolver">
+									<p:confirm header="Confirmação"
+										message="Esta revisão programada deixa de ser controlada e não vai gerar mais alerta. Confirma?" />
+								</p:commandButton>
+							</span>
+							<span class="btn-secondary-modern">
+								<p:commandButton value="  Cancelar" icon="fa fa-times"
+									onclick="PF('dlgResolverAlerta').hide();" alt="Cancelar" />
+							</span>
+						</div>
+					</h:panelGroup>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

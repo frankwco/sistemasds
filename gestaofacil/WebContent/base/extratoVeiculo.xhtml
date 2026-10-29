@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-history" style="margin-right:10px;"></i>Extrato do Veículo</h2>
+					<p>Linha do tempo unificada de despesas, abastecimentos e serviços</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Filtro ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-filter icon-blue"></i>
+					<div>
+						<h4>Filtro</h4>
+						<small>Selecione o veículo e o período</small>
+					</div>
+				</div>
+				<h:form id="frmFiltro">
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo *</label>
+							<p:autoComplete style="width:100%" dropdown="true" required="true"
+								requiredMessage="Veículo é obrigatório"
+								value="#{extratoVeiculoMB.veiculo}" scrollHeight="170"
+								completeMethod="#{extratoVeiculoMB.completarVeiculo}"
+								forceSelection="true" converter="#{converterVeiculo}" var="cur"
+								itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Início</label>
+							<p:calendar style="width:100%" value="#{extratoVeiculoMB.dataInicio}"
+								pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Fim</label>
+							<p:calendar style="width:100%" value="#{extratoVeiculoMB.dataFim}"
+								pattern="dd/MM/yyyy" />
+						</div>
+					</div>
+
+					<div class="gf-modal-footer" style="justify-content:flex-start;">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Buscar" icon="fa fa-search"
+								actionListener="#{extratoVeiculoMB.buscar()}" update=":frmTabela" />
+						</span>
+					</div>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-list-alt icon-teal"></i>
+					<div>
+						<h4>Extrato</h4>
+						<small>Total do período: <h:outputText value="#{extratoVeiculoMB.totalPeriodo}">
+							<f:convertNumber type="currency" currencySymbol="R$ " />
+						</h:outputText></small>
+					</div>
+				</div>
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{extratoVeiculoMB.listExtrato}"
+						resizableColumns="true" reflow="true" var="list" rows="15"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum lançamento no período selecionado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Data" sortBy="#{list.data}">
+							<h:outputText value="#{list.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Tipo">
+							<h:outputText value="#{list.tipo}" />
+						</p:column>
+
+						<p:column headerText="Categoria/Combustível">
+							<h:outputText value="#{list.categoriaDespesa.nome}"
+								rendered="#{list.categoriaDespesa != null and list.tipo != 'Abastecimento'}" />
+							<h:outputText value="#{list.combustivel}"
+								rendered="#{list.tipo == 'Abastecimento'}" />
+						</p:column>
+
+						<p:column headerText="Fornecedor">
+							<h:outputText value="#{list.fornecedor.nome}" />
+						</p:column>
+
+						<p:column headerText="Km">
+							<h:outputText value="#{list.km}" />
+						</p:column>
+
+						<p:column headerText="Valor">
+							<h:outputText value="#{list.valor}">
+								<f:convertNumber type="currency" currencySymbol="R$ " />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Observação">
+							<h:outputText value="#{list.observacao}" />
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

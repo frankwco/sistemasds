@@ -1,0 +1,75 @@
+.highlight {
+    background-color: #e9ae60 !important;
+}
+
+// Spinner em CSS puro: anima só com "transform", que o navegador executa fora
+// da thread principal. O <ion-spinner> (SVG) congelava enquanto o app lia/gravava
+// o array grande de coletas no Storage.
+.gf-spinner {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    border: 4px solid rgba(var(--ion-color-primary-rgb), 0.25);
+    border-top-color: var(--ion-color-primary);
+    border-radius: 50%;
+    animation: gf-girar 0.8s linear infinite;
+    will-change: transform;
+}
+
+@keyframes gf-girar {
+    to { transform: rotate(360deg); }
+}
+
+.gf-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+
+    .gf-spinner {
+        border-color: rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+    }
+
+    p {
+        margin-top: 12px;
+    }
+}
+
+.coleta-titulo {
+    font-weight: 600;
+}
+
+.coleta-status {
+    font-size: 24px;
+    vertical-align: middle;
+}
+
+// Linha de chips (um por grupo) no lugar da ion-grid de duas linhas: bem menos elementos por coleta.
+.coleta-grupos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 6px 0;
+}
+
+.coleta-grupo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 56px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.coleta-total {
+    color: var(--ion-color-success);
+}

@@ -1,0 +1,183 @@
+<ion-header [translucent]="true" class="home-header">
+    <ion-toolbar color="primary" class="home-toolbar">
+        <ion-title>
+            <span class="toolbar-title">
+                <ion-icon name="bus-outline" class="toolbar-logo"></ion-icon>
+                DS Transportes
+            </span>
+            <span class="toolbar-version">{{ constanteApp.chave.replace('Versao', 'V ') }}</span>
+        </ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="sair()" class="logout-btn">
+                <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="home-content">
+
+    <!-- Seleção de Veículo -->
+    <ion-card class="selection-card">
+        <ion-card-header class="card-header-custom">
+            <div class="card-header-left">
+                <div class="card-icon-badge vehicle">
+                    <ion-icon name="car-sport-outline"></ion-icon>
+                </div>
+                <ion-card-title class="card-title-custom">Veículo</ion-card-title>
+            </div>
+            <ion-button fill="clear" class="search-btn" (click)="pesquisarVeiculo()">
+                <ion-icon name="search-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-card-header>
+        <ion-card-content class="card-body-custom">
+            <p class="info-main" *ngIf="veiculoSelecionado.descricao">{{ veiculoSelecionado.descricao }}</p>
+            <p class="info-sub" *ngIf="veiculoSelecionado.placa">{{ veiculoSelecionado.placa }}</p>
+            <p class="info-empty" *ngIf="!veiculoSelecionado.descricao">Nenhum veículo selecionado</p>
+        </ion-card-content>
+    </ion-card>
+
+    <!-- Seleção de Motorista -->
+    <ion-card class="selection-card" *ngIf="veiculoSelecionado.id!=null">
+        <ion-card-header class="card-header-custom">
+            <div class="card-header-left">
+                <div class="card-icon-badge driver">
+                    <ion-icon name="person-outline"></ion-icon>
+                </div>
+                <ion-card-title class="card-title-custom">Motorista</ion-card-title>
+            </div>
+            <ion-button fill="clear" class="search-btn" (click)="pesquisarMotorista()">
+                <ion-icon name="search-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-card-header>
+        <ion-card-content class="card-body-custom">
+            <p class="info-main" *ngIf="motoristaSelecionado.nome">{{ motoristaSelecionado.nome }}</p>
+            <p class="info-sub" *ngIf="motoristaSelecionado.email">{{ motoristaSelecionado.email }}</p>
+            <p class="info-empty" *ngIf="!motoristaSelecionado.nome">Nenhum motorista selecionado</p>
+        </ion-card-content>
+    </ion-card>
+
+    <!-- Botão principal Coletar -->
+    <div class="coletar-wrapper">
+        <ion-button expand="block" shape="round" class="coletar-btn" (click)="chamarColeta()">
+            <ion-icon slot="start" name="cart-outline"></ion-icon>
+            Iniciar Coleta
+        </ion-button>
+    </div>
+
+    <!-- Grid de funções de Veículos -->
+    <div class="section-label">Veículos</div>
+
+    <ion-grid class="actions-grid">
+        <ion-row>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('captura-ia')">
+                    <div class="action-icon report">
+                        <ion-icon name="sparkles-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Lançamento por IA</span>
+                </div>
+            </ion-col>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('abastecimento')">
+                    <div class="action-icon info">
+                        <ion-icon name="water-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Abastecimento</span>
+                </div>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('despesa-manutencao')">
+                    <div class="action-icon warning">
+                        <ion-icon name="construct-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Despesa/Manutenção</span>
+                </div>
+            </ion-col>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('alertas')">
+                    <div class="action-icon danger">
+                        <ion-icon name="notifications-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Central de Alertas</span>
+                </div>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('meus-lancamentos')">
+                    <div class="action-icon info">
+                        <ion-icon name="list-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Meus Lançamentos</span>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <!-- Financeiro (só pra quem tem acessoSistema=true) -->
+    <ng-container *ngIf="usuario.acessoSistema">
+        <div class="section-label">Financeiro</div>
+
+        <ion-grid class="actions-grid">
+            <ion-row>
+                <ion-col size="6">
+                    <div class="action-card" (click)="chamarPagina('cobranca')">
+                        <div class="action-icon report">
+                            <ion-icon name="logo-whatsapp"></ion-icon>
+                        </div>
+                        <span class="action-label">Cobrança</span>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-container>
+
+    <!-- Grid de ações rápidas -->
+    <div class="section-label">Ações Rápidas</div>
+
+    <ion-grid class="actions-grid">
+        <ion-row>
+            <ion-col size="6">
+                <div class="action-card" (click)="informacoesPonto()">
+                    <div class="action-icon info">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Dados de Pontos</span>
+                </div>
+            </ion-col>
+            <ion-col size="6">
+                <div class="action-card" (click)="pontosSemColetas()">
+                    <div class="action-icon warning">
+                        <ion-icon name="close-circle-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Pontos sem Coletas</span>
+                </div>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col size="6">
+                <div class="action-card" (click)="chamarPagina('relatorio-coletas')">
+                    <div class="action-icon report">
+                        <ion-icon name="bar-chart-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Relatório de Coletas</span>
+                </div>
+            </ion-col>
+            <ion-col size="6">
+                <div class="action-card" (click)="pontosComAvisos()">
+                    <div class="action-icon danger">
+                        <ion-icon name="alert-circle-outline"></ion-icon>
+                    </div>
+                    <span class="action-label">Pontos com Avisos</span>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+</ion-content>

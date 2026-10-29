@@ -1,0 +1,127 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Meus Lançamentos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="lancamentos-content">
+
+  <div class="aviso-vazio" *ngIf="!usuarioLogado.id">
+    <ion-icon name="person-outline"></ion-icon>
+    <p>Saia e faça login novamente pra ver seus lançamentos.</p>
+  </div>
+
+  <ng-container *ngIf="usuarioLogado.id">
+    <div class="carregando" *ngIf="carregando">
+      <ion-spinner name="dots"></ion-spinner>
+    </div>
+
+    <div class="aviso-vazio" *ngIf="!carregando && lancamentos.length === 0">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <p>Nenhum lançamento encontrado.</p>
+    </div>
+
+    <ion-list *ngIf="!carregando && lancamentos.length > 0" lines="none" class="lista-lancamentos">
+      <div *ngFor="let l of lancamentos" class="grupo-lancamento">
+        <ion-item button class="item-lancamento" [class.item-excluindo]="excluindoId === l.id" (click)="alternarDetalhe(l)">
+          <div class="icone-badge" slot="start">
+            <ion-icon [name]="iconePara(l)"></ion-icon>
+          </div>
+          <ion-label>
+            <h2>{{ l.tipo }}</h2>
+            <p *ngIf="l.veiculo">{{ l.veiculo.descricao }} {{ l.veiculo.placa }}</p>
+            <p>{{ l.data | date:'dd/MM/yyyy' }}</p>
+          </ion-label>
+          <div slot="end" class="valor-lancamento">
+            <span *ngIf="l.valor != null">R$ {{ l.valor | number:'1.2-2' }}</span>
+          </div>
+          <ion-button *ngIf="excluindoId !== l.id" fill="clear" color="danger" slot="end" (click)="confirmarExclusao(l, $event)" title="Excluir">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+          <ion-spinner *ngIf="excluindoId === l.id" slot="end" name="dots"></ion-spinner>
+        </ion-item>
+
+        <div class="detalhe-lancamento" *ngIf="expandidoId === l.id">
+          <div class="detalhe-linha" *ngIf="l.motorista?.nome">
+            <span class="detalhe-label">Motorista</span>
+            <span class="detalhe-valor">{{ l.motorista.nome }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.categoriaDespesa?.nome">
+            <span class="detalhe-label">Categoria</span>
+            <span class="detalhe-valor">{{ l.categoriaDespesa.nome }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.fornecedor?.nome">
+            <span class="detalhe-label">Fornecedor</span>
+            <span class="detalhe-valor">{{ l.fornecedor.nome }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="!l.fornecedor?.nome && l.fornecedorSugerido">
+            <span class="detalhe-label">Fornecedor sugerido</span>
+            <span class="detalhe-valor">{{ l.fornecedorSugerido }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.km != null">
+            <span class="detalhe-label">Km do odômetro</span>
+            <span class="detalhe-valor">{{ l.km }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.litros != null">
+            <span class="detalhe-label">Litros</span>
+            <span class="detalhe-valor">{{ l.litros }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.valorLitro != null">
+            <span class="detalhe-label">Valor/Litro</span>
+            <span class="detalhe-valor">R$ {{ l.valorLitro | number:'1.2-3' }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.combustivel">
+            <span class="detalhe-label">Combustível</span>
+            <span class="detalhe-valor">{{ l.combustivel }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.tipoManutencao">
+            <span class="detalhe-label">Tipo de manutenção</span>
+            <span class="detalhe-valor">{{ l.tipoManutencao }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.dataEntrada">
+            <span class="detalhe-label">Entrada</span>
+            <span class="detalhe-valor">{{ l.dataEntrada | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.dataSaida">
+            <span class="detalhe-label">Saída</span>
+            <span class="detalhe-valor">{{ l.dataSaida | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.kmProximaRevisao != null">
+            <span class="detalhe-label">Km da próxima revisão</span>
+            <span class="detalhe-valor">{{ l.kmProximaRevisao }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.numeroDocumento">
+            <span class="detalhe-label">Nº documento</span>
+            <span class="detalhe-valor">{{ l.numeroDocumento }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.origemLancamento">
+            <span class="detalhe-label">Origem</span>
+            <span class="detalhe-valor">{{ l.origemLancamento }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.confiancaIA != null">
+            <span class="detalhe-label">Confiança da IA</span>
+            <span class="detalhe-valor">{{ l.confiancaIA * 100 | number:'1.0-0' }}%</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.observacao">
+            <span class="detalhe-label">Observação</span>
+            <span class="detalhe-valor">{{ l.observacao }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.textoBrutoIA">
+            <span class="detalhe-label">Texto bruto da IA</span>
+            <span class="detalhe-valor">{{ l.textoBrutoIA }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="l.criadoEm">
+            <span class="detalhe-label">Lançado em</span>
+            <span class="detalhe-valor">{{ l.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </ion-list>
+  </ng-container>
+
+</ion-content>

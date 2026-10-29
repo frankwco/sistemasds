@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-car" style="margin-right:10px;"></i>Veículos</h2>
+					<p>Cadastre e gerencie os veículos da frota</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{veiculoMB.criarNovoObjeto()}"
+							onclick="PF('dlgVeiculo').show(); PF('dlgVeiculo').content.scrollTop('0')"
+							title="Cadastrar Veículo" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{veiculoMB.listVeiculo}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum veículo cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Descrição" filterBy="#{list.descricao}"
+							sortBy="#{list.descricao}" filterMatchMode="contains">
+							<h:outputText value="#{list.descricao}" />
+						</p:column>
+
+						<p:column headerText="Placa" filterBy="#{list.placa}"
+							sortBy="#{list.placa}" filterMatchMode="contains">
+							<h:outputText value="#{list.placa}" />
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipo}"
+							sortBy="#{list.tipo}" filterMatchMode="contains">
+							<h:outputText value="#{list.tipo}" />
+						</p:column>
+
+						<p:column headerText="Km Atual" filterBy="#{list.kmAtual}"
+							sortBy="#{list.kmAtual}" filterMatchMode="contains">
+							<h:outputText value="#{list.kmAtual}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgVeiculo').show();"
+										actionListener="#{veiculoMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{veiculoMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Veículo" widgetVar="dlgVeiculo" modal="true"
+				responsive="true" width="60%" id="dlgVeiculo" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-file-text-o" style="margin-right:6px;color:#1565C0;"></i>Descrição *</label>
+							<p:inputText style="width:100%" required="true"
+								requiredMessage="Descrição é obrigatória"
+								title="Descrição" value="#{veiculoMB.veiculo.descricao}" />
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-card-o" style="margin-right:6px;color:#1565C0;"></i>Placa *</label>
+								<p:inputText style="width:100%" onkeyup="value=value.toUpperCase()" required="true"
+									requiredMessage="Placa é obrigatória"
+									title="Placa" value="#{veiculoMB.veiculo.placa}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo</label>
+								<p:inputText style="width:100%" title="Tipo" value="#{veiculoMB.veiculo.tipo}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-cube" style="margin-right:6px;color:#1565C0;"></i>Tipo de Compartimento</label>
+								<p:inputText style="width:100%" title="Tipo de Compartimento"
+									value="#{veiculoMB.veiculo.tipoCompartimento}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km Atual</label>
+								<p:inputNumber style="width:100%" title="Km Atual" decimalPlaces="0"
+									thousandSeparator="." value="#{veiculoMB.veiculo.kmAtual}" />
+							</div>
+						</div>
+
+						<div class="gf-form-item" style="margin-top:16px;">
+							<label><i class="fa fa-comment-o" style="margin-right:6px;color:#1565C0;"></i>Observação</label>
+							<p:inputText style="width:100%" onkeyup="value=value.toUpperCase()"
+								title="Observação" value="#{veiculoMB.veiculo.observacao}" />
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{veiculoMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgVeiculo').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

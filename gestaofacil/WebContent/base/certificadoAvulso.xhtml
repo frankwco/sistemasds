@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<!-- TITULO -->
+			<div class="row">
+				<div class="col-md-12">
+					<h1 class="page-header">Cadastro de Certificados Avulso</h1>
+
+				</div>
+			</div>
+			<!-- FIM TITULO -->
+
+			<!-- BOTAO CADASTRAR -->
+			<div class="row container-fluid">
+				<div class="col-md-12">
+					<ol class="breadcrumb">
+						<h:form id="frmCadastrar">
+							<p:commandButton value="Cadastrar" update=":frmCertificadoAvulso"
+								actionListener="#{certificadoAvulsoMB.criarNovoObjeto()}"
+								onclick="PF('dlgCertificadoAvulso').show(); PF('dlgCertificadoAvulso').content.scrollTop('0')"
+								title="Cadastrar Certificado Avulso" />
+						</h:form>
+					</ol>
+				</div>
+			</div>
+			<!-- FIM DO BOTAO CADASTRAR -->
+			<!-- TABELA-->
+			<div class="col-md-12" style="min-height: 700px">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela"
+						value="#{certificadoAvulsoMB.listaCertificadosAvulso}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum certificado avulso cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Cliente"
+							filterBy="#{list.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+							sortBy="#{list.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+							filterMatchMode="contains">
+							<h:outputText
+								value="#{list.cliente.nomeRazaoSocialNomeFantasiaEndereco}" />
+						</p:column>
+
+						<p:column headerText="Data Emissão">
+							<h:outputText
+								value="#{formataDataMB.formatarData(list.dataEmissao)}" />
+						</p:column>
+
+						<p:column headerText="Data Inicial Fechamento">
+							<h:outputText
+								value="#{formataDataMB.formatarData(list.dataInicialFechamento)}" />
+						</p:column>
+
+						<p:column headerText="Data Final Fechamento">
+							<h:outputText
+								value="#{formataDataMB.formatarData(list.dataFinalFechamento)}" />
+						</p:column>
+
+						<p:column headerText="Opções">
+							<p:panelGrid columns="2" styleClass="ui-noborder">
+
+								<p:commandButton alt="Alterar" icon="ui-icon-pencil"
+									update=":frmCertificadoAvulso" title="Alterar"
+									styleClass="btn btn-block"
+									oncomplete="PF('dlgCertificadoAvulso').show();"
+									actionListener="#{certificadoAvulsoMB.informaObjeto(list)}">
+								</p:commandButton>
+
+								<p:commandButton
+									actionListener="#{certificadoAvulsoMB.inativar(list)}"
+									icon="ui-icon-trash" title="Excluir" styleClass="btn btn-block"
+									update=":frmTabela :dlgInformacao" alt="Excluir">
+									<p:confirm header="Confirmação" message="Deseja excluir?" />
+								</p:commandButton>
+
+							</p:panelGrid>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+
+			</div>
+			<!--FIM DA TABELA-->
+
+			<!-- DIALOG SALVAR -->
+			<p:dialog header="Certificado Avulso"
+				widgetVar="dlgCertificadoAvulso" modal="true" responsive="true"
+				width="80%" id="dlgCertificadoAvulso" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmCertificadoAvulso">
+					<div class="ui-fluid">
+
+						<div class="col-md-12">
+							<label>Cliente: </label>
+
+							<p:selectOneMenu style="width:100%"
+								value="#{certificadoAvulsoMB.certificadoAvulso.cliente}"
+								converter="#{converterCliente}" panelStyle="width:180px"
+								effect="fade" var="t" filter="true" filterMatchMode="contains">
+								<f:selectItems value="#{clienteMB.listCliente}" var="cur"
+									itemLabel="#{cur.id} - #{cur.nomeRazaoSocialNomeFantasiaEndereco}"
+									itemValue="#{cur}" />
+								<p:column style="white-space:normal !important;">
+									<h:outputText value="#{t.nomeRazaoSocialNomeFantasiaEndereco}" />
+								</p:column>
+							</p:selectOneMenu>
+
+						</div>
+
+
+						<div class="col-md-6">
+							<label>Data Inicial Fechamento: *</label>
+							<p:calendar required="true" requiredMessage="Data Obrigatória!!"
+								value="#{certificadoAvulsoMB.certificadoAvulso.dataInicialFechamento}"
+								mask="99/99/9999" pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="col-md-6">
+							<label>Data Final Fechamento: *</label>
+							<p:calendar required="true" requiredMessage="Data Obrigatória!!"
+								value="#{certificadoAvulsoMB.certificadoAvulso.dataFinalFechamento}"
+								mask="99/99/9999" pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="col-md-12">
+						<p:editor  value="#{certificadoAvulsoMB.certificadoAvulso.texto}" width="600" />
+						</div>
+
+
+						<small>Campos obrigatórios *</small>
+					</div>
+					<div class="modal-footer">
+						<p:commandButton value="Salvar"
+							actionListener="#{certificadoAvulsoMB.salvar()}"
+							styleClass="ui-priority-primary"
+							update=":dlgInformacao :frmTabela" />
+
+						<p:commandButton value="Cancelar"
+							onclick="PF('dlgCertificadoAvulso').hide();" alt="Cancelar" />
+					</div>
+				</h:form>
+			</p:dialog>
+			<!-- FIM DO DIALOG SALVAR -->
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>
+

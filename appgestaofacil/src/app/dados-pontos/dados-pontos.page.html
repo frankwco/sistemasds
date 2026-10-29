@@ -1,0 +1,102 @@
+<ion-header class="dp-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Informações de Ponto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dp-content">
+
+  <!-- Card Cidade -->
+  <ion-card class="selection-card" (click)="pesquisarCidades()">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-orange">
+          <ion-icon name="location-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Cidade</span>
+          <span class="selection-value">{{ cidadeSelecionada.nome }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="selection-arrow"></ion-icon>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Ponto de Coleta -->
+  <ion-card class="selection-card" (click)="pesquisarPontos()" *ngIf="cidadeSelecionada.nome != 'Selecione'">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-blue">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Ponto de Coleta</span>
+          <span class="selection-value">{{ pontoColetaSelecionado.nomeRazaoSocial }}</span>
+          <span class="selection-detail" *ngIf="pontoColetaSelecionado.nomeFantasia">
+            {{ pontoColetaSelecionado.nomeFantasia }}
+            <span *ngIf="pontoColetaSelecionado.apelido"> - {{ pontoColetaSelecionado.apelido }}</span>
+          </span>
+          <span class="selection-address" *ngIf="pontoColetaSelecionado.enderecoCompleto">
+            <ion-icon name="map-outline"></ion-icon> {{ pontoColetaSelecionado.enderecoCompleto }}
+          </span>
+          <span class="selection-email" *ngIf="pontoColetaSelecionado.email">
+            <ion-icon name="mail-outline"></ion-icon> {{ pontoColetaSelecionado.email }}
+          </span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="selection-arrow"></ion-icon>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Datas de Coletas -->
+  <ion-card class="dates-card" *ngIf="pontoColetaSelecionado.id > 0">
+    <ion-card-header class="dates-header">
+      <div class="dates-icon-badge">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <ion-card-title class="dates-title">Datas de Coletas</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="dates-grid">
+        <div class="date-row date-next">
+          <div class="date-label">
+            <ion-icon name="arrow-forward-circle-outline"></ion-icon>
+            <span>Próxima</span>
+          </div>
+          <span class="date-value">{{ proximaColeta.dataProximaColeta | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="date-row">
+          <div class="date-label">
+            <ion-icon name="arrow-back-circle-outline"></ion-icon>
+            <span>Anterior</span>
+          </div>
+          <span class="date-value">{{ proximaColeta.pontoColeta.dataUltimaColeta | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="date-row">
+          <div class="date-label">
+            <ion-icon name="repeat-outline"></ion-icon>
+            <span>Periodicidade</span>
+          </div>
+          <span class="date-value">{{ proximaColeta.pontoColeta.periodicidadeColeta }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Botões de Ação -->
+  <div class="actions-area" *ngIf="pontoColetaSelecionado.id > 0">
+    <ion-button expand="block" fill="outline" class="action-btn btn-coletas" (click)="pesquisarColetasPonto()">
+      <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+      Coletas
+    </ion-button>
+    <ion-button expand="block" fill="outline" class="action-btn btn-fones" (click)="pesquisarTelefones()">
+      <ion-icon slot="start" name="call-outline"></ion-icon>
+      Fones
+    </ion-button>
+  </div>
+
+</ion-content>

@@ -1,0 +1,150 @@
+<ion-header class="pp-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Pesquisar Pontos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="pp-content">
+
+  <!-- Search Area -->
+  <div class="search-area">
+    <ion-searchbar placeholder="Pesquisar por ponto" type="text" debounce="200"
+      (ionChange)="getItems($event)" class="custom-searchbar"></ion-searchbar>
+    <ion-searchbar placeholder="Pesquisar por endereço" type="text" debounce="200"
+      (ionChange)="getItemsEndereco($event)" class="custom-searchbar"></ion-searchbar>
+  </div>
+
+  <!-- Seção: Pontos para Coletar -->
+  <div class="section-header">
+    <div class="section-icon-badge badge-blue">
+      <ion-icon name="location-outline"></ion-icon>
+    </div>
+    <span class="section-title" *ngIf="!separarPontos">Pontos para Coletar</span>
+    <span class="section-title" *ngIf="separarPontos">Pontos de Coleta</span>
+    <span class="section-count" *ngIf="items.length > 0">{{ items.length }}</span>
+  </div>
+
+  <!-- Carregando -->
+  <div class="loading-state" *ngIf="carregando">
+    <div class="gf-spinner"></div>
+    <p>Carregando pontos...</p>
+  </div>
+
+  <!-- Lista de Pontos -->
+  <div class="points-list">
+    <ion-card class="point-card" *ngFor="let item of visiveis; trackBy: trackByPonto">
+      <ion-card-content (click)="fechar(item)">
+
+        <div class="point-top">
+          <div class="point-icon-badge">
+            <ion-icon name="business-outline"></ion-icon>
+          </div>
+          <div class="point-info">
+            <span class="point-name">{{ item.nomeRazaoSocial }}</span>
+            <span class="point-fantasy" *ngIf="item.nomeFantasia">({{ item.nomeFantasia }}) {{ item.apelido }}</span>
+            <span class="point-address">{{ item.enderecoCompleto }}</span>
+          </div>
+        </div>
+
+        <!-- Badges de status -->
+        <div class="status-badges">
+          <span class="badge badge-dark"
+            *ngIf="!item.dataUltimaColeta && item.periodicidadeColeta != 'Coleta Única'">
+            <ion-icon name="star-outline"></ion-icon> 1ª Coleta - {{ item.periodicidadeColeta }}
+          </span>
+          <span class="badge badge-dark" *ngIf="item.periodicidadeColeta == 'Coleta Única'">
+            {{ item.periodicidadeColeta | uppercase }}
+          </span>
+          <span class="badge badge-light" *ngIf="item.dataUltimaColeta">
+            <ion-icon name="calendar-outline"></ion-icon> Última: {{ item.dataUltimaColeta | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <!-- Ações (apenas quando não separa pontos) -->
+        <div class="point-actions" *ngIf="!separarPontos">
+          <div class="action-chips">
+            <div class="action-chip chip-info" (click)="$event.stopPropagation(); pesquisarColetasPonto(item)">
+              <ion-icon name="bag-check-outline"></ion-icon>
+              <span>{{ item.quantidadeColetadaMes }}/{{ item.quantidadeColetaMes }}</span>
+            </div>
+            <div class="action-chip chip-default" (click)="$event.stopPropagation(); pesquisarColetasPonto(item)">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ item.periodicidadeColeta }}</span>
+            </div>
+            <div class="action-chip chip-phone" (click)="$event.stopPropagation(); pesquisarTelefones(item)">
+              <ion-icon name="call-outline"></ion-icon>
+              <span>Fones</span>
+            </div>
+            <div class="action-chip chip-danger" *ngIf="item.situacaoAviso"
+              (click)="$event.stopPropagation(); mostrarMensagemAviso(item)">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <span>Aviso</span>
+            </div>
+          </div>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Seção: Pontos Coletados -->
+  <div *ngIf="!separarPontos">
+    <div class="section-header">
+      <div class="section-icon-badge badge-green">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+      <span class="section-title">Pontos Coletados</span>
+      <span class="section-count count-green" *ngIf="pontosColetados.length > 0">{{ pontosColetados.length }}</span>
+    </div>
+
+    <div class="points-list" *ngIf="isItemAvailable">
+      <ion-card class="point-card point-card-done" *ngFor="let item of coletadosVisiveis; trackBy: trackByPonto" (click)="voltar()">
+        <ion-card-content>
+
+          <div class="point-top">
+            <div class="point-icon-badge badge-done">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </div>
+            <div class="point-info">
+              <span class="point-name">{{ item.nomeRazaoSocial }}</span>
+              <span class="point-fantasy" *ngIf="item.nomeFantasia">({{ item.nomeFantasia }}) {{ item.apelido }}</span>
+              <span class="point-address">{{ item.enderecoCompleto }}</span>
+            </div>
+          </div>
+
+          <div class="point-actions">
+            <div class="action-chips">
+              <div class="action-chip chip-info" (click)="$event.stopPropagation(); pesquisarColetasPonto(item)">
+                <ion-icon name="bag-check-outline"></ion-icon>
+                <span>{{ item.quantidadeColetadaMes }}/{{ item.quantidadeColetaMes }}</span>
+              </div>
+              <div class="action-chip chip-default" (click)="$event.stopPropagation(); pesquisarColetasPonto(item)">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ item.periodicidadeColeta }}</span>
+              </div>
+              <div class="action-chip chip-phone" (click)="$event.stopPropagation(); pesquisarTelefones(item)">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>Fones</span>
+              </div>
+              <div class="action-chip chip-danger" *ngIf="item.situacaoAviso">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <span>Aviso</span>
+              </div>
+            </div>
+          </div>
+
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <ion-infinite-scroll threshold="200px" (ionInfinite)="carregarMais($event)" [disabled]="!temMais">
+    <ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+</ion-content>

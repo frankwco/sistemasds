@@ -1,0 +1,174 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Despesa/Manutenção</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="despesa-content">
+
+  <!-- Card Veículo/Motorista -->
+  <ion-card class="selection-card">
+    <ion-card-content>
+      <div class="selection-row">
+        <div class="selection-icon-badge badge-blue">
+          <ion-icon name="car-sport-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Veículo</span>
+          <span class="selection-value">{{ veiculoSelecionado.descricao || 'Nenhum selecionado' }} {{ veiculoSelecionado.placa }}</span>
+        </div>
+      </div>
+      <div class="selection-row selection-row-spaced" *ngIf="motoristaSelecionado.nome">
+        <div class="selection-icon-badge badge-green">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="selection-info">
+          <span class="selection-label">Motorista</span>
+          <span class="selection-value">{{ motoristaSelecionado.nome }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Formulário -->
+  <ion-card class="form-card">
+    <ion-card-header class="form-header">
+      <div class="form-icon-badge">
+        <ion-icon name="construct-outline"></ion-icon>
+      </div>
+      <ion-card-title class="form-title">Dados da Despesa</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="input-group">
+        <label class="input-label">Categoria</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="pricetags-outline" slot="start" color="primary"></ion-icon>
+          <ion-select [(ngModel)]="categoriaDespesa" placeholder="Selecione" [compareWith]="compareEntidade" [disabled]="carregandoCatalogos">
+            <ion-select-option *ngFor="let c of categorias" [value]="c">{{ c.nome }}</ion-select-option>
+          </ion-select>
+          <ion-spinner *ngIf="carregandoCatalogos" slot="end" name="dots"></ion-spinner>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Fornecedor</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+          <ion-select [(ngModel)]="fornecedor" placeholder="Selecione" [compareWith]="compareEntidade" [disabled]="carregandoCatalogos">
+            <ion-select-option *ngFor="let f of fornecedores" [value]="f">{{ f.nome }}</ion-select-option>
+          </ion-select>
+          <ion-button *ngIf="!carregandoCatalogos" fill="clear" slot="end" (click)="cadastrarNovoFornecedor()" title="Cadastrar novo fornecedor">
+            <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group input-group-half">
+          <label class="input-label">Data</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
+            <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="data"></ion-datetime>
+          </ion-item>
+        </div>
+
+        <div class="input-group input-group-half">
+          <label class="input-label">Valor (R$)</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="cash-outline" slot="start" color="primary"></ion-icon>
+            <ion-input type="number" inputmode="decimal" [(ngModel)]="valor" placeholder="0,00"></ion-input>
+          </ion-item>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Observação</label>
+        <ion-item lines="none" class="form-item">
+          <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+          <ion-textarea [(ngModel)]="observacao" placeholder="Opcional" rows="2"></ion-textarea>
+        </ion-item>
+      </div>
+
+      <ion-item lines="none" class="form-item toggle-item">
+        <ion-icon name="build-outline" slot="start" color="primary"></ion-icon>
+        <ion-label>É manutenção/serviço?</ion-label>
+        <ion-toggle slot="end" [(ngModel)]="manutencao" color="success"></ion-toggle>
+      </ion-item>
+
+      <ng-container *ngIf="manutencao">
+        <div class="subsection-label">Detalhes da Manutenção</div>
+
+        <div class="input-group">
+          <label class="input-label">Tipo de Manutenção</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="hammer-outline" slot="start" color="primary"></ion-icon>
+            <ion-select [(ngModel)]="tipoManutencao" placeholder="Selecione">
+              <ion-select-option value="Preventiva">Preventiva</ion-select-option>
+              <ion-select-option value="Corretiva">Corretiva</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group input-group-half">
+            <label class="input-label">Data de Entrada</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="log-in-outline" slot="start" color="primary"></ion-icon>
+              <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="dataEntrada"></ion-datetime>
+            </ion-item>
+          </div>
+
+          <div class="input-group input-group-half">
+            <label class="input-label">Data de Saída</label>
+            <ion-item lines="none" class="form-item">
+              <ion-icon name="log-out-outline" slot="start" color="primary"></ion-icon>
+              <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="dataSaida"></ion-datetime>
+            </ion-item>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Km da Próxima Revisão</label>
+          <ion-item lines="none" class="form-item">
+            <ion-icon name="speedometer-outline" slot="start" color="primary"></ion-icon>
+            <ion-input type="number" inputmode="numeric" [(ngModel)]="kmProximaRevisao" placeholder="0"></ion-input>
+          </ion-item>
+        </div>
+      </ng-container>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Comprovante -->
+  <ion-card class="foto-card">
+    <ion-card-content>
+      <ion-button expand="block" shape="round" fill="outline" class="foto-btn" (click)="tirarFoto()" *ngIf="!fotoBase64">
+        <ion-icon slot="start" name="camera-outline"></ion-icon>
+        Fotografar comprovante
+      </ion-button>
+
+      <div *ngIf="fotoBase64" class="foto-preview">
+        <img [src]="'data:image/jpeg;base64,' + fotoBase64" />
+        <ion-button fill="clear" color="danger" (click)="removerFoto()">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="action-area">
+    <ion-button expand="block" shape="round" class="salvar-btn" (click)="salvar()" [disabled]="salvando">
+      <ion-spinner *ngIf="salvando" name="dots"></ion-spinner>
+      <ng-container *ngIf="!salvando">
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        Salvar
+      </ng-container>
+    </ion-button>
+  </div>
+
+</ion-content>

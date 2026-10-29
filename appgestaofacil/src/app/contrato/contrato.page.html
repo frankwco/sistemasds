@@ -1,0 +1,16 @@
+<ion-header>
+    <ion-toolbar color="success">
+      <ion-buttons slot="start">
+  <ion-back-button></ion-back-button>
+</ion-buttons>
+        <ion-title>Contratos para Assinar</ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-searchbar type="text" debounce="200" (ionChange)="getItems($event)"></ion-searchbar>
+
+    <ion-list *ngIf="isItemAvailable">
+        <ion-item (click)="assinar()" *ngFor="let item of items">{{ item }}</ion-item>
+    </ion-list>
+
+</ion-content>

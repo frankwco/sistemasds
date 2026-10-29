@@ -1,0 +1,14 @@
+eclipse.preferences.version=1
+encoding/certificado.jrxml=UTF-8
+encoding/certificado_periodo.jrxml=UTF-8
+encoding/coleta_periodo.jrxml=UTF-8
+encoding/coleta_periodo_cidade.jrxml=UTF-8
+encoding/coleta_periodo_cidade_sub.jrxml=UTF-8
+encoding/coleta_periodo_sub.jrxml=UTF-8
+encoding/contrato.jrxml=UTF-8
+encoding/quantidade_coletada_periodo.jrxml=UTF-8
+encoding/quantidade_coletada_periodo_cidade.jrxml=UTF-8
+encoding/romaneio.jrxml=UTF-8
+encoding/romaneio_grupos_contrato.jrxml=UTF-8
+encoding/romaneio_grupos_contrato_parte_descricao.jrxml=UTF-8
+encoding/romaneio_parcelas.jrxml=UTF-8

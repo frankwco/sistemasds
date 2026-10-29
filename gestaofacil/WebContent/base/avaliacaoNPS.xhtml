@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+    <ui:composition template="../resources/template/template-administrador.xhtml">
+
+        <ui:define name="mensagem">
+            <ui:include src="../componentes/mensagem.xhtml" />
+        </ui:define>
+        <ui:define name="modal-confirmacao">
+            <ui:include src="../componentes/dialog-confirmacao.xhtml" />
+        </ui:define>
+
+        <ui:define name="conteudo">
+
+            <!-- TÍTULO -->
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="page-header">
+                        <i class="fa fa-star" style="margin-right:8px;color:#f9a825;"></i>
+                        Pesquisa de Satisfação NPS
+                    </h1>
+                </div>
+            </div>
+            <!-- FIM TÍTULO -->
+
+            <!-- CARDS DE MÉTRICAS -->
+            <div class="row" style="margin-bottom:20px;">
+
+                <!-- Score NPS -->
+                <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+                    <div
+                        style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);text-align:center;">
+                        <div
+                            style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#757575;margin-bottom:8px;">
+                            Score NPS</div>
+                        <div
+                            style="font-size:36px;font-weight:bold;color:#{avaliacaoNPSMB.scoreNPS >= 50 ? '#2e7d32' : avaliacaoNPSMB.scoreNPS >= 0 ? '#f57f17' : '#c62828'};">
+                            #{avaliacaoNPSMB.scoreNPS}
+                        </div>
+                        <div style="font-size:12px;color:#9e9e9e;">de -100 a 100</div>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+                    <div
+                        style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);text-align:center;">
+                        <div
+                            style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#757575;margin-bottom:8px;">
+                            Total de Avaliações</div>
+                        <div style="font-size:36px;font-weight:bold;color:#1565c0;">#{avaliacaoNPSMB.totalAvaliacoes}
+                        </div>
+                        <div style="font-size:12px;color:white;">.</div>
+
+                    </div>
+                </div>
+
+                <!-- Promotores -->
+                <div class="col-md-2 col-sm-4 col-xs-12" style="margin-bottom:16px;">
+                    <div
+                        style="background:#e8f5e9;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);text-align:center;">
+                        <div
+                            style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#2e7d32;margin-bottom:8px;">
+                            Promotores</div>
+                        <div style="font-size:36px;font-weight:bold;color:#2e7d32;">#{avaliacaoNPSMB.promotores}</div>
+                        <div style="font-size:12px;color:#388e3c;">notas 9 e 10</div>
+                    </div>
+                </div>
+
+                <!-- Passivos -->
+                <div class="col-md-2 col-sm-4 col-xs-12" style="margin-bottom:16px;">
+                    <div
+                        style="background:#fff8e1;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);text-align:center;">
+                        <div
+                            style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#f57f17;margin-bottom:8px;">
+                            Passivos</div>
+                        <div style="font-size:36px;font-weight:bold;color:#f57f17;">#{avaliacaoNPSMB.passivos}</div>
+                        <div style="font-size:12px;color:#fb8c00;">notas 7 e 8</div>
+                    </div>
+                </div>
+
+                <!-- Detratores -->
+                <div class="col-md-2 col-sm-4 col-xs-12" style="margin-bottom:16px;">
+                    <div
+                        style="background:#ffebee;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);text-align:center;">
+                        <div
+                            style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#c62828;margin-bottom:8px;">
+                            Detratores</div>
+                        <div style="font-size:36px;font-weight:bold;color:#c62828;">#{avaliacaoNPSMB.detratores}</div>
+                        <div style="font-size:12px;color:#e53935;">notas 0 a 6</div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- FIM CARDS -->
+
+            <!-- TABELA DE AVALIAÇÕES -->
+            <div class="col-md-12" style="min-height:500px;">
+                <h:form id="frmTabela">
+                    <p:dataTable id="tabela" value="#{avaliacaoNPSMB.listaAvaliacoes}" resizableColumns="true"
+                        reflow="true" var="av" rows="15" paginator="true" paginatorPosition="bottom"
+                        emptyMessage="Nenhuma avaliação registrada." rowsPerPageTemplate="10,15,30,50,100">
+
+                        <p:ajax event="filter" global="false" />
+
+                        <p:column headerText="Data" sortBy="#{av.dataAvaliacao}" style="width:120px;">
+                            <h:outputText value="#{av.dataAvaliacao}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Nota" sortBy="#{av.nota}" style="width:110px;text-align:center;">
+                            <span
+                                style="display:inline-block;background:#{av.notaCategoriaCor};color:#fff;border-radius:20px;padding:3px 14px;font-weight:bold;font-size:14px;min-width:32px;text-align:center;">
+                                #{av.nota}
+                            </span>
+                            <br />
+                            <span style="font-size:11px;color:#888;">#{av.notaCategoria}</span>
+                        </p:column>
+
+                        <p:column headerText="Ponto de Coleta"
+                            filterBy="#{av.coletaApp.pontoColetaSelecionado.nomeRazaoSocial}" filterMatchMode="contains"
+                            style="white-space:normal !important;">
+                            <h:outputText rendered="#{av.coletaApp != null}"
+                                value="#{av.coletaApp.pontoColetaSelecionado.nomeRazaoSocial}" />
+                            <h:outputText rendered="#{av.coletaApp == null}" value="-" style="color:#bbb;" />
+                        </p:column>
+
+                        <p:column headerText="Coleta (data)" style="width:110px;">
+                            <h:outputText rendered="#{av.coletaApp != null}" value="#{av.coletaApp.dataUltimaColeta}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                            </h:outputText>
+                            <h:outputText rendered="#{av.coletaApp == null}" value="-" style="color:#bbb;" />
+                        </p:column>
+
+                        <p:column headerText="Motorista / E-mail" style="white-space:normal !important;">
+                            <h:outputText rendered="#{av.coletaApp != null}" value="#{av.coletaApp.nomeMotorista}" />
+                            <h:outputText rendered="#{av.coletaApp == null}" value="-" style="color:#bbb;" />
+                        </p:column>
+
+                        <p:column headerText="Comentário" style="white-space:normal !important;">
+                            <h:outputText value="#{av.comentario}" rendered="#{not empty av.comentario}" />
+                            <h:outputText value="—" style="color:#bbb;" rendered="#{empty av.comentario}" />
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+            </div>
+            <!-- FIM TABELA -->
+
+        </ui:define>
+    </ui:composition>
+</h:body>
+
+</html>

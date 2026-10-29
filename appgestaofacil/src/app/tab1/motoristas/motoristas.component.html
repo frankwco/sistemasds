@@ -1,0 +1,36 @@
+<ion-header class="modal-header">
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-button (click)="voltar()">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Selecionar Motorista</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="select-content">
+
+    <div class="search-hint">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Toque no motorista desejado para selecioná-lo</span>
+    </div>
+
+    <ion-list class="select-list" lines="none">
+        <ion-item class="select-item" button detail (click)="fechar(item)" *ngFor="let item of motoristas">
+            <div class="item-icon-badge" slot="start">
+                <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <ion-label>
+                <h3>{{ item.nome }}</h3>
+                <p *ngIf="item.email">{{ item.email }}</p>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+
+    <div class="empty-state" *ngIf="motoristas && motoristas.length === 0">
+        <ion-icon name="person-outline"></ion-icon>
+        <p>Nenhum motorista disponível</p>
+    </div>
+
+</ion-content>

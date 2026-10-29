@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<style type="text/css">
+				/* ── Estilos específicos do Painel Executivo ── */
+
+				/* Card "neutro" pra valores de referência (mês/ano anterior) -
+				   não é alerta, é só comparação, então não usa laranja/vermelho */
+				.sc-muted { background: linear-gradient(135deg, #607D8B, #90A4AE); }
+
+				.stat-card .sc-value .sc-unit {
+					font-size: 14px; font-weight: 500; opacity: .85; margin-left: 3px;
+				}
+
+				/* Badge com o período selecionado, pra ficar sempre visível */
+				.gf-period-badge {
+					display: inline-flex; align-items: center; gap: 8px;
+					background: #eef5ff; border: 1px solid #d3e6ff; border-radius: 20px;
+					padding: 6px 16px; font-size: 13px; font-weight: 600; color: #1565C0;
+					margin-top: 10px;
+				}
+				.gf-period-badge i { font-size: 13px; }
+				.gf-period-badge .separador { color: #90a4ae; font-weight: 400; }
+			</style>
+
+			<div class="gf-page">
+
+				<!-- ═══ HERO BANNER ═══ -->
+				<div class="gf-hero hero-compact">
+					<div>
+						<h2><i class="fa fa-dashboard" style="margin-right:10px;"></i>Painel Executivo</h2>
+						<p>Carteira de clientes, faturamento e peso coletado - visão rápida do negócio</p>
+					</div>
+					<i class="fa fa-line-chart hero-icon"></i>
+				</div>
+
+				<!-- ═══ FORM PRINCIPAL ═══ -->
+				<h:form id="frmPainelExecutivo">
+
+					<p:ajaxStatus onstart="PF('statusDialog').show()"
+						onsuccess="PF('statusDialog').hide()" />
+
+					<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+						closable="false" resizable="false" showHeader="false"
+						styleClass="gf-loading-dialog">
+						<span class="gf-loading-text">Aguarde, buscando dados...</span>
+						<p:graphicImage name="img/aguarde.gif" />
+					</p:dialog>
+
+					<!-- Busca os dados via ajax assim que a tela termina de carregar,
+					     em vez de travar a página inteira até a consulta terminar. -->
+					<p:remoteCommand name="carregarPainelInicial" autoRun="true"
+						actionListener="#{painelExecutivoMB.buscar}"
+						update=":painelResultado" />
+
+					<!-- ── Card: Filtro ── -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-filter icon-blue"></i>
+							<div>
+								<h4>Selecionar Período</h4>
+								<small>Compara automaticamente com o mesmo período do ano anterior</small>
+							</div>
+						</div>
+
+						<div class="gf-filter-bar">
+							<label><i class="fa fa-calendar-o" style="margin-right:6px;"></i>Mês:</label>
+							<p:selectOneMenu style="width:150px" value="#{painelExecutivoMB.mes}">
+								<f:selectItem itemLabel="Janeiro" itemValue="1" />
+								<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+								<f:selectItem itemLabel="Março" itemValue="3" />
+								<f:selectItem itemLabel="Abril" itemValue="4" />
+								<f:selectItem itemLabel="Maio" itemValue="5" />
+								<f:selectItem itemLabel="Junho" itemValue="6" />
+								<f:selectItem itemLabel="Julho" itemValue="7" />
+								<f:selectItem itemLabel="Agosto" itemValue="8" />
+								<f:selectItem itemLabel="Setembro" itemValue="9" />
+								<f:selectItem itemLabel="Outubro" itemValue="10" />
+								<f:selectItem itemLabel="Novembro" itemValue="11" />
+								<f:selectItem itemLabel="Dezembro" itemValue="12" />
+							</p:selectOneMenu>
+
+							<label><i class="fa fa-calendar" style="margin-right:6px;"></i>Ano:</label>
+							<p:selectOneMenu style="width:130px" value="#{painelExecutivoMB.ano}">
+								<f:selectItems value="#{painelExecutivoMB.anosDisponiveis}" />
+							</p:selectOneMenu>
+
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Buscar" icon="fa fa-search"
+									actionListener="#{painelExecutivoMB.buscar}"
+									update=":painelResultado" />
+							</span>
+						</div>
+					</div>
+
+				</h:form>
+
+				<h:panelGroup id="painelResultado" layout="block">
+
+					<h:panelGroup layout="block" rendered="#{not painelExecutivoMB.carregado}"
+						styleClass="gf-card" style="text-align:center;padding:60px 20px;">
+						<i class="fa fa-spinner fa-spin" style="font-size:36px;color:#1565C0;"></i>
+						<p style="margin-top:14px;color:#607d8b;font-size:14px;">Carregando indicadores...</p>
+					</h:panelGroup>
+
+					<h:panelGroup layout="block" rendered="#{painelExecutivoMB.carregado}">
+
+					<div class="gf-period-badge">
+						<i class="fa fa-calendar-check-o"></i>
+						Exibindo #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}
+						<span class="separador">|</span>
+						comparando com o mesmo período de #{painelExecutivoMB.ano - 1}
+					</div>
+
+					<!-- ═══ CARTEIRA DE CLIENTES ═══ -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-users icon-blue"></i>
+							<div>
+								<h4>Carteira de Clientes</h4>
+								<small>Situação atual e movimentação em #{painelExecutivoMB.ano}</small>
+							</div>
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-file-text"></i></div>
+									<div>
+										<div class="sc-label">Contratos Ativos (atual)</div>
+										<div class="sc-value">#{painelExecutivoMB.dados.contratosAtivos}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-truck"></i></div>
+									<div>
+										<div class="sc-label">Pontos de Coleta Ativos (atual)</div>
+										<div class="sc-value">#{painelExecutivoMB.dados.pontosColetaAtivos}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-success">
+									<div class="sc-icon"><i class="fa fa-plus-circle"></i></div>
+									<div>
+										<div class="sc-label">Contratos Novos em #{painelExecutivoMB.ano}</div>
+										<div class="sc-value">#{painelExecutivoMB.dados.contratosNovosAno}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoContratosStatCard}">
+									<div class="sc-icon"><i class="fa fa-exchange"></i></div>
+									<div>
+										<div class="sc-label">Variação de Contratos em #{painelExecutivoMB.ano}</div>
+										<div class="sc-value">#{painelExecutivoMB.dados.variacaoContratosAno}</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- ═══ FINANCEIRO ═══ -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-usd icon-green"></i>
+							<div>
+								<h4>Financeiro</h4>
+								<small>Faturamento apurado nos fechamentos do mês</small>
+							</div>
+						</div>
+
+						<h:panelGroup layout="block" styleClass="gf-alert"
+							rendered="#{painelExecutivoMB.dados.contratosSemFechamentoMes > 0}">
+							<i class="fa fa-exclamation-triangle"></i>
+							<span>
+								<strong>Atenção:</strong> #{painelExecutivoMB.dados.contratosSemFechamentoMes}
+								contrato(s) ativo(s) ainda sem fechamento feito em
+								#{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}. O peso
+								coletado desses clientes já entra na conta, mas o faturamento só entra
+								depois que o fechamento do mês é feito - isso pode estar puxando o
+								R$/kg pra baixo até todos os fechamentos serem concluídos.
+								<h:outputText id="verContratosSemFechamento" value=" Ver quais »"
+									style="cursor:pointer;text-decoration:underline;font-weight:700;white-space:nowrap;" />
+							</span>
+							<p:overlayPanel for="verContratosSemFechamento" dismissable="true"
+								showCloseIcon="true" style="width:400px;max-width:90vw;">
+								<p style="font-weight:700;margin:0 0 8px;font-size:13px;color:#37474f;">
+									Contratos ativos sem fechamento em
+									#{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}
+								</p>
+								<p:dataTable value="#{painelExecutivoMB.dados.contratosSemFechamentoLista}"
+									var="c" style="font-size:12px;"
+									emptyMessage="Nenhum contrato pendente.">
+									<p:column headerText="Cliente">
+										<h:outputText value="#{c.cliente.nomeRazaoSocial}" />
+									</p:column>
+									<p:column headerText="Início do Contrato" width="100">
+										<h:outputText value="#{c.dataInicial}">
+											<f:convertDateTime pattern="dd/MM/yyyy" />
+										</h:outputText>
+									</p:column>
+								</p:dataTable>
+							</p:overlayPanel>
+						</h:panelGroup>
+
+						<div class="gf-section-title" style="margin-top:0;">
+							<i class="fa fa-money"></i>
+							Faturamento - #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-success">
+									<div class="sc-icon"><i class="fa fa-money"></i></div>
+									<div>
+										<div class="sc-label">Faturamento em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}</div>
+										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoMes)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-money"></i></div>
+									<div>
+										<div class="sc-label">Faturamento em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano - 1}</div>
+										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoMesAnoAnterior)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoFaturamentoMesStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do Mês vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoMesPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoMesPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoMesPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<hr class="gf-divider" />
+
+						<div class="gf-section-title">
+							<i class="fa fa-bank"></i>
+							Faturamento - Ano #{painelExecutivoMB.ano}
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-success">
+									<div class="sc-icon"><i class="fa fa-bank"></i></div>
+									<div>
+										<div class="sc-label">Faturamento no Ano #{painelExecutivoMB.ano}</div>
+										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoAno)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-bank"></i></div>
+									<div>
+										<div class="sc-label">Faturamento no Ano #{painelExecutivoMB.ano - 1}</div>
+										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoAnoAnterior)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoFaturamentoAnoStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do Ano vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- ═══ OPERACIONAL ═══ -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-balance-scale icon-purple"></i>
+							<div>
+								<h4>Operacional</h4>
+								<small>Peso realmente coletado e eficiência de faturamento por quilo</small>
+							</div>
+						</div>
+
+						<div class="gf-section-title" style="margin-top:0;">
+							<i class="fa fa-cubes"></i>
+							Peso Coletado - #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-cubes"></i></div>
+									<div>
+										<div class="sc-label">Peso Coletado em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}</div>
+										<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoMes)}<span class="sc-unit">kg</span></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-cubes"></i></div>
+									<div>
+										<div class="sc-label">Peso Coletado em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano - 1}</div>
+										<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoMesAnoAnterior)}<span class="sc-unit">kg</span></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoPesoMesStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do Mês vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoPesoMesPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoPesoMesPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoPesoMesPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="gf-section-title" style="margin-top:0;">
+							<i class="fa fa-balance-scale"></i>
+							Faturamento x Peso Coletado - #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano} (R$/kg)
+							<h:outputText id="infoRkgMes" styleClass="fa fa-info-circle"
+								style="cursor:pointer;color:#1565C0;font-size:15px;" value="" />
+							<p:overlayPanel for="infoRkgMes" dismissable="true"
+								showCloseIcon="true" style="width:420px;max-width:90vw;">
+								<div style="font-size:13px;line-height:1.6;color:#37474f;">
+
+									<p style="font-weight:700;margin:0 0 6px;">📊 O que os três números significam</p>
+									<p style="margin:0 0 4px;">
+										<strong>1. #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}: R$
+											#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMes)}/kg</strong>
+										- pra cada 1 kg coletado nesse mês, o faturamento médio foi esse valor.
+									</p>
+									<p style="margin:0 0 4px;">
+										<strong>2. #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano - 1}: R$
+											#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMesAnoAnterior)}/kg</strong>
+										- no mesmo mês do ano anterior, era esse o valor por kg.
+									</p>
+									<p style="margin:0 0 10px;">
+										<strong>3. Variação:
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual == null}"
+												value="-" />
+										</strong>
+										- o valor por kg mudou isso de um ano pro outro. A conta: (atual −
+										anterior) ÷ anterior × 100.
+									</p>
+
+									<p style="font-weight:700;margin:14px 0 6px;">💰 O que isso significou no seu caso (números reais)</p>
+									<table style="width:100%;border-collapse:collapse;font-size:12px;">
+										<thead>
+											<tr style="background:#f0f4f8;">
+												<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #dde3ea;"></th>
+												<th style="padding:5px 8px;text-align:right;border-bottom:1px solid #dde3ea;">#{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano - 1}</th>
+												<th style="padding:5px 8px;text-align:right;border-bottom:1px solid #dde3ea;">#{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td style="padding:5px 8px;">Peso coletado</td>
+												<td style="padding:5px 8px;text-align:right;">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoMesAnoAnterior)} kg</td>
+												<td style="padding:5px 8px;text-align:right;">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoMes)} kg</td>
+											</tr>
+											<tr>
+												<td style="padding:5px 8px;">Faturamento por kg</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMesAnoAnterior)}</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMes)}</td>
+											</tr>
+											<tr style="font-weight:700;">
+												<td style="padding:5px 8px;">Faturamento total</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoMesAnoAnterior)}</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoMes)}</td>
+											</tr>
+										</tbody>
+									</table>
+
+									<p style="font-weight:700;margin:14px 0 6px;">⚠️ Atenção</p>
+									<p style="margin:0;">
+										Esse indicador não diz que o faturamento total caiu na mesma
+										proporção - ele diz que o faturamento <em>em relação ao peso
+											coletado</em> mudou. No período acima, o faturamento total variou
+										<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoMesPercentual != null}"
+											value=" #{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoMesPercentual)}%" />
+										<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoMesPercentual == null}"
+											value=" (sem faturamento no ano anterior pra comparar)" />
+										- compare com os cards de "Faturamento" e "Peso Coletado" acima pra
+										ver o quadro completo: se o peso cresceu mais rápido que o
+										faturamento, o R$/kg cai mesmo que a empresa esteja faturando mais
+										no total.
+									</p>
+
+								</div>
+							</p:overlayPanel>
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-balance-scale"></i></div>
+									<div>
+										<div class="sc-label">Faturamento x Peso em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano} (R$/kg)</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloMes != null}"
+												value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMes)}" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloMes == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-balance-scale"></i></div>
+									<div>
+										<div class="sc-label">Faturamento x Peso em #{painelExecutivoMB.nomeMesSelecionado}/#{painelExecutivoMB.ano - 1} (R$/kg)</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloMesAnoAnterior != null}"
+												value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloMesAnoAnterior)}" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloMesAnoAnterior == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoFaturamentoPorQuiloMesStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do R$/kg vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloMesPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<hr class="gf-divider" />
+
+						<div class="gf-section-title">
+							<i class="fa fa-cube"></i>
+							Peso Coletado - Ano #{painelExecutivoMB.ano}
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-cube"></i></div>
+									<div>
+										<div class="sc-label">Peso Coletado no Ano #{painelExecutivoMB.ano}</div>
+										<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoAno)}<span class="sc-unit">kg</span></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-cube"></i></div>
+									<div>
+										<div class="sc-label">Peso Coletado no Ano #{painelExecutivoMB.ano - 1}</div>
+										<div class="sc-value">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoAnoAnterior)}<span class="sc-unit">kg</span></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoPesoAnoStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do Ano vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoPesoAnoPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoPesoAnoPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoPesoAnoPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<hr class="gf-divider" />
+
+						<div class="gf-section-title">
+							<i class="fa fa-balance-scale"></i>
+							Faturamento x Peso Coletado - Ano #{painelExecutivoMB.ano} (R$/kg)
+							<h:outputText id="infoRkgAno" styleClass="fa fa-info-circle"
+								style="cursor:pointer;color:#1565C0;font-size:15px;" value="" />
+							<p:overlayPanel for="infoRkgAno" dismissable="true"
+								showCloseIcon="true" style="width:420px;max-width:90vw;">
+								<div style="font-size:13px;line-height:1.6;color:#37474f;">
+
+									<p style="font-weight:700;margin:0 0 6px;">📊 O que os três números significam</p>
+									<p style="margin:0 0 4px;">
+										<strong>1. Ano #{painelExecutivoMB.ano}: R$
+											#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAno)}/kg</strong>
+										- pra cada 1 kg coletado no ano, o faturamento médio foi esse valor.
+									</p>
+									<p style="margin:0 0 4px;">
+										<strong>2. Ano #{painelExecutivoMB.ano - 1}: R$
+											#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAnoAnterior)}/kg</strong>
+										- no ano anterior, era esse o valor por kg.
+									</p>
+									<p style="margin:0 0 10px;">
+										<strong>3. Variação:
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual == null}"
+												value="-" />
+										</strong>
+										- o valor por kg mudou isso de um ano pro outro. A conta: (atual −
+										anterior) ÷ anterior × 100.
+									</p>
+
+									<p style="font-weight:700;margin:14px 0 6px;">💰 O que isso significou no seu caso (números reais)</p>
+									<table style="width:100%;border-collapse:collapse;font-size:12px;">
+										<thead>
+											<tr style="background:#f0f4f8;">
+												<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #dde3ea;"></th>
+												<th style="padding:5px 8px;text-align:right;border-bottom:1px solid #dde3ea;">Ano #{painelExecutivoMB.ano - 1}</th>
+												<th style="padding:5px 8px;text-align:right;border-bottom:1px solid #dde3ea;">Ano #{painelExecutivoMB.ano}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td style="padding:5px 8px;">Peso coletado</td>
+												<td style="padding:5px 8px;text-align:right;">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoAnoAnterior)} kg</td>
+												<td style="padding:5px 8px;text-align:right;">#{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.pesoColetadoAno)} kg</td>
+											</tr>
+											<tr>
+												<td style="padding:5px 8px;">Faturamento por kg</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAnoAnterior)}</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAno)}</td>
+											</tr>
+											<tr style="font-weight:700;">
+												<td style="padding:5px 8px;">Faturamento total</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoAnoAnterior)}</td>
+												<td style="padding:5px 8px;text-align:right;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoAno)}</td>
+											</tr>
+										</tbody>
+									</table>
+
+									<p style="font-weight:700;margin:14px 0 6px;">⚠️ Atenção</p>
+									<p style="margin:0;">
+										Esse indicador não diz que o faturamento total caiu na mesma
+										proporção - ele diz que o faturamento <em>em relação ao peso
+											coletado</em> mudou. No período acima, o faturamento total variou
+										<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual != null}"
+											value=" #{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual)}%" />
+										<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoAnoPercentual == null}"
+											value=" (sem faturamento no ano anterior pra comparar)" />
+										- compare com os cards de "Faturamento" e "Peso Coletado" acima pra
+										ver o quadro completo: se o peso cresceu mais rápido que o
+										faturamento, o R$/kg cai mesmo que a empresa esteja faturando mais
+										no total.
+									</p>
+
+								</div>
+							</p:overlayPanel>
+						</div>
+
+						<div class="row stat-cards">
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-balance-scale"></i></div>
+									<div>
+										<div class="sc-label">Faturamento x Peso no Ano #{painelExecutivoMB.ano} (R$/kg)</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloAno != null}"
+												value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAno)}" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloAno == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-muted">
+									<div class="sc-icon"><i class="fa fa-balance-scale"></i></div>
+									<div>
+										<div class="sc-label">Faturamento x Peso no Ano #{painelExecutivoMB.ano - 1} (R$/kg)</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloAnoAnterior != null}"
+												value="R$ #{formatarMB.formatarNumeroDuasCasasDecimais(painelExecutivoMB.dados.faturamentoPorQuiloAnoAnterior)}" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.faturamentoPorQuiloAnoAnterior == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card #{painelExecutivoMB.variacaoFaturamentoPorQuiloStatCard}">
+									<div class="sc-icon"><i class="fa fa-percent"></i></div>
+									<div>
+										<div class="sc-label">Variação do R$/kg vs Ano Anterior</div>
+										<div class="sc-value">
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual != null}"
+												value="#{formatarMB.formatarNumeroUmaCasaDecimal(painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual)}%" />
+											<h:outputText rendered="#{painelExecutivoMB.dados.variacaoFaturamentoPorQuiloPercentual == null}"
+												value="-" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					</h:panelGroup>
+
+				</h:panelGroup>
+
+			</div>
+
+		</ui:define>
+
+	</ui:composition>
+
+</h:body>
+</html>

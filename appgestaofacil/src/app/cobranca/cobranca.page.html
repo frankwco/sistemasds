@@ -1,0 +1,138 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="voltar()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Cobrança</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="atualizar()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cobranca-content">
+  <ion-refresher slot="fixed" (ionRefresh)="atualizar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="aviso-vazio" *ngIf="!usuarioLogado.id">
+    <ion-icon name="person-outline"></ion-icon>
+    <p>Saia e faça login novamente pra ver a Cobrança.</p>
+  </div>
+
+  <ng-container *ngIf="usuarioLogado.id">
+    <div class="resumo-topo" *ngIf="resumo && !carregando">
+      <div class="resumo-arquivo" *ngIf="resumo.dataArquivoFormatada">
+        Relatório de {{ resumo.dataArquivoFormatada }}
+      </div>
+      <div class="resumo-chips">
+        <span class="resumo-chip">
+          <span class="num">{{ resumo.totalClientesEmAberto }}</span>
+          <span class="lbl">clientes</span>
+        </span>
+        <span class="resumo-chip chip-total">
+          <span class="num">{{ resumo.valorTotalEmAbertoFormatado }}</span>
+          <span class="lbl">em aberto</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="carregando" *ngIf="carregando">
+      <ion-spinner name="dots"></ion-spinner>
+    </div>
+
+    <div class="aviso-vazio" *ngIf="!carregando && cobrancas.length === 0">
+      <ion-icon name="checkmark-done-outline"></ion-icon>
+      <p>Nenhum cliente com título em atraso no momento.</p>
+    </div>
+
+    <div class="lista-cobrancas" *ngIf="!carregando && cobrancas.length > 0">
+      <ion-card class="cliente-card" *ngFor="let c of cobrancas">
+        <ion-card-header class="card-header-custom" (click)="alternarDetalhe(c)">
+          <div class="card-header-left">
+            <ion-card-title class="card-title-custom">{{ c.nome }}</ion-card-title>
+            <p class="card-subtitle" *ngIf="c.cidade">{{ c.cidade }}</p>
+          </div>
+          <div class="valor-total">{{ c.valorTotalFormatado }}</div>
+        </ion-card-header>
+
+        <ion-card-content class="card-body-custom">
+          <div class="aviso-divergente" *ngIf="c.temNomeDivergente">
+            <ion-icon name="warning-outline"></ion-icon>
+            Nome no relatório do banco diverge: {{ c.nomesSacadoRelatorio }}
+          </div>
+
+          <div class="ultima-notificacao" *ngIf="ultimoHistorico(c) as ultimo">
+            <ion-icon [name]="ultimo.whatsapp ? 'logo-whatsapp' : 'mail-outline'"></ion-icon>
+            <span>Última notificação: {{ ultimo.texto }}</span>
+          </div>
+          <div class="ultima-notificacao sem-notificacao" *ngIf="!ultimoHistorico(c)">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+            <span>Nenhuma notificação enviada ainda</span>
+          </div>
+
+          <div class="telefone-linha" *ngIf="c.telefone1">
+            <span class="telefone-numero">{{ c.telefone1 }}</span>
+            <div class="telefone-acoes">
+              <ion-button fill="clear" class="whats-btn" [disabled]="enviandoTelefone === chaveTelefone(c.clienteId, 1)" (click)="enviarWhatsapp(c, 1)">
+                <ion-spinner *ngIf="enviandoTelefone === chaveTelefone(c.clienteId, 1)" name="dots"></ion-spinner>
+                <ion-icon *ngIf="enviandoTelefone !== chaveTelefone(c.clienteId, 1)" name="logo-whatsapp" slot="icon-only"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" class="confirma-btn" [class.confirmado]="c.telefone1Whatsapp" [disabled]="confirmandoTelefone === chaveTelefone(c.clienteId, 1)" (click)="confirmarOuDesmarcarWhatsapp(c, 1)">
+                <ion-spinner *ngIf="confirmandoTelefone === chaveTelefone(c.clienteId, 1)" name="dots"></ion-spinner>
+                <ion-icon *ngIf="confirmandoTelefone !== chaveTelefone(c.clienteId, 1)" [name]="c.telefone1Whatsapp ? 'checkmark-circle' : 'help-circle-outline'" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+
+          <div class="telefone-linha" *ngIf="c.telefone2">
+            <span class="telefone-numero">{{ c.telefone2 }}</span>
+            <div class="telefone-acoes">
+              <ion-button fill="clear" class="whats-btn" [disabled]="enviandoTelefone === chaveTelefone(c.clienteId, 2)" (click)="enviarWhatsapp(c, 2)">
+                <ion-spinner *ngIf="enviandoTelefone === chaveTelefone(c.clienteId, 2)" name="dots"></ion-spinner>
+                <ion-icon *ngIf="enviandoTelefone !== chaveTelefone(c.clienteId, 2)" name="logo-whatsapp" slot="icon-only"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" class="confirma-btn" [class.confirmado]="c.telefone2Whatsapp" [disabled]="confirmandoTelefone === chaveTelefone(c.clienteId, 2)" (click)="confirmarOuDesmarcarWhatsapp(c, 2)">
+                <ion-spinner *ngIf="confirmandoTelefone === chaveTelefone(c.clienteId, 2)" name="dots"></ion-spinner>
+                <ion-icon *ngIf="confirmandoTelefone !== chaveTelefone(c.clienteId, 2)" [name]="c.telefone2Whatsapp ? 'checkmark-circle' : 'help-circle-outline'" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+
+          <ion-button fill="clear" size="small" class="toggle-detalhe" (click)="alternarDetalhe(c)">
+            {{ expandidoId === c.clienteId ? 'Ver menos' : 'Ver parcelas e histórico' }}
+          </ion-button>
+
+          <div class="detalhe" *ngIf="expandidoId === c.clienteId">
+            <div class="detalhe-titulo">Parcelas em aberto</div>
+            <div class="parcela-linha" *ngFor="let p of c.parcelasFormatadas">{{ p }}</div>
+
+            <div class="detalhe-titulo">Histórico (rodada atual)</div>
+            <div class="historico-linha" *ngFor="let h of c.historicoAtual">
+              <ion-icon [name]="h.whatsapp ? 'logo-whatsapp' : 'mail-outline'"></ion-icon>
+              {{ h.texto }}
+            </div>
+            <p class="aviso-historico-vazio" *ngIf="!c.historicoAtual || c.historicoAtual.length === 0">
+              Nenhuma notificação registrada ainda nesta rodada.
+            </p>
+
+            <ion-button fill="clear" size="small" class="toggle-anteriores" *ngIf="c.historicoAnterior && c.historicoAnterior.length > 0" (click)="toggleAnteriores(c.clienteId)">
+              {{ anterioresVisiveis[c.clienteId] ? 'Ocultar anteriores' : 'Ver notificações anteriores' }}
+            </ion-button>
+            <ng-container *ngIf="anterioresVisiveis[c.clienteId]">
+              <div class="historico-linha" *ngFor="let h of c.historicoAnterior">
+                <ion-icon [name]="h.whatsapp ? 'logo-whatsapp' : 'mail-outline'"></ion-icon>
+                {{ h.texto }}
+              </div>
+            </ng-container>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ng-container>
+
+</ion-content>

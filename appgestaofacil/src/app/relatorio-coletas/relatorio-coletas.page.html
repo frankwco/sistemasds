@@ -1,0 +1,160 @@
+<ion-header class="rel-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Relatório de Coletas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="rel-content">
+
+  <!-- Card de Filtros -->
+  <ion-card class="filter-card">
+    <ion-card-header class="filter-header">
+      <div class="filter-icon-badge">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <ion-card-title class="filter-title">Período da Consulta</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item lines="none" class="date-item">
+        <ion-icon name="calendar-number-outline" slot="start" color="primary"></ion-icon>
+        <ion-label>Data Inicial</ion-label>
+        <ion-datetime displayFormat="DD/MM/YYYY" [(ngModel)]="dataInicial" min="2023-01-01"
+          placeholder="Informe" locale="pt-BR"></ion-datetime>
+      </ion-item>
+
+      <ion-item lines="none" class="date-item">
+        <ion-icon name="calendar-number-outline" slot="start" color="primary"></ion-icon>
+        <ion-label>Data Final</ion-label>
+        <ion-datetime displayFormat="DD/MM/YYYY" min="2023-01-01" [(ngModel)]="dataFinal"
+          placeholder="Informe"></ion-datetime>
+      </ion-item>
+
+      <ion-button expand="block" shape="round" class="search-btn" (click)="pesquisar()">
+        <ion-icon slot="start" name="search-outline"></ion-icon>
+        Pesquisar
+      </ion-button>
+
+      <div class="loading-area" *ngIf="buscando">
+        <p>Buscando...</p>
+        <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card de Resultados -->
+  <ion-card class="results-card" *ngIf="dadosFirebase.length > 0">
+    <ion-card-header class="results-header">
+      <div class="results-header-left">
+        <div class="results-icon-badge">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+        </div>
+        <ion-card-title class="results-title">Resumo da Consulta</ion-card-title>
+      </div>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- Filtro por veículo -->
+      <ion-item lines="none" class="vehicle-filter">
+        <ion-icon name="car-sport-outline" slot="start" color="primary"></ion-icon>
+        <ion-label>Filtrar por Veículo</ion-label>
+        <ion-select (ionChange)="selecionarVeiculo($event.target.value)" interface="action-sheet">
+          <ion-select-option *ngFor="let veiculo of veiculos" [value]="veiculo.placaVeiculo">
+            {{ veiculo.placaVeiculo }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Lista de resultados -->
+      <div class="result-item" *ngFor="let item of dadosFirebase; let idx = index">
+        <div class="result-label" *ngIf="item.tipo === 'totalVeiculo'">
+          <span class="result-date">{{ item.data | date: 'dd/MM/yyyy' }}</span>
+          <span class="result-plate">{{ item.placaVeiculo }}</span>
+        </div>
+        <div class="result-label total-label" *ngIf="item.tipo === 'totalDia'">
+          <span>TOTAIS DO DIA</span>
+        </div>
+
+        <div class="groups-grid">
+          <div class="group-col group-a">
+            <span class="group-name">A</span>
+            <span class="group-value">{{ item.a | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-e">
+            <span class="group-name">E</span>
+            <span class="group-value">{{ item.e | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-b">
+            <span class="group-name">B</span>
+            <span class="group-value">{{ item.b | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a2">
+            <span class="group-name">A2</span>
+            <span class="group-value">{{ item.a2 | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a3">
+            <span class="group-name">A3</span>
+            <span class="group-value">{{ item.a3 | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a4">
+            <span class="group-name">A4</span>
+            <span class="group-value">{{ item.a4 | number:'1.3-3' }}</span>
+          </div>
+        </div>
+
+        <div class="result-total">
+          Total: {{ item.total | number:'1.3-3' }}
+        </div>
+
+        <div class="day-divider" *ngIf="item.tipo === 'totalDia'"></div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card de Totais Gerais -->
+  <ion-card class="totals-card" *ngIf="dadosFirebase.length > 0">
+    <ion-card-header class="totals-header">
+      <div class="totals-icon-badge">
+        <ion-icon name="calculator-outline"></ion-icon>
+      </div>
+      <ion-card-title class="totals-title">Totais Gerais</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="totals-grid">
+        <div class="total-row">
+          <span class="total-label-text">A</span>
+          <span class="total-value">{{ totalDiaObj.a | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label-text">E</span>
+          <span class="total-value">{{ totalDiaObj.e | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label-text">B</span>
+          <span class="total-value">{{ totalDiaObj.b | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label-text">A2</span>
+          <span class="total-value">{{ totalDiaObj.a2 | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label-text">A3</span>
+          <span class="total-value">{{ totalDiaObj.a3 | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label-text">A4</span>
+          <span class="total-value">{{ totalDiaObj.a4 | number:'1.3-3' }}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span class="total-label-text">Total</span>
+          <span class="total-value">{{ totalDiaObj.total | number:'1.3-3' }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

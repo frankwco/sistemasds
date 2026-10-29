@@ -1,0 +1,205 @@
+// ── Header / Toolbar ──
+
+.home-toolbar {
+  --border-width: 0;
+
+  .toolbar-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .toolbar-logo {
+    font-size: 22px;
+  }
+
+  .toolbar-version {
+    display: block;
+    font-size: 11px;
+    opacity: 0.75;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+}
+
+.logout-btn {
+  --color: #fff;
+  font-size: 22px;
+}
+
+// ── Content ──
+
+.home-content {
+  --background: #f0f4fa;
+}
+
+// ── Selection Cards (Veículo / Motorista) ──
+
+.selection-card {
+  margin: 16px 16px 0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+
+  .card-header-custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 8px;
+
+    .card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  }
+
+  .card-icon-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+
+    &.vehicle {
+      background: linear-gradient(135deg, #3880ff, #5b5ea6);
+    }
+
+    &.driver {
+      background: linear-gradient(135deg, #2dd36f, #1a9e54);
+    }
+  }
+
+  .card-title-custom {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  .search-btn {
+    --color: #3880ff;
+    font-size: 22px;
+  }
+
+  .card-body-custom {
+    padding: 4px 16px 16px;
+  }
+
+  .info-main {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 2px;
+  }
+
+  .info-sub {
+    font-size: 13px;
+    color: #718096;
+    margin: 0;
+  }
+
+  .info-empty {
+    font-size: 13px;
+    color: #a0aec0;
+    font-style: italic;
+    margin: 0;
+  }
+}
+
+// ── Botão Coletar ──
+
+.coletar-wrapper {
+  padding: 20px 16px 4px;
+}
+
+.coletar-btn {
+  --background: linear-gradient(135deg, #2dd36f 0%, #1a9e54 100%);
+  --border-radius: 28px;
+  --box-shadow: 0 4px 14px rgba(45, 211, 111, 0.35);
+  height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: none;
+}
+
+// ── Section Label ──
+
+.section-label {
+  padding: 18px 20px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+// ── Actions Grid ──
+
+.actions-grid {
+  padding: 0 8px 16px;
+
+  ion-col {
+    padding: 6px;
+  }
+}
+
+.action-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 12px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 130px;
+  justify-content: center;
+
+  &:active {
+    transform: scale(0.96);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.action-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+
+  &.info {
+    background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, #ffc409, #e0a800);
+  }
+
+  &.report {
+    background: linear-gradient(135deg, #3dc2ff, #2b9cd4);
+  }
+
+  &.danger {
+    background: linear-gradient(135deg, #eb445a, #c23044);
+  }
+}
+
+.action-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+  line-height: 1.3;
+}

@@ -1,0 +1,119 @@
+<ion-header class="ass-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/coleta"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Assinar e Finalizar</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ass-content">
+
+  <!-- Tela toda bloqueada enquanto a coleta é salva (mesmo padrão do "Excluindo...") -->
+  <div *ngIf="salvando" class="gf-overlay">
+    <div class="gf-spinner"></div>
+    <p>Salvando coleta...</p>
+  </div>
+
+  <!-- Card Resumo da Coleta -->
+  <ion-card class="resumo-card">
+    <ion-card-header class="resumo-header">
+      <div class="resumo-icon-badge">
+        <ion-icon name="clipboard-outline"></ion-icon>
+      </div>
+      <ion-card-title class="resumo-title">Resumo da Coleta</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="groups-grid">
+        <div class="group-col group-a" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('A;')">
+          <span class="group-name">A</span>
+          <span class="group-value">{{ coleta.a }}</span>
+        </div>
+        <div class="group-col group-e" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('E;')">
+          <span class="group-name">E</span>
+          <span class="group-value">{{ coleta.e }}</span>
+        </div>
+        <div class="group-col group-b" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('B;')">
+          <span class="group-name">B</span>
+          <span class="group-value">{{ coleta.b }}</span>
+        </div>
+        <div class="group-col group-a2" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('A2;')">
+          <span class="group-name">A2</span>
+          <span class="group-value">{{ coleta.a2 }}</span>
+        </div>
+        <div class="group-col group-a3" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('A3;')">
+          <span class="group-name">A3</span>
+          <span class="group-value">{{ coleta.a3 }}</span>
+        </div>
+        <div class="group-col group-a4" *ngIf="coleta.pontoColetaSelecionado.gruposColetados.includes('A4;')">
+          <span class="group-name">A4</span>
+          <span class="group-value">{{ coleta.a4 }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card E-mail -->
+  <ion-card class="email-card">
+    <ion-card-header class="email-header">
+      <div class="email-icon-badge">
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+      <div class="email-info">
+        <ion-card-title class="email-title">E-mail do Ponto</ion-card-title>
+        <span class="email-current" *ngIf="coleta.pontoColetaSelecionado.email">{{ coleta.pontoColetaSelecionado.email }}</span>
+        <span class="email-empty" *ngIf="!coleta.pontoColetaSelecionado.email">Sem e-mail cadastrado</span>
+      </div>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="email-input-row">
+        <ion-item lines="none" class="email-item">
+          <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+          <ion-input placeholder="Novo e-mail" [(ngModel)]="emailNovo"></ion-input>
+        </ion-item>
+        <ion-button class="email-ok-btn" fill="solid" color="primary">OK</ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Card Assinatura -->
+  <ion-card class="signature-card">
+    <ion-card-header class="signature-header">
+      <div class="signature-header-left">
+        <div class="signature-icon-badge">
+          <ion-icon name="pencil-outline"></ion-icon>
+        </div>
+        <ion-card-title class="signature-title">Assinatura</ion-card-title>
+      </div>
+      <div class="signature-actions">
+        <button class="sig-action-btn" (click)="undo()">
+          <ion-icon name="arrow-undo-outline"></ion-icon>
+        </button>
+        <button class="sig-action-btn btn-clear" (click)="clear()">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+    </ion-card-header>
+
+    <ion-card-content>
+      <div class="signature-area">
+        <signature-pad [options]="signaturePadOptions"></signature-pad>
+      </div>
+      <div class="signer-name">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>{{ coleta.pontoColetaSelecionado.nomeRazaoSocial }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Botão Finalizar -->
+  <div class="action-area">
+    <ion-button expand="block" shape="round" class="finalizar-btn" [disabled]="salvando" (click)="continuar()">
+      <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+      Finalizar
+    </ion-button>
+  </div>
+
+</ion-content>

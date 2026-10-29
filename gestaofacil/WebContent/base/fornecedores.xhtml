@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-industry" style="margin-right:10px;"></i>Fornecedores</h2>
+					<p>Cadastre postos, oficinas, seguradoras e órgãos ambientais</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{fornecedorMB.criarNovoObjeto()}"
+							onclick="PF('dlgFornecedor').show(); PF('dlgFornecedor').content.scrollTop('0')"
+							title="Cadastrar Fornecedor" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{fornecedorMB.listFornecedor}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum fornecedor cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Nome" filterBy="#{list.nome}"
+							sortBy="#{list.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.nome}" />
+						</p:column>
+
+						<p:column headerText="Tipo" filterBy="#{list.tipo}"
+							sortBy="#{list.tipo}" filterMatchMode="contains">
+							<h:outputText value="#{list.tipo}" />
+						</p:column>
+
+						<p:column headerText="Bandeira" filterBy="#{list.bandeira}"
+							sortBy="#{list.bandeira}" filterMatchMode="contains">
+							<h:outputText value="#{list.bandeira}" />
+						</p:column>
+
+						<p:column headerText="Avaliação">
+							<p:rating value="#{list.avaliacao}" readonly="true" stars="5"
+								rendered="#{list.tipo == 'Oficina'}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgFornecedor').show();"
+										actionListener="#{fornecedorMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{fornecedorMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Fornecedor" widgetVar="dlgFornecedor" modal="true"
+				responsive="true" width="60%" id="dlgFornecedor" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-tag" style="margin-right:6px;color:#1565C0;"></i>Nome *</label>
+							<p:inputText style="width:100%" required="true"
+								requiredMessage="Nome é obrigatório"
+								title="Nome" value="#{fornecedorMB.fornecedor.nome}" />
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo *</label>
+								<p:selectOneMenu style="width:100%" required="true"
+									requiredMessage="Selecione o tipo do fornecedor"
+									value="#{fornecedorMB.fornecedor.tipo}">
+									<f:selectItem itemLabel="Selecione" itemValue="" />
+									<f:selectItem itemLabel="Posto" itemValue="Posto" />
+									<f:selectItem itemLabel="Oficina" itemValue="Oficina" />
+									<f:selectItem itemLabel="Seguradora" itemValue="Seguradora" />
+									<f:selectItem itemLabel="Órgão Ambiental" itemValue="Órgão Ambiental" />
+									<p:ajax update=":frmModalSalvar:pnlAvaliacao" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-flag" style="margin-right:6px;color:#1565C0;"></i>Bandeira (para postos)</label>
+								<p:inputText style="width:100%" title="Bandeira" value="#{fornecedorMB.fornecedor.bandeira}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-card-o" style="margin-right:6px;color:#1565C0;"></i>CNPJ</label>
+								<p:inputText style="width:100%" title="CNPJ" value="#{fornecedorMB.fornecedor.cnpj}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-phone" style="margin-right:6px;color:#1565C0;"></i>Telefone</label>
+								<p:inputText style="width:100%" title="Telefone" value="#{fornecedorMB.fornecedor.telefone}" />
+							</div>
+						</div>
+
+						<p:outputPanel id="pnlAvaliacao">
+							<h:panelGroup layout="block" styleClass="gf-form-item"
+								rendered="#{fornecedorMB.fornecedor.tipo == 'Oficina'}">
+								<label><i class="fa fa-star" style="margin-right:6px;color:#1565C0;"></i>Avaliação</label>
+								<p:rating value="#{fornecedorMB.fornecedor.avaliacao}" stars="5" />
+							</h:panelGroup>
+						</p:outputPanel>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{fornecedorMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgFornecedor').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

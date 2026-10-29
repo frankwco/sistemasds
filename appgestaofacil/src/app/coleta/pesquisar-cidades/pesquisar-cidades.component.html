@@ -1,0 +1,21 @@
+<ion-header>
+    <ion-toolbar>
+
+        <ion-buttons slot="start" (click)="voltar()">
+            <ion-button>
+                <ion-icon name="arrow-back-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+
+        <ion-title>Pesquisar Cidades</ion-title>
+
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-searchbar type="text" debounce="200" (ionChange)="getItems($event)"></ion-searchbar>
+
+    <ion-list>
+        <ion-item (click)="fechar(item)" *ngFor="let item of items">{{ item.nome }}</ion-item>
+    </ion-list>
+
+</ion-content>

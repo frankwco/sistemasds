@@ -1,0 +1,1083 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<style type="text/css">
+			/* ── Estilos específicos de fechamentoMes (comuns via gf-admin.css) ── */
+
+			/* Botões de status de contrato */
+			.btn-ativo .ui-button  { background: linear-gradient(135deg, #2E7D32, #43A047) !important; color: #fff !important; }
+			.btn-ativo .ui-button:hover  { box-shadow: 0 4px 14px rgba(46,125,50,.35) !important; }
+			.btn-renovado .ui-button { background: linear-gradient(135deg, #1565C0, #1E88E5) !important; color: #fff !important; }
+			.btn-renovado .ui-button:hover { box-shadow: 0 4px 14px rgba(21,101,192,.35) !important; }
+			.btn-inativo .ui-button  { background: linear-gradient(135deg, #F57F17, #FFB300) !important; color: #fff !important; }
+			.btn-inativo .ui-button:hover  { box-shadow: 0 4px 14px rgba(245,127,23,.35) !important; }
+			.btn-obs .ui-button { background: linear-gradient(135deg, #6A1B9A, #9C27B0) !important; color: #fff !important; }
+			.btn-obs .ui-button:hover { box-shadow: 0 4px 14px rgba(106,27,154,.35) !important; }
+
+			/* Período filter (usado nos dialogs de período) */
+			.periodo-filter {
+				display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
+				background: #f5f7fa; border-radius: 10px; padding: 16px 20px;
+				margin-bottom: 16px; border: 1px solid #e0e6ed;
+			}
+			.periodo-filter label {
+				font-weight: 600; font-size: 13px; color: #37474f; margin: 0;
+			}
+
+			/* Card recolhível (ex.: Filtrar Contratos) */
+			.gf-card-collapsible .gf-card-header { cursor: pointer; user-select: none; }
+			.gf-card-collapsible .gf-card-toggle-icon {
+				margin-left: auto; color: #90a4ae; transition: transform .2s;
+			}
+			.gf-card-collapsible.is-collapsed .gf-card-toggle-icon { transform: rotate(-90deg); }
+			.gf-card-collapsible.is-collapsed .gf-card-body { display: none; }
+		</style>
+		<script type="text/javascript">
+			function gfToggleCard(header) {
+				var card = header.closest('.gf-card-collapsible');
+				if (card) { card.classList.toggle('is-collapsed'); }
+			}
+		</script>
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-calendar-check-o" style="margin-right:10px;"></i>Fechamento do Mês</h2>
+					<p>Gerencie fechamentos, faturamentos, romaneios e certificados dos contratos</p>
+				</div>
+				<i class="fa fa-bar-chart hero-icon"></i>
+			</div>
+
+			<!-- ═══ VISÃO GERAL (independe de busca) ═══ -->
+			<div class="row stat-cards" style="margin-bottom:8px;">
+				<div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;">
+					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple"
+						title="Soma tudo que está em aberto no sistema inteiro (excedente + faturamento mensal, qualquer situação de contrato) — não depende da busca abaixo. Clique para ver o detalhamento.">
+						<div class="sc-icon"><i class="fa fa-globe"></i></div>
+						<div>
+							<div class="sc-label">Visão Geral — Todo o Sistema</div>
+							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoSistema)}</div>
+						</div>
+					</a>
+				</div>
+				<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-success"
+						title="Soma tudo que está em aberto (excedente + faturamento mensal) dos contratos com situação Ativo — não depende da busca abaixo. Clique para ver o detalhamento.">
+						<div class="sc-icon"><i class="fa fa-check-circle"></i></div>
+						<div>
+							<div class="sc-label">Contratos Ativos — Total em Aberto</div>
+							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoAtivos)}</div>
+						</div>
+					</a>
+				</div>
+				<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-info"
+						title="Soma tudo que está em aberto (excedente + faturamento mensal) dos contratos com situação Renovado — não depende da busca abaixo. Clique para ver o detalhamento.">
+						<div class="sc-icon"><i class="fa fa-refresh"></i></div>
+						<div>
+							<div class="sc-label">Contratos Renovados — Total em Aberto</div>
+							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoRenovados)}</div>
+						</div>
+					</a>
+				</div>
+			</div>
+
+			<!-- ═══ FORM PRINCIPAL ═══ -->
+			<h:form id="frmCadastrar">
+
+				<p:ajaxStatus onstart="PF('statusDialog').show()"
+					onsuccess="PF('statusDialog').hide()" />
+
+				<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+					closable="false" resizable="false" showHeader="false"
+					styleClass="gf-loading-dialog">
+					<span class="gf-loading-text">Aguarde, realizando operação...</span>
+					<p:graphicImage name="img/aguarde.gif" />
+				</p:dialog>
+
+				<!-- ── Card: Filtrar Contratos ── -->
+				<div class="gf-card gf-card-collapsible#{fechamentoMesMB.expandirFiltroContratos ? '' : ' is-collapsed'}">
+					<div class="gf-card-header" onclick="gfToggleCard(this)">
+						<i class="fa fa-filter icon-blue"></i>
+						<div>
+							<h4>Filtrar Contratos</h4>
+							<small>Selecione o tipo de contrato para visualizar</small>
+						</div>
+						<i class="fa fa-chevron-down gf-card-toggle-icon"></i>
+					</div>
+
+					<div class="gf-card-body">
+						<div class="gf-status-btns">
+							<span class="btn-ativo">
+								<p:commandButton value="  Contratos ATIVOS"
+									icon="fa fa-check-circle"
+									update="@form"
+									actionListener="#{fechamentoMesMB.buscarContratos('Ativo')}" />
+							</span>
+							<span class="btn-renovado">
+								<p:commandButton value="  Contratos RENOVADOS"
+									icon="fa fa-refresh"
+									update="@form"
+									actionListener="#{fechamentoMesMB.buscarContratos('Renovado')}" />
+							</span>
+							<span class="btn-inativo">
+								<p:commandButton value="  Contratos INATIVOS"
+									icon="fa fa-pause-circle"
+									update="@form"
+									actionListener="#{fechamentoMesMB.buscarContratos('Inativo')}" />
+							</span>
+							<span class="btn-obs">
+								<p:commandButton value="  Sem Observações"
+									icon="fa fa-exclamation-triangle"
+									action="fechamentoSemObservacaoFaturado.jsf" />
+							</span>
+						</div>
+
+						<p:dataTable var="list" id="tabelaInformacoesFinanceiras"
+							value="#{fechamentoMesMB.listInformacoesFinanceiras}"
+							rowKey="#{list.id}" style="margin-bottom:0" rows="5"
+							paginator="true" paginatorPosition="bottom"
+							selection="#{fechamentoMesMB.informacaoesFinanceirasSelecionadas}"
+							emptyMessage="Clique em um dos botões acima para exibir os contratos"
+							rowsPerPageTemplate="5,10,15,30,50,100">
+							<p:ajax event="filter" global="false" />
+							<f:facet name="header">
+								<i class="fa fa-list-alt" style="margin-right:8px;"></i>
+								Selecionar Contratos para Fechamento do Mês
+							</f:facet>
+							<p:column selectionMode="multiple"
+								style="width:50px;text-align:center" />
+							<p:column headerText="Cliente"
+								filterBy="#{list.cliente.nomeRazaoSocial}"
+								sortBy="#{list.cliente.nomeRazaoSocial}"
+								filterMatchMode="contains">
+								<h:outputText value="#{list.cliente.nomeRazaoSocial}" />
+							</p:column>
+							<p:column headerText="Pontos de Coleta"
+								filterMatchMode="contains"
+								filterBy="#{list.listaItensInformacoesFinanceiraPontoColetaString}"
+								style="white-space:normal !important;">
+								<h:outputText escape="false"
+									value="#{list.listaItensInformacoesFinanceiraPontoColetaString}" />
+							</p:column>
+							<p:column headerText="Data Início / Término" width="200">
+								<i class="fa fa-calendar" style="color:#90a4ae;margin-right:4px;font-size:12px;"></i>
+								<h:outputText value="#{formataDataMB.formatarData(list.dataInicial)}" />
+								<span style="color:#90a4ae;margin:0 4px;">até</span>
+								<h:outputText value="#{formataDataMB.formatarData(list.dataFinal)}" />
+							</p:column>
+							<p:column headerText="Situação" width="110">
+								<h:outputText value="#{list.situacaoContrato}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+
+				<!-- ── Card: Período / Busca / Ações ── -->
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-search icon-teal"></i>
+						<div>
+							<h4>Buscar e Executar Fechamento</h4>
+							<small>Selecione o período e a ação desejada</small>
+						</div>
+					</div>
+
+					<!-- Filtro Mês / Ano -->
+					<div class="gf-filter-bar">
+						<label><i class="fa fa-calendar-o" style="margin-right:6px;"></i>Mês:</label>
+						<p:selectOneMenu style="width:140px"
+							value="#{fechamentoMesMB.fechamentoMes.mes}">
+							<f:selectItem itemLabel="Todos" itemValue="0" />
+							<f:selectItem itemLabel="Janeiro" itemValue="1" />
+							<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+							<f:selectItem itemLabel="Março" itemValue="3" />
+							<f:selectItem itemLabel="Abril" itemValue="4" />
+							<f:selectItem itemLabel="Maio" itemValue="5" />
+							<f:selectItem itemLabel="Junho" itemValue="6" />
+							<f:selectItem itemLabel="Julho" itemValue="7" />
+							<f:selectItem itemLabel="Agosto" itemValue="8" />
+							<f:selectItem itemLabel="Setembro" itemValue="9" />
+							<f:selectItem itemLabel="Outubro" itemValue="10" />
+							<f:selectItem itemLabel="Novembro" itemValue="11" />
+							<f:selectItem itemLabel="Dezembro" itemValue="12" />
+						</p:selectOneMenu>
+
+						<label><i class="fa fa-calendar" style="margin-right:6px;"></i>Ano:</label>
+						<p:selectOneMenu style="width:130px"
+							value="#{fechamentoMesMB.fechamentoMes.ano}">
+							<f:selectItem itemLabel="Todos" itemValue="0" />
+							<f:selectItem itemLabel="2015" itemValue="2015" />
+							<f:selectItem itemLabel="2016" itemValue="2016" />
+							<f:selectItem itemLabel="2017" itemValue="2017" />
+							<f:selectItem itemLabel="2018" itemValue="2018" />
+							<f:selectItem itemLabel="2019" itemValue="2019" />
+							<f:selectItem itemLabel="2020" itemValue="2020" />
+							<f:selectItem itemLabel="2021" itemValue="2021" />
+							<f:selectItem itemLabel="2022" itemValue="2022" />
+							<f:selectItem itemLabel="2023" itemValue="2023" />
+							<f:selectItem itemLabel="2024" itemValue="2024" />
+							<f:selectItem itemLabel="2025" itemValue="2025" />
+							<f:selectItem itemLabel="2026" itemValue="2026" />
+							<f:selectItem itemLabel="2027" itemValue="2027" />
+							<f:selectItem itemLabel="2028" itemValue="2028" />
+							<f:selectItem itemLabel="2029" itemValue="2029" />
+							<f:selectItem itemLabel="2030" itemValue="2030" />
+						</p:selectOneMenu>
+					</div>
+
+					<!-- Accordion -->
+					<p:accordionPanel>
+
+						<!-- Tab: Buscar por Mês -->
+						<p:tab title="Buscar por Mês">
+							<div class="gf-actions-grid">
+								<span class="btn-primary-modern">
+									<p:commandButton id="btnBuscarFechamento"
+										icon="fa fa-search"
+										value="  Buscar Fechamentos do Mês"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.buscarFechamentoMes('')}" />
+								</span>
+								<span class="btn-warning-modern">
+									<p:commandButton
+										icon="fa fa-plus-circle"
+										value="  Buscar com Excedente"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.buscarFechamentoMes('excedente')}" />
+								</span>
+							</div>
+						</p:tab>
+
+						<!-- Tab: Buscar por Cliente -->
+						<p:tab title="Buscar por Cliente">
+							<div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+								<div style="flex:1; min-width:300px;">
+									<label style="font-weight:600;font-size:13px;color:#37474f;display:block;margin-bottom:6px;">
+										<i class="fa fa-user" style="margin-right:6px;"></i>Selecione o Cliente
+									</label>
+									<p:selectOneMenu style="width:100%" dropdown="true"
+										id="selectBuscarCliente"
+										value="#{fechamentoMesMB.clienteSelecionado}"
+										converter="#{converterCliente}" panelStyle="width:180px"
+										effect="fade" var="t" filter="true" filterMatchMode="contains">
+										<f:selectItem itemLabel="Selecione" itemValue="" />
+										<f:selectItems value="#{clienteMB.listCliente}" var="cur"
+											itemLabel="#{cur.nomeRazaoSocialNomeFantasiaEndereco}"
+											itemValue="#{cur}" />
+										<p:column style="white-space:normal !important;">
+											<h:outputText value="#{t.nomeRazaoSocialNomeFantasiaEndereco}" />
+										</p:column>
+									</p:selectOneMenu>
+								</div>
+								<span class="btn-primary-modern">
+									<p:commandButton value="  Buscar Fechamentos"
+										icon="fa fa-search"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.buscarFechamentoMesClienteSelecionado()}" />
+								</span>
+							</div>
+						</p:tab>
+
+						<!-- Tab: Fazer ou Excluir Fechamento -->
+						<p:tab title="Fazer ou Excluir Fechamento">
+
+							<div class="gf-alert">
+								<i class="fa fa-exclamation-triangle"></i>
+								<span><strong>ATENÇÃO:</strong> Para os contratos que já estão fechados, o que você deseja fazer?</span>
+								<p:selectOneMenu style="width:160px; margin-left:auto;"
+									id="selectContratosFechados"
+									value="#{fechamentoMesMB.contratosFechados}">
+									<f:selectItem itemLabel="Não Fechar" itemValue="não fechar" />
+									<f:selectItem itemLabel="Fechar Também" itemValue="fechar" />
+								</p:selectOneMenu>
+							</div>
+
+							<hr class="gf-divider" />
+
+							<div class="gf-actions-grid">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-check"
+										value="  Fechamento dos Selecionados"
+										update=":frmModalConfirmarFechamento"
+										oncomplete="PF('dlgConfirmarFechamento').show()" />
+								</span>
+								<span class="btn-success-modern">
+									<p:commandButton icon="fa fa-check-circle"
+										value="  Todos ATIVOS"
+										actionListener="#{fechamentoMesMB.fazerFechamentoMes('todos', null)}"
+										update=":frmTabela, :dlgInformacao">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja fazer o fechamento deste MÊS/ANO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-check-square"
+										value="  ATIVOS e RENOVADOS"
+										actionListener="#{fechamentoMesMB.fazerFechamentoMes('ativoRenovado', null)}"
+										update=":frmTabela, :dlgInformacao">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja fazer o fechamento deste MÊS/ANO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-teal-modern">
+									<p:commandButton icon="fa fa-check-square-o"
+										value="  ATIVOS, INATIVOS e RENOVADOS"
+										actionListener="#{fechamentoMesMB.fazerFechamentoMes('ativoInativoRenovado', null)}"
+										update=":frmTabela, :dlgInformacao">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja fazer o fechamento deste MÊS/ANO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-warning-modern">
+									<p:commandButton icon="fa fa-refresh"
+										value="  Atualizar TODOS"
+										actionListener="#{fechamentoMesMB.fazerFechamentoMes('atualizar', null)}"
+										update=":frmTabela, :dlgInformacao">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja ATUALIZAR o fechamento deste MÊS/ANO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash"
+										value="  EXCLUIR TODOS do Mês"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.inativarFechamentoMes(null)}">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja EXCLUIR o fechamento deste MÊS/ANO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-secondary-modern">
+									<p:commandButton icon="fa fa-wrench"
+										value="  Corrigir Duplicados"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.corrigirFechamentosDuplicados()}">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja CORRIGIR o fechamento?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-secondary-modern">
+									<p:commandButton icon="fa fa-wrench"
+										value="  Corrigir Sem Coleta"
+										update=":frmTabela, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.corrigirFechamentosSemItensColeta()}">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja CORRIGIR o fechamento?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:tab>
+
+					</p:accordionPanel>
+				</div>
+
+			</h:form>
+
+			<!-- ═══ TABELA DE RESULTADOS ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-table icon-green"></i>
+					<div>
+						<h4>Fechamentos do Mês</h4>
+						<small>Resultado da busca - clique nas ações para gerenciar</small>
+					</div>
+				</div>
+
+				<h:form id="frmTabela">
+
+					<!-- ── Resumo do resultado listado ── -->
+					<h:panelGroup layout="block" styleClass="row stat-cards stat-cards-5"
+						style="margin-bottom:8px;"
+						rendered="#{not empty fechamentoMesMB.listaFechamentoMes}">
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-info">
+								<div class="sc-icon"><i class="fa fa-usd"></i></div>
+								<div>
+									<div class="sc-label">Faturamento do Mês (resultado listado)</div>
+									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoTotalListado)}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-warning" title="Contratos Mensal — cobrança mensal recorrente normal (não é excedente). Soma só o(s) mês(es) que aparecem nas linhas da busca atual.">
+								<div class="sc-icon"><i class="fa fa-calendar-o"></i></div>
+								<div>
+									<div class="sc-label">Faturamento Mensal do Mês Pesquisado</div>
+									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoMensalTotalListado)}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-warning" title="Contratos Mensal — soma o total em aberto (todos os meses pendentes) de cada contrato listado, sem repetir o mesmo contrato duas vezes.">
+								<div class="sc-icon"><i class="fa fa-stack-exchange"></i></div>
+								<div>
+									<div class="sc-label">Faturamento Mensal Geral dos Contratos Listados</div>
+									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoMensalTotalGeralContratosListados)}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple" title="Contratos Anual — cobrança além da mensalidade fixa. Soma só o(s) mês(es) que aparecem nas linhas da busca atual. Clique para ver o detalhamento completo.">
+								<div class="sc-icon"><i class="fa fa-exclamation-circle"></i></div>
+								<div>
+									<div class="sc-label">Excedente do Mês Pesquisado</div>
+									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.excedenteTotalListado)}</div>
+								</div>
+							</a>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple" title="Contratos Anual — soma o total em aberto (todos os meses pendentes) de cada contrato listado, sem repetir o mesmo contrato duas vezes. Clique para ver o detalhamento completo.">
+								<div class="sc-icon"><i class="fa fa-stack-exchange"></i></div>
+								<div>
+									<div class="sc-label">Excedente Geral dos Contratos Listados</div>
+									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.excedenteTotalGeralContratosListados)}</div>
+								</div>
+							</a>
+						</div>
+					</h:panelGroup>
+
+					<p:dataTable id="tabela"
+						value="#{fechamentoMesMB.listaFechamentoMes}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum fechamento encontrado. Utilize os filtros acima para buscar."
+						rowsPerPageTemplate="10,15,30,50,100" editable="true"
+						editMode="cell">
+						<p:ajax event="filter" global="false" />
+
+						<p:column style="white-space:normal !important;"
+							sortBy="#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+							headerText="Informação Financeira"
+							filterBy="#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}"
+							filterMatchMode="contains">
+							<h:outputText
+								value="#{list.informacaoFinanceira.id}-(#{list.id})#{list.informacaoFinanceira.cliente.id}-#{list.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}" />
+						</p:column>
+
+						<p:column headerText="Mês/Ano" width="60">
+							<h:outputText value="#{list.mes}/#{list.ano}" />
+						</p:column>
+
+						<p:column headerText="Data Fecham." width="110">
+							<h:outputText value="#{list.dataFechamento}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Valor Final" width="110">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFinal)}" />
+						</p:column>
+
+						<p:column headerText="Excedente/Fat." width="130">
+							<h:outputText value="#{list.fechamentosAbertos}" escape="false" />
+						</p:column>
+
+						<p:column headerText="Pagamento / Contrato"
+							style="white-space:normal !important;"
+							filterBy="#{list.informacaoFinanceira.formaCobrancaRecebimento}"
+							filterMatchMode="contains">
+							<h:outputText escape="false"
+								value="#{list.informacaoFinanceira.formaCobrancaRecebimento}" />
+							<br />
+							<small style="color:#78909c;">
+								<i class="fa fa-calendar-o" style="margin-right:3px;"></i>
+								<h:outputText escape="false"
+									value="Início: #{formatarMB.formatarData(list.informacaoFinanceira.dataInicial)} Fim: #{formatarMB.formatarData(list.informacaoFinanceira.dataFinal)}" />
+							</small>
+						</p:column>
+
+						<p:column headerText="Ações" width="280"
+							style="white-space:normal !important; min-width:160px;">
+							<div class="action-btn-group">
+
+								<!-- Seção: Documentos -->
+								<div class="action-section">
+									<div class="action-section-label"><i class="fa fa-file-text-o"></i> Documentos</div>
+									<div class="action-btns">
+										<span class="btn-primary-modern">
+											<p:commandButton value=" Romaneio" icon="fa fa-file-text-o"
+												onclick="this.form.target='_blank'"
+												action="#{fechamentoMesMB.gerarRomaneio(list)}" ajax="false" />
+										</span>
+										<span class="btn-success-modern">
+											<p:commandButton value=" Cert. Padrão" icon="fa fa-certificate"
+												onclick="this.form.target='_blank'"
+												action="#{fechamentoMesMB.gerarCertificado(list)}"
+												ajax="false" />
+										</span>
+										<span class="btn-teal-modern">
+											<p:commandButton value=" Cert. Avulso" icon="fa fa-file-o"
+												onclick="this.form.target='_blank'"
+												action="#{certificadoAvulsoMB.gerarCertificado(list)}"
+												ajax="false" />
+										</span>
+										<span class="btn-purple-modern">
+											<p:commandButton value=" Cert. Período" icon="fa fa-calendar-plus-o"
+												actionListener="#{fechamentoMesMB.buscarPontosColetaCliente(list.informacaoFinanceira.cliente.id)}"
+												oncomplete="PF('dlgSelecionarPeriodos').show()"
+												update=":formSelecionarPeriodos" />
+										</span>
+										<span class="btn-secondary-modern">
+											<p:commandButton value=" Cad./Alt. Avulso" icon="fa fa-pencil"
+												update=":frmCertificadoAvulso" oncomplete="rc()"
+												actionListener="#{certificadoAvulsoMB.buscarCertificadoFechamento(list)}"
+												onclick="PF('dlgCertificadoAvulso').show(); PF('dlgCertificadoAvulso').content.scrollTop('0')"
+												title="Cadastrar Certificado Avulso" />
+										</span>
+									</div>
+								</div>
+
+								<!-- Seção: Faturamento -->
+								<div class="action-section">
+									<div class="action-section-label"><i class="fa fa-money"></i> Faturamento</div>
+									<div class="action-btns">
+										<span class="btn-warning-modern">
+											<p:commandButton value=" Faturamento" icon="fa fa-money"
+												update="frmModalFaturamento, frmModalFaturamento:tabelaFaturamento"
+												oncomplete="PF('dlgFaturamento').show()"
+												actionListener="#{fechamentoMesMB.buscarFechamentoAberto(list)}" />
+										</span>
+										<span class="btn-primary-modern">
+											<p:commandButton value=" Todos Fat." icon="fa fa-list"
+												update="frmModalTodosFaturamentos, frmModalTodosFaturamentos:tabelaTodosFaturamentos"
+												oncomplete="PF('dlgTodosFaturamentos').show()"
+												actionListener="#{fechamentoMesMB.buscarTodosFechamentoCliente(list)}" />
+										</span>
+										<span class="btn-danger-modern">
+											<p:commandButton
+												rendered="#{list.faturado==true and list.valorFaturar>0}"
+												value=" Cancelar Faturamento" icon="fa fa-ban"
+												update="@form, :dlgInformacao"
+												actionListener="#{fechamentoMesMB.cancelarParcelaFechamento(list)}">
+												<p:confirm header="Confirmação"
+													message="Tem certeza que deseja cancelar o FATURAMENTO?" />
+											</p:commandButton>
+										</span>
+									</div>
+								</div>
+
+								<!-- Seção: Gerenciar -->
+								<div class="action-section">
+									<div class="action-section-label"><i class="fa fa-cog"></i> Gerenciar</div>
+									<div class="action-btns">
+										<span class="btn-secondary-modern">
+											<p:commandButton value=" Atualizar" icon="fa fa-refresh"
+												update="@form, :dlgInformacao"
+												actionListener="#{fechamentoMesMB.fazerFechamentoMes('atualizar', list)}">
+												<p:confirm header="Confirmação"
+													message="Tem certeza que deseja Atualizar o FECHAMENTO DO MÊS?" />
+											</p:commandButton>
+										</span>
+										<span class="btn-danger-modern">
+											<p:commandButton value=" Excluir" icon="fa fa-trash-o"
+												update="@form, :dlgInformacao"
+												actionListener="#{fechamentoMesMB.inativarFechamentoMes(list)}">
+												<p:confirm header="Confirmação"
+													message="Tem certeza que deseja Excluir o FECHAMENTO DO MÊS?" />
+											</p:commandButton>
+										</span>
+									</div>
+								</div>
+
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<h:form>
+				<p:remoteCommand name="rc" update=":frmCertificadoAvulso" />
+			</h:form>
+
+			<!-- ═══ DIALOG: CERTIFICADO AVULSO ═══ -->
+			<p:dialog header="Certificado Avulso"
+				widgetVar="dlgCertificadoAvulso" modal="true" responsive="true"
+				width="80%" id="dlgCertificadoAvulso" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmCertificadoAvulso">
+					<div class="ui-fluid">
+						<div class="dlg-client-name">
+							<i class="fa fa-user" style="margin-right:8px;color:#1565C0;"></i>
+							#{certificadoAvulsoMB.certificadoAvulso.fechamentoMes.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}
+						</div>
+						<div style="margin-top:16px;">
+							<label style="font-weight:600;font-size:13px;color:#37474f;display:block;margin-bottom:8px;">
+								<i class="fa fa-info-circle" style="margin-right:6px;color:#1565C0;"></i>
+								Para colar texto do Word, utilize o ícone "Past as Text"
+							</label>
+							<p:editor value="#{certificadoAvulsoMB.certificadoAvulso.texto}" />
+						</div>
+					</div>
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{certificadoAvulsoMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgCertificadoAvulso').hide();" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: FATURAMENTO MÊS ═══ -->
+			<p:dialog header="Faturamento do Mês" widgetVar="dlgFaturamento"
+				modal="true" responsive="true" width="70%" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalFaturamento">
+					<div class="dlg-client-name">
+						<i class="fa fa-building" style="margin-right:8px;color:#1565C0;"></i>
+						<h:outputText
+							value="#{fechamentoMesMB.fechamentoMesFaturamento.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}" />
+					</div>
+
+					<p:dataTable id="tabelaFaturamento"
+						value="#{fechamentoMesMB.listaFechamentoMesExcedente}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum faturamento encontrado"
+						rowsPerPageTemplate="5,10,15,30,50,100" editable="true"
+						editMode="cell">
+						<p:ajax event="filter" global="false" />
+
+						<p:column headerText="Mês/Ano" width="70">
+							<h:outputText value="#{list.mes}/#{list.ano}" />
+						</p:column>
+
+						<p:column id="colunaFaturado" width="130" headerText="Faturar?">
+							<p:cellEditor>
+								<f:facet name="output">
+									<h:outputText rendered="#{list.faturado==true}" value="Sim"
+										style="color:#2E7D32;font-weight:600;" />
+									<h:outputText rendered="#{list.faturado==false}" value="Não"
+										style="color:#C62828;font-weight:600;" />
+								</f:facet>
+								<f:facet name="input">
+									<p:selectOneMenu style="width:125px" value="#{list.faturado}">
+										<f:selectItem itemLabel="Não" itemValue="false" />
+										<f:selectItem itemLabel="Sim" itemValue="true" />
+										<p:ajax update="valorDesconto" />
+									</p:selectOneMenu>
+								</f:facet>
+							</p:cellEditor>
+						</p:column>
+
+						<p:column headerText="Valor Final" width="100">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFinal)}" />
+						</p:column>
+
+						<p:column headerText="Excedente/Fat." width="110">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFaturar)}" />
+						</p:column>
+
+						<p:column headerText="Desconto" width="120">
+							<p:cellEditor>
+								<f:facet name="output">
+									<h:outputText
+										value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorDesconto)}" />
+								</f:facet>
+								<f:facet name="input">
+									<p:inputNumber id="valorDesconto"
+										disabled="#{list.faturado==false}" decimalPlaces="2"
+										thousandSeparator="." decimalSeparator=","
+										title="Valor Fixo Mensal Ponto" value="#{list.valorDesconto}">
+										<p:ajax event="blur" update="tabelaFaturamento"
+											listener="#{fechamentoMesMB.calcularDescontoTotalAberto()}" />
+									</p:inputNumber>
+								</f:facet>
+							</p:cellEditor>
+						</p:column>
+
+						<p:column headerText="Pagamento" width="90">
+							<h:outputText
+								value="#{list.informacaoFinanceira.formaCobrancaRecebimento}" />
+						</p:column>
+
+						<p:column headerText="Observação">
+							<p:cellEditor>
+								<f:facet name="output">
+									<h:outputText value="#{list.observacao}" />
+								</f:facet>
+								<f:facet name="input">
+									<p:inputText value="#{list.observacao}">
+										<p:ajax event="blur" update="@form"
+											listener="#{fechamentoMesMB.mudarStatusFechamentoMes(list)}" />
+									</p:inputText>
+								</f:facet>
+							</p:cellEditor>
+						</p:column>
+
+						<p:columnGroup type="footer" id="gga">
+							<p:row id="ggb">
+								<p:column colspan="3" style="text-align:right;font-weight:700;"
+									footerText="Valor Total: " />
+								<p:column style="font-weight:700;color:#1565C0;"
+									footerText="#{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalAberto)}" />
+								<p:column id="ggc" style="font-weight:700;color:#E65100;"
+									footerText="#{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalDesconto)}" />
+								<p:column footerText="" />
+								<p:column footerText="" />
+							</p:row>
+						</p:columnGroup>
+					</p:dataTable>
+
+					<hr class="gf-divider" />
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data do Vencimento *</label>
+							<p:calendar required="true" requiredMessage="Data Obrigatória!!"
+								value="#{fechamentoMesMB.parcelaFechamento.dataVencimento}"
+								pattern="dd/MM/yyyy" />
+						</div>
+						<div class="gf-form-item">
+							<label><i class="fa fa-barcode" style="margin-right:6px;color:#1565C0;"></i>Nosso Número</label>
+							<p:inputText
+								value="#{fechamentoMesMB.parcelaFechamento.nossoNumero}" />
+						</div>
+					</div>
+
+					<div class="gf-modal-footer">
+						<span class="btn-success-modern">
+							<p:commandButton
+								onkeypress="if (event.keyCode == 13) { return false; }"
+								icon="fa fa-check" value="  Confirmar Faturamento"
+								update=":frmTabela, :dlgInformacao"
+								actionListener="#{fechamentoMesMB.salvarParcelaFechamento()}"
+								oncomplete="PF('dlgFaturamento').hide()">
+								<p:confirm header="Confirmação"
+									message="Tem certeza que deseja fazer/cancelar o faturamento?" />
+							</p:commandButton>
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: TODOS FATURAMENTOS ═══ -->
+			<p:dialog header="Todos os Faturamentos"
+				widgetVar="dlgTodosFaturamentos" modal="true" responsive="true"
+				width="85%" closable="true" closeOnEscape="true" resizable="false"
+				draggable="false">
+				<h:form id="frmModalTodosFaturamentos">
+					<div class="dlg-client-name">
+						<i class="fa fa-building" style="margin-right:8px;color:#1565C0;"></i>
+						<h:outputText
+							value="#{fechamentoMesMB.fechamentoMesFaturamento.informacaoFinanceira.cliente.nomeRazaoSocialNomeFantasiaEndereco}" />
+					</div>
+
+					<p:dataTable id="tabelaTodosFaturamentos"
+						value="#{fechamentoMesMB.listaTodosFechamentosCliente}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum faturamento encontrado"
+						rowsPerPageTemplate="4,10,15,30,50,100">
+						<p:ajax event="filter" global="false" />
+
+						<p:column headerText="Mês/Ano" width="70">
+							<h:outputText value="#{list.mes}/#{list.ano}" />
+						</p:column>
+
+						<p:column id="colunaFaturado" width="80" headerText="Faturado">
+							<h:outputText rendered="#{list.faturado==true}" value="Sim"
+								style="color:#2E7D32;font-weight:600;" />
+							<h:outputText rendered="#{list.faturado==false}" value="Não"
+								style="color:#C62828;font-weight:600;" />
+						</p:column>
+
+						<p:column headerText="Valor Final" width="100">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFinal)}" />
+						</p:column>
+
+						<p:column headerText="Excedente/Fat." width="110">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorFaturar)}" />
+						</p:column>
+
+						<p:column headerText="Desconto" width="90">
+							<h:outputText
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(list.valorDesconto)}" />
+						</p:column>
+
+						<p:column headerText="Pagamento" width="90">
+							<h:outputText
+								value="#{list.informacaoFinanceira.formaCobrancaRecebimento}" />
+						</p:column>
+
+						<p:column headerText="Observação" style="white-space:normal !important;">
+							<h:outputText value="#{list.observacao}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="200">
+							<div class="action-btn-group">
+								<span class="btn-danger-modern">
+									<p:commandButton disabled="#{list.faturado==false}"
+										icon="fa fa-ban" value="  Cancelar Faturamento"
+										update="@form, :dlgInformacao"
+										actionListener="#{fechamentoMesMB.cancelarParcelaFechamento(list)}">
+										<p:confirm header="Confirmação"
+											message="Tem certeza que deseja cancelar o FATURAMENTO?" />
+									</p:commandButton>
+								</span>
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										value="  Alterar Obs."
+										update=":frmModalAlterarObservacao"
+										oncomplete="PF('dlgAlterarObservacao').show()"
+										actionListener="#{fechamentoMesMB.carregarFechamento(list)}" />
+								</span>
+							</div>
+						</p:column>
+
+						<p:columnGroup type="footer" id="gga">
+							<p:row id="ggb">
+								<p:column colspan="3" style="text-align:right;font-weight:700;"
+									footerText="Valor Total: " />
+								<p:column style="font-weight:700;color:#1565C0;"
+									footerText="#{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalAberto)}" />
+								<p:column id="ggc" style="font-weight:700;color:#E65100;"
+									footerText="#{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalDesconto)}" />
+								<p:column footerText="" />
+								<p:column footerText="" />
+							</p:row>
+						</p:columnGroup>
+					</p:dataTable>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: ALTERAR OBSERVAÇÃO ═══ -->
+			<p:dialog header="Alterar Observação"
+				widgetVar="dlgAlterarObservacao" modal="true" responsive="true"
+				width="50%" id="dlgAlterarObservacao" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalAlterarObservacao">
+					<div style="margin-bottom:16px;">
+						<label style="font-weight:600;font-size:13px;color:#37474f;display:block;margin-bottom:8px;">
+							<i class="fa fa-pencil-square-o" style="margin-right:6px;color:#1565C0;"></i>
+							Observação
+						</label>
+						<p:inputText style="width:100%;border-radius:8px;"
+							value="#{fechamentoMesMB.fechamentoMesSelecionado.observacao}" />
+					</div>
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								oncomplete="PF('dlgAlterarObservacao').hide()"
+								actionListener="#{fechamentoMesMB.salvarFechamento()}"
+								update=":dlgInformacao :frmModalTodosFaturamentos" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: CONFIRMAR FECHAMENTO ═══ -->
+			<p:dialog header="Confirmar Fechamento"
+				widgetVar="dlgConfirmarFechamento" modal="true" responsive="true"
+				width="65%" closable="true" closeOnEscape="true" resizable="false"
+				draggable="false">
+				<h:form id="frmModalConfirmarFechamento">
+					<p:dataTable var="list"
+						value="#{fechamentoMesMB.informacaoesFinanceirasSelecionadas}"
+						style="margin-bottom:0" rows="5" paginator="true"
+						paginatorPosition="bottom"
+						emptyMessage="Nenhum Contrato Selecionado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+						<p:ajax event="filter" global="false" />
+						<f:facet name="header">
+							<i class="fa fa-check-square-o" style="margin-right:8px;"></i>
+							Contratos Selecionados para Fechamento do Mês
+						</f:facet>
+						<p:column headerText="Cliente"
+							filterBy="#{list.cliente.nomeRazaoSocial}"
+							sortBy="#{list.cliente.nomeRazaoSocial}"
+							filterMatchMode="contains">
+							<h:outputText value="#{list.cliente.nomeRazaoSocial}" />
+						</p:column>
+						<p:column headerText="Pontos de Coleta" filterMatchMode="contains"
+							filterBy="#{list.listaItensInformacoesFinanceiraPontoColetaString}"
+							style="white-space:normal !important;">
+							<h:outputText escape="false"
+								value="#{list.listaItensInformacoesFinanceiraPontoColetaString}" />
+						</p:column>
+					</p:dataTable>
+
+					<div class="gf-modal-footer">
+						<span class="btn-success-modern">
+							<p:commandButton icon="fa fa-check"
+								value="  CONFIRMAR Fechamento dos Selecionados"
+								update=":frmTabela, :dlgInformacao"
+								actionListener="#{fechamentoMesMB.fazerFechamentoMes('selecionados', null)}">
+								<p:confirm header="Confirmação"
+									message="Tem certeza que deseja fazer o fechamento deste MÊS/ANO?" />
+							</p:commandButton>
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: SELECIONAR PERÍODOS ═══ -->
+			<p:dialog header="Selecionar Períodos para Certificado"
+				widgetVar="dlgSelecionarPeriodos" modal="true" responsive="true"
+				width="90%" id="dlgSelecionarPeriodos" closable="true"
+				closeOnEscape="true" resizable="false" height="500"
+				draggable="false">
+				<h:form id="formSelecionarPeriodos">
+
+					<!-- Período Inicial -->
+					<div class="periodo-filter">
+						<i class="fa fa-arrow-right" style="color:#1565C0;"></i>
+						<label>Mês Inicial:</label>
+						<p:selectOneMenu style="width:140px"
+							value="#{fechamentoMesMB.certificadoPeriodo.mesInicial}">
+							<f:selectItem itemLabel="Janeiro" itemValue="1" />
+							<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+							<f:selectItem itemLabel="Março" itemValue="3" />
+							<f:selectItem itemLabel="Abril" itemValue="4" />
+							<f:selectItem itemLabel="Maio" itemValue="5" />
+							<f:selectItem itemLabel="Junho" itemValue="6" />
+							<f:selectItem itemLabel="Julho" itemValue="7" />
+							<f:selectItem itemLabel="Agosto" itemValue="8" />
+							<f:selectItem itemLabel="Setembro" itemValue="9" />
+							<f:selectItem itemLabel="Outubro" itemValue="10" />
+							<f:selectItem itemLabel="Novembro" itemValue="11" />
+							<f:selectItem itemLabel="Dezembro" itemValue="12" />
+						</p:selectOneMenu>
+						<label>Ano Inicial:</label>
+						<p:selectOneMenu style="width:130px"
+							value="#{fechamentoMesMB.certificadoPeriodo.anoInicial}">
+							<f:selectItem itemLabel="2015" itemValue="2015" />
+							<f:selectItem itemLabel="2016" itemValue="2016" />
+							<f:selectItem itemLabel="2017" itemValue="2017" />
+							<f:selectItem itemLabel="2018" itemValue="2018" />
+							<f:selectItem itemLabel="2019" itemValue="2019" />
+							<f:selectItem itemLabel="2020" itemValue="2020" />
+							<f:selectItem itemLabel="2021" itemValue="2021" />
+							<f:selectItem itemLabel="2022" itemValue="2022" />
+							<f:selectItem itemLabel="2023" itemValue="2023" />
+							<f:selectItem itemLabel="2024" itemValue="2024" />
+							<f:selectItem itemLabel="2025" itemValue="2025" />
+							<f:selectItem itemLabel="2026" itemValue="2026" />
+							<f:selectItem itemLabel="2027" itemValue="2027" />
+							<f:selectItem itemLabel="2028" itemValue="2028" />
+							<f:selectItem itemLabel="2029" itemValue="2029" />
+							<f:selectItem itemLabel="2030" itemValue="2030" />
+						</p:selectOneMenu>
+					</div>
+
+					<!-- Período Final -->
+					<div class="periodo-filter">
+						<i class="fa fa-arrow-left" style="color:#E65100;"></i>
+						<label>Mês Final:</label>
+						<p:selectOneMenu style="width:140px"
+							value="#{fechamentoMesMB.certificadoPeriodo.mesFinal}">
+							<f:selectItem itemLabel="Janeiro" itemValue="1" />
+							<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+							<f:selectItem itemLabel="Março" itemValue="3" />
+							<f:selectItem itemLabel="Abril" itemValue="4" />
+							<f:selectItem itemLabel="Maio" itemValue="5" />
+							<f:selectItem itemLabel="Junho" itemValue="6" />
+							<f:selectItem itemLabel="Julho" itemValue="7" />
+							<f:selectItem itemLabel="Agosto" itemValue="8" />
+							<f:selectItem itemLabel="Setembro" itemValue="9" />
+							<f:selectItem itemLabel="Outubro" itemValue="10" />
+							<f:selectItem itemLabel="Novembro" itemValue="11" />
+							<f:selectItem itemLabel="Dezembro" itemValue="12" />
+						</p:selectOneMenu>
+						<label>Ano Final:</label>
+						<p:selectOneMenu style="width:130px"
+							value="#{fechamentoMesMB.certificadoPeriodo.anoFinal}">
+							<f:selectItem itemLabel="2015" itemValue="2015" />
+							<f:selectItem itemLabel="2016" itemValue="2016" />
+							<f:selectItem itemLabel="2017" itemValue="2017" />
+							<f:selectItem itemLabel="2018" itemValue="2018" />
+							<f:selectItem itemLabel="2019" itemValue="2019" />
+							<f:selectItem itemLabel="2020" itemValue="2020" />
+							<f:selectItem itemLabel="2021" itemValue="2021" />
+							<f:selectItem itemLabel="2022" itemValue="2022" />
+							<f:selectItem itemLabel="2023" itemValue="2023" />
+							<f:selectItem itemLabel="2024" itemValue="2024" />
+							<f:selectItem itemLabel="2025" itemValue="2025" />
+							<f:selectItem itemLabel="2026" itemValue="2026" />
+							<f:selectItem itemLabel="2027" itemValue="2027" />
+							<f:selectItem itemLabel="2028" itemValue="2028" />
+							<f:selectItem itemLabel="2029" itemValue="2029" />
+							<f:selectItem itemLabel="2030" itemValue="2030" />
+						</p:selectOneMenu>
+					</div>
+
+					<div style="margin-top:16px;">
+						<p:dataTable id="tabela"
+							value="#{fechamentoMesMB.listaPontosColeta}"
+							resizableColumns="true" reflow="true" var="list" rows="10"
+							paginator="true" paginatorPosition="bottom"
+							emptyMessage="Nenhum Ponto de Coleta Cadastrado"
+							rowsPerPageTemplate="10,15,30,50,100">
+							<p:ajax event="filter" global="false" />
+
+							<p:column headerText="Cliente"
+								style="white-space:normal !important;"
+								filterBy="#{list.cliente.nomeRazaoSocialNomeFantasia}"
+								sortBy="#{list.cliente.nomeRazaoSocialNomeFantasia}"
+								filterMatchMode="contains">
+								<h:outputText
+									value="#{list.cliente.nomeRazaoSocialNomeFantasia}" />
+							</p:column>
+
+							<p:column headerText="Nome/Razão"
+								style="white-space:normal !important;"
+								filterBy="#{list.nomeRazaoSocialNomeFantasia}"
+								sortBy="#{list.nomeRazaoSocialNomeFantasia}"
+								filterMatchMode="contains">
+								<h:outputText
+									value="#{list.nomeRazaoSocialNomeFantasiaEndereco}" />
+							</p:column>
+
+							<p:column headerText="Ações" width="180">
+								<span class="btn-purple-modern">
+									<p:commandButton value="  Certificado Período"
+										icon="fa fa-certificate"
+										onclick="this.form.target='_blank'"
+										action="#{fechamentoMesMB.gerarCertificadoPeriodo(list)}"
+										ajax="false" />
+								</span>
+							</p:column>
+						</p:dataTable>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>
+

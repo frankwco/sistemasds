@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-file-text-o" style="margin-right:10px;"></i>Tipos de Documento</h2>
+					<p>Cadastre os tipos de documento exigidos de veículos e motoristas</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{tipoDocumentoMB.criarNovoObjeto()}"
+							onclick="PF('dlgTipoDocumento').show(); PF('dlgTipoDocumento').content.scrollTop('0')"
+							title="Cadastrar Tipo de Documento" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela" value="#{tipoDocumentoMB.listTipoDocumento}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhum tipo de documento cadastrado"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Nome" filterBy="#{list.nome}"
+							sortBy="#{list.nome}" filterMatchMode="contains">
+							<h:outputText value="#{list.nome}" />
+						</p:column>
+
+						<p:column headerText="Aplicável a" filterBy="#{list.aplicavelA}"
+							sortBy="#{list.aplicavelA}" filterMatchMode="contains">
+							<h:outputText value="#{list.aplicavelA}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgTipoDocumento').show();"
+										actionListener="#{tipoDocumentoMB.preencherLista(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{tipoDocumentoMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Tipo de Documento" widgetVar="dlgTipoDocumento" modal="true"
+				responsive="true" width="60%" id="dlgTipoDocumento" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div class="gf-form-group" style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label><i class="fa fa-tag" style="margin-right:6px;color:#1565C0;"></i>Nome *</label>
+							<p:inputText style="width:100%" required="true"
+								requiredMessage="Nome é obrigatório"
+								title="Nome" value="#{tipoDocumentoMB.tipoDocumento.nome}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Aplicável a *</label>
+							<p:selectOneMenu style="width:100%" required="true"
+								requiredMessage="Selecione a que o documento é aplicável"
+								value="#{tipoDocumentoMB.tipoDocumento.aplicavelA}">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="Veículo" itemValue="Veiculo" />
+								<f:selectItem itemLabel="Motorista" itemValue="Motorista" />
+								<f:selectItem itemLabel="Ambos" itemValue="Ambos" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{tipoDocumentoMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgTipoDocumento').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

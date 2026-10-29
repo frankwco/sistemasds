@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-sliders" style="margin-right:10px;"></i>Configurações de Ajustes de Valores</h2>
+					<p>Configure os percentuais de ajuste aplicados aos valores de cobrança</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Novo registro ═══ -->
+			<div class="gf-card">
+				<h:form id="frmCadastrar">
+					<span class="gf-new-btn">
+						<p:commandButton value="  Cadastrar" icon="fa fa-plus"
+							update=":frmModalSalvar"
+							actionListener="#{configuracaoAjustesMB.criarNovoObjeto()}"
+							onclick="PF('dlgConfiguracaoAjustes').show(); PF('dlgConfiguracaoAjustes').content.scrollTop('0')"
+							title="Cadastrar Configuração de Ajustes" />
+					</span>
+				</h:form>
+			</div>
+
+			<!-- ═══ CARD: Tabela ═══ -->
+			<div class="gf-card">
+				<h:form id="frmTabela">
+					<p:dataTable id="tabela"
+						value="#{configuracaoAjustesMB.listaConfiguracaoAjustes}"
+						resizableColumns="true" reflow="true" var="list" rows="10"
+						paginator="true" paginatorPosition="bottom"
+						emptyMessage="Nenhuma configuração cadastrada"
+						rowsPerPageTemplate="5,10,15,30,50,100">
+
+						<p:column headerText="Descrição" filterBy="#{list.descricao}"
+							sortBy="#{list.descricao}" filterMatchMode="contains">
+							<h:outputText value="#{list.descricao}" />
+						</p:column>
+
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil"
+										update=":frmModalSalvar" title="Alterar"
+										oncomplete="PF('dlgConfiguracaoAjustes').show();"
+										actionListener="#{configuracaoAjustesMB.preencherListaEstado(list)}" />
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o"
+										actionListener="#{configuracaoAjustesMB.inativar(list)}" title="Excluir"
+										update=":frmTabela :dlgInformacao" alt="Excluir">
+										<p:confirm header="Confirmação" message="Deseja excluir?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</div>
+
+			<!-- ═══ DIALOG: Cadastrar/Editar ═══ -->
+			<p:dialog header="Configuração de Ajustes Financeiros"
+				widgetVar="dlgConfiguracaoAjustes" modal="true" responsive="true"
+				width="60%" id="dlgConfiguracaoAjustes" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmModalSalvar">
+					<div style="flex-direction:column;">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-tag" style="margin-right:6px;color:#1565C0;"></i>Descrição *</label>
+								<p:inputText style="width:100%" onkeyup="value=value.toUpperCase()"
+									required="true" requiredMessage="Descrição é obrigatória"
+									title="Descrição" value="#{configuracaoAjustesMB.configuracaoAjustes.descricao}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Cadastro *</label>
+								<p:calendar style="width:100%" required="true"
+									requiredMessage="Data de Cadastro é obrigatória"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.dataCadastro}"
+									mask="99/99/9999" pattern="dd/MM/yyyy" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-percent" style="margin-right:6px;color:#1565C0;"></i>Porcentagem da Mensalidade</label>
+								<p:inputNumber style="width:100%" decimalPlaces="2" thousandSeparator="."
+									decimalSeparator=","
+									title="Porcentagem de Acréscimo na Mensalidade"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.porcentagemValorFixo}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-percent" style="margin-right:6px;color:#1565C0;"></i>Porcentagem Excedente Valor Fixo</label>
+								<p:inputNumber style="width:100%" decimalPlaces="2" thousandSeparator="."
+									decimalSeparator=","
+									title="Porcentagem de Acréscimo no Excedente do Valor Fixo"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.porcentagemExcedente}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-percent" style="margin-right:6px;color:#1565C0;"></i>Porcentagem Valor Quilo</label>
+								<p:inputNumber style="width:100%" decimalPlaces="2" thousandSeparator="."
+									decimalSeparator=","
+									title="Porcentagem cobrada quando o valor é por quilo"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.porcentagemValorQuilo}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-percent" style="margin-right:6px;color:#1565C0;"></i>Porcentagem Valor Quilo Cobrado Parte</label>
+								<p:inputNumber style="width:100%" decimalPlaces="2" thousandSeparator="."
+									decimalSeparator=","
+									title="Porcentagem cobrada por quilo quando cobrado por parte"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.porcentagemQuiloGrupoParte}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-toggle-on" style="margin-right:6px;color:#1565C0;"></i>Situação *</label>
+								<p:selectOneMenu style="width:100%" required="true"
+									requiredMessage="Selecione a Situação" dropdown="true"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.situacao}"
+									panelStyle="width:180px" effect="fade">
+									<f:selectItem itemLabel="Ativo" itemValue="Ativo" />
+									<f:selectItem itemLabel="Inativo" itemValue="Inativo" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar-times-o" style="margin-right:6px;color:#1565C0;"></i>Data da Inativação</label>
+								<p:calendar style="width:100%"
+									value="#{configuracaoAjustesMB.configuracaoAjustes.dataInativacao}"
+									mask="99/99/9999" pattern="dd/MM/yyyy" />
+							</div>
+						</div>
+					</div>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar" icon="fa fa-save"
+								actionListener="#{configuracaoAjustesMB.salvar()}"
+								update=":dlgInformacao :frmTabela" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Cancelar" icon="fa fa-times"
+								onclick="PF('dlgConfiguracaoAjustes').hide();" alt="Cancelar" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

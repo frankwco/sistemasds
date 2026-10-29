@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<style type="text/css">
+			.btn-circle {
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+				padding: 0;
+				font-size: 18px;
+				line-height: 1;
+			}
+			.gf-pulsando {
+				animation: gfPulsar 1.2s infinite;
+			}
+			@keyframes gfPulsar {
+				0% { opacity: 1; }
+				50% { opacity: 0.4; }
+				100% { opacity: 1; }
+			}
+
+			/* ═══ Chat estilo WhatsApp (Captura por IA) ═══ */
+			.gf-chat {
+				display: flex;
+				flex-direction: column;
+				background: #e9e3da;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+			.gf-chat-mensagens {
+				min-height: 160px;
+				max-height: 380px;
+				overflow-y: auto;
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			.gf-chat-vazio {
+				margin: auto;
+				color: #888;
+				font-style: italic;
+				text-align: center;
+				padding: 0 20px;
+			}
+			.gf-bolha {
+				max-width: 75%;
+				padding: 8px 12px;
+				border-radius: 10px;
+				font-size: 14px;
+				line-height: 1.4;
+				box-shadow: 0 1px 1px rgba(0,0,0,.08);
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.gf-bolha-enviada {
+				align-self: flex-end;
+				background: #dcf8c6;
+				border-bottom-right-radius: 2px;
+			}
+			.gf-bolha-recebida {
+				align-self: flex-start;
+				background: #fff;
+				border-bottom-left-radius: 2px;
+			}
+			.gf-bolha-pendente {
+				opacity: .75;
+				border: 1px dashed #7cb342;
+			}
+			.gf-bolha-pendente-acao {
+				margin-top: 4px;
+				text-align: right;
+				font-size: 12px;
+			}
+			.gf-bolha-status {
+				font-style: italic;
+				color: #666;
+			}
+			.gf-chat-compor {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 10px;
+				background: #f4f4f4;
+				border-top: 1px solid #ddd;
+			}
+			.gf-chat-input {
+				flex: 1;
+				border-radius: 20px;
+				border: 1px solid #ccc;
+				padding: 9px 14px;
+				resize: none;
+				font-size: 14px;
+				max-height: 80px;
+				overflow-y: auto;
+			}
+			.gf-chat-enviar {
+				width: 42px;
+				height: 42px;
+				min-width: 42px;
+				border-radius: 50%;
+				background: #2e7d32;
+				color: #fff;
+				border: none;
+			}
+			.gf-chat-status {
+				display: block;
+				padding: 0 10px 6px;
+				font-style: italic;
+				color: #666;
+				font-size: 12px;
+			}
+			.gf-chat-ajuda {
+				display: block;
+				padding: 0 10px 10px;
+			}
+			.gf-anexo-wrapper {
+				display: flex;
+			}
+			.gf-anexo-wrapper .ui-fileupload-content {
+				display: none;
+			}
+			.gf-anexo-wrapper .ui-fileupload-buttonbar {
+				background: transparent;
+				border: none;
+				padding: 0;
+			}
+			.gf-anexo-wrapper .ui-fileupload-upload,
+			.gf-anexo-wrapper .ui-fileupload-cancel {
+				display: none;
+			}
+			.gf-anexo-wrapper .ui-fileupload-choose {
+				width: 42px;
+				height: 42px;
+				min-width: 42px;
+				border-radius: 50%;
+				padding: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+			}
+			.gf-anexo-wrapper .ui-fileupload-choose .ui-button-text,
+			.gf-anexo-wrapper .ui-fileupload-choose .ui-icon {
+				display: none;
+			}
+			.gf-anexo-wrapper .ui-fileupload-choose:before {
+				font-family: FontAwesome;
+				content: "\f0c6";
+				font-size: 18px;
+				color: #555;
+				line-height: 1;
+			}
+		</style>
+
+		<p:ajaxStatus onstart="gfIniciarRotacaoLoading(); PF('statusDialog').show()"
+			onsuccess="gfPararRotacaoLoading(); PF('statusDialog').hide()" />
+		<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+			resizable="false" showHeader="false" styleClass="gf-loading-dialog">
+			<span id="gfLoadingTexto" class="gf-loading-text">Aguarde...</span>
+			<p:graphicImage name="img/aguarde.gif" />
+		</p:dialog>
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-magic" style="margin-right:10px;"></i>Captura por IA</h2>
+					<p>Anexe uma foto ou PDF e/ou fale ou digite um complemento — a IA extrai os campos pra você conferir</p>
+				</div>
+			</div>
+
+			<!-- ═══ CARD: Enviar para IA (estilo chat) ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-comments icon-green"></i>
+					<div>
+						<h4>Enviar para IA</h4>
+						<small>Anexe uma foto ou PDF e/ou fale ou digite algo, depois toque em enviar</small>
+					</div>
+				</div>
+				<h:form id="frmUpload" enctype="multipart/form-data">
+					<div class="gf-chat">
+						<div class="gf-chat-mensagens" id="gfChatMensagens">
+							<div class="gf-chat-vazio" id="gfChatVazio">Anexe uma foto ou PDF e/ou fale ou digite algo pra começar</div>
+						</div>
+
+						<span id="gfStatusFala" class="gf-chat-status"></span>
+						<small class="gf-chat-ajuda">Transcrição ao vivo do navegador — só funciona no Chrome/Edge, e só em `localhost` ou endereço com HTTPS.</small>
+
+						<div class="gf-chat-compor">
+							<span id="gfAnexoWrapper" class="gf-anexo-wrapper" title="Anexar foto ou PDF do cupom fiscal, nota ou anotação">
+								<p:fileUpload fileUploadListener="#{capturaIaMB.anexarFoto}" mode="advanced"
+									auto="true" dragDropSupport="false" update=":frmUpload:pnlFoto :dlgInformacao"
+									allowTypes="/(\.|\/)(jpe?g|png|pdf)$/" oncomplete="gfAoAnexarFoto();"
+									label="Anexar foto ou PDF" uploadLabel="Enviar" cancelLabel="Cancelar"
+									invalidFileMessage="Formato não reconhecido — envie uma imagem (JPG/PNG) ou um PDF" />
+							</span>
+
+							<button type="button" id="gfBtnFalar" class="btn btn-primary btn-circle"
+								onclick="gfAlternarReconhecimento();" title="Clique para falar, clique de novo para parar">
+								<i id="gfIconeFala" class="fa fa-microphone"></i>
+							</button>
+
+							<textarea id="gfChatInput" class="gf-chat-input" rows="1"
+								placeholder="Digite ou fale uma mensagem..."></textarea>
+
+							<button type="button" class="gf-chat-enviar" onclick="gfEnviarCaptura();" title="Enviar pra IA">
+								<i class="fa fa-paper-plane"></i>
+							</button>
+						</div>
+
+						<p:outputPanel id="pnlFoto">
+							<!-- input HTML puro (não é componente JSF) só pra JS ler o nome do
+							     arquivo anexado, sem cair na fase de "update model" do formulário -->
+							<input type="hidden" id="gfFotoAnexada" value="#{capturaIaMB.fotoNomeArquivo}" />
+						</p:outputPanel>
+						<h:inputHidden id="transcricaoHidden" value="#{capturaIaMB.transcricaoTexto}" />
+						<p:remoteCommand name="gfEnviarCapturaRemoto"
+							actionListener="#{capturaIaMB.processarCaptura()}"
+							update=":dlgRevisao :dlgInformacao :frmUpload:pnlFoto" oncomplete="gfAoConcluirCaptura();" />
+						<p:remoteCommand name="gfRemoverFotoRemoto"
+							actionListener="#{capturaIaMB.removerFoto()}" update=":frmUpload:pnlFoto" />
+					</div>
+				</h:form>
+
+				<h:outputScript>
+					window.gfRecognition = null;
+					window.gfEscutando = false;
+					window.gfTranscricaoFinal = '';
+
+					// mensagens que vão se revezando enquanto espera a IA responder —
+					// áudio/foto podem demorar dezenas de segundos, e sem isso o
+					// usuário acha que travou
+					window.gfMensagensProcessandoIA = ['Analisando com IA...', 'Processando...',
+						'Interpretando os dados...', 'Quase lá...'];
+					window.gfIntervaloLoading = null;
+
+					// recebe um elemento (ou null) e devolve o id do interval, pra quem
+					// chamou poder pará-lo depois
+					function gfIniciarRotacaoMensagens(elemento) {
+						if (!elemento) { return null; }
+						var indice = 0;
+						return setInterval(function() {
+							indice = (indice + 1) % window.gfMensagensProcessandoIA.length;
+							elemento.textContent = window.gfMensagensProcessandoIA[indice];
+						}, 2500);
+					}
+
+					function gfIniciarRotacaoLoading() {
+						gfPararRotacaoLoading();
+						window.gfIntervaloLoading = gfIniciarRotacaoMensagens(document.getElementById('gfLoadingTexto'));
+					}
+
+					function gfPararRotacaoLoading() {
+						if (window.gfIntervaloLoading) {
+							clearInterval(window.gfIntervaloLoading);
+							window.gfIntervaloLoading = null;
+						}
+					}
+
+					function gfChatLimparVazio() {
+						var vazio = document.getElementById('gfChatVazio');
+						if (vazio) { vazio.remove(); }
+					}
+
+					function gfChatRolarParaFim() {
+						var lista = document.getElementById('gfChatMensagens');
+						lista.scrollTop = lista.scrollHeight;
+					}
+
+					// monta uma bolha vazia no DOM (o conteúdo é preenchido por quem
+					// chama, sempre via createElement/textContent — nunca innerHTML com
+					// texto do usuário, pra não abrir brecha de XSS num nome de arquivo
+					// ou numa transcrição de voz maliciosa)
+					function gfNovaBolha(classes, id) {
+						gfChatLimparVazio();
+						var div = document.createElement('div');
+						div.className = 'gf-bolha ' + classes;
+						if (id) { div.id = id; }
+						document.getElementById('gfChatMensagens').appendChild(div);
+						gfChatRolarParaFim();
+						return div;
+					}
+
+					function gfAdicionarIcone(elemento, classes) {
+						var i = document.createElement('i');
+						i.className = classes;
+						elemento.appendChild(i);
+						elemento.appendChild(document.createTextNode(' '));
+					}
+
+					function gfAdicionarTexto(elemento, texto) {
+						elemento.appendChild(document.createTextNode(texto));
+					}
+
+					function gfIconeParaArquivo(nome) {
+						return nome &amp;&amp; nome.toLowerCase().endsWith('.pdf') ? 'fa fa-file-pdf-o' : 'fa fa-image';
+					}
+
+					// um botão só, alternando entre ligar/desligar o microfone — não
+					// existe mais um clique separado pra "parar", é sempre o mesmo ícone
+					function gfAlternarReconhecimento() {
+						if (window.gfEscutando) {
+							gfPararReconhecimento();
+						} else {
+							gfIniciarReconhecimento();
+						}
+					}
+
+					function gfIniciarReconhecimento() {
+						console.log('[capturaIA] gfIniciarReconhecimento chamado');
+						var SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+						if (!SpeechRecognitionImpl) {
+							alert('Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.');
+							return;
+						}
+
+						window.gfTranscricaoFinal = document.getElementById('gfChatInput').value.trim();
+						if (window.gfTranscricaoFinal.length > 0) {
+							window.gfTranscricaoFinal += ' ';
+						}
+
+						window.gfRecognition = new SpeechRecognitionImpl();
+						window.gfRecognition.lang = 'pt-BR';
+						window.gfRecognition.continuous = true;
+						window.gfRecognition.interimResults = true;
+
+						window.gfRecognition.onresult = function(evento) {
+							var textoIntermediario = '';
+							for (var i = evento.resultIndex; i &lt; evento.results.length; i++) {
+								var trecho = evento.results[i][0].transcript;
+								if (evento.results[i].isFinal) {
+									window.gfTranscricaoFinal += trecho + ' ';
+								} else {
+									textoIntermediario += trecho;
+								}
+							}
+							document.getElementById('gfChatInput').value = window.gfTranscricaoFinal + textoIntermediario;
+						};
+
+						window.gfRecognition.onerror = function(erro) {
+							console.log('[capturaIA] erro no reconhecimento de voz:', erro);
+							if (erro.error === 'no-speech' || erro.error === 'aborted') { return; }
+							alert('Erro no reconhecimento de voz: ' + erro.error);
+						};
+
+						// o navegador às vezes encerra sozinho (limite de tempo), mesmo com
+						// continuous=true — o usuário decide quando enviar pra IA, então
+						// aqui só deixamos o botão pronto pra ligar de novo se precisar
+						window.gfRecognition.onend = function() {
+							window.gfEscutando = false;
+							gfAtualizarBotaoFala(false);
+							document.getElementById('gfStatusFala').innerText = '';
+						};
+
+						window.gfRecognition.start();
+						window.gfEscutando = true;
+						gfAtualizarBotaoFala(true);
+						document.getElementById('gfStatusFala').innerText = 'Ouvindo...';
+					}
+
+					function gfPararReconhecimento() {
+						console.log('[capturaIA] gfPararReconhecimento chamado');
+						if (window.gfRecognition) {
+							window.gfRecognition.stop();
+						}
+					}
+
+					function gfAtualizarBotaoFala(escutando) {
+						var botao = document.getElementById('gfBtnFalar');
+						var icone = document.getElementById('gfIconeFala');
+						if (escutando) {
+							botao.classList.remove('btn-primary');
+							botao.classList.add('btn-danger');
+							icone.className = 'fa fa-microphone gf-pulsando';
+						} else {
+							botao.classList.remove('btn-danger');
+							botao.classList.add('btn-primary');
+							icone.className = 'fa fa-microphone';
+						}
+					}
+
+					// callback do p:fileUpload — o upload em si já aconteceu (auto="true");
+					// aqui só criamos/atualizamos a bolha "pendente" mostrando o que foi
+					// anexado, com um link pra remover antes de enviar
+					function gfAoAnexarFoto() {
+						var nome = document.getElementById('gfFotoAnexada').value;
+						if (!nome) { return; }
+						var bolha = document.getElementById('gfBolhaFotoPendente');
+						if (!bolha) {
+							bolha = gfNovaBolha('gf-bolha-enviada gf-bolha-pendente', 'gfBolhaFotoPendente');
+						} else {
+							bolha.innerHTML = '';
+						}
+						gfAdicionarIcone(bolha, gfIconeParaArquivo(nome));
+						gfAdicionarTexto(bolha, nome);
+
+						var linha = document.createElement('div');
+						linha.className = 'gf-bolha-pendente-acao';
+						var link = document.createElement('a');
+						link.href = '#';
+						link.textContent = 'Remover';
+						link.onclick = function(evento) { evento.preventDefault(); gfRemoverFotoAnexada(); };
+						linha.appendChild(link);
+						bolha.appendChild(linha);
+						gfChatRolarParaFim();
+					}
+
+					function gfRemoverFotoAnexada() {
+						var bolha = document.getElementById('gfBolhaFotoPendente');
+						if (bolha) { bolha.remove(); }
+						gfRemoverFotoRemoto();
+					}
+
+					// envia foto (se anexada) e/ou o texto do campo (já editado pelo
+					// usuário, se ele tiver corrigido algo) — pelo menos um dos dois
+					// precisa estar preenchido, o resto é decidido no backend
+					function gfEnviarCaptura() {
+						var texto = document.getElementById('gfChatInput').value.trim();
+						var fotoNome = document.getElementById('gfFotoAnexada').value;
+						if (texto.length === 0 &amp;&amp; !fotoNome) {
+							alert('Anexe uma foto/PDF ou fale/digite algo antes de enviar.');
+							return;
+						}
+						if (window.gfEscutando) {
+							gfPararReconhecimento();
+						}
+
+						var bolhaFoto = document.getElementById('gfBolhaFotoPendente');
+						if (bolhaFoto) {
+							bolhaFoto.removeAttribute('id');
+							bolhaFoto.classList.remove('gf-bolha-pendente');
+							bolhaFoto.innerHTML = '';
+							gfAdicionarIcone(bolhaFoto, gfIconeParaArquivo(fotoNome));
+							gfAdicionarTexto(bolhaFoto, fotoNome);
+						}
+						if (texto.length > 0) {
+							var bolhaTexto = gfNovaBolha('gf-bolha-enviada', null);
+							gfAdicionarTexto(bolhaTexto, texto);
+						}
+						var bolhaStatus = gfNovaBolha('gf-bolha-recebida gf-bolha-status', 'gfBolhaAnalisando');
+						gfAdicionarTexto(bolhaStatus, window.gfMensagensProcessandoIA[0]);
+						window.gfIntervaloBolhaAnalisando = gfIniciarRotacaoMensagens(bolhaStatus);
+
+						document.getElementById('gfChatInput').value = '';
+						document.getElementById('frmUpload:transcricaoHidden').value = texto;
+						gfEnviarCapturaRemoto();
+					}
+
+					// Confirmar/Descartar não re-renderizam o dialog inteiro (só o
+					// pnlEstadoRevisao, um par de inputs hidden) — quem decide se o
+					// dialog abre/fecha depois de um desses cliques é este JS, lendo
+					// o hidden #gfRevisando que acabou de ser atualizado. Widget já
+					// existe (foi criado quando a IA extraiu os dados a primeira
+					// vez), então isVisible()/show()/hide() sempre têm o que chamar.
+					function gfSincronizarDialogRevisao() {
+						var flag = document.getElementById('gfRevisando');
+						var deveEstarAberto = flag &amp;&amp; flag.value === 'true';
+						var dialog = PF('dlgRevisao');
+						if (!dialog) { return; }
+						if (deveEstarAberto &amp;&amp; !dialog.isVisible()) {
+							dialog.show();
+						} else if (!deveEstarAberto &amp;&amp; dialog.isVisible()) {
+							dialog.hide();
+						}
+					}
+
+					// chamado no oncomplete do botão "Confirmar e Salvar" — se o
+					// backend gravou com sucesso, ultimoTipoSalvo vem preenchido e
+					// mostra uma bolha com link pra tela de listagem certa
+					function gfAoConfirmarSalvar() {
+						var tipo = document.getElementById('gfUltimoTipoSalvo').value;
+						if (!tipo) { return; }
+
+						var bolha = gfNovaBolha('gf-bolha-recebida', null);
+						gfAdicionarIcone(bolha, 'fa fa-check-circle');
+						gfAdicionarTexto(bolha, 'Lançamento salvo! ');
+
+						var link = document.createElement('a');
+						link.href = tipo === 'Abastecimento' ? 'abastecimentos.jsf' : 'despesasManutencao.jsf';
+						link.textContent = 'Ver registros';
+						bolha.appendChild(link);
+
+						document.getElementById('gfUltimoTipoSalvo').value = '';
+					}
+
+					function gfAoConcluirCaptura() {
+						if (window.gfIntervaloBolhaAnalisando) {
+							clearInterval(window.gfIntervaloBolhaAnalisando);
+							window.gfIntervaloBolhaAnalisando = null;
+						}
+						var bolha = document.getElementById('gfBolhaAnalisando');
+						var flagRevisando = document.getElementById('gfRevisando');
+						var sucesso = flagRevisando &amp;&amp; flagRevisando.value === 'true';
+						if (bolha) {
+							bolha.removeAttribute('id');
+							bolha.classList.remove('gf-bolha-status');
+							bolha.innerHTML = '';
+							gfAdicionarIcone(bolha, sucesso ? 'fa fa-check-circle' : 'fa fa-exclamation-triangle');
+							gfAdicionarTexto(bolha, sucesso ? 'Extraí os dados — confira no formulário'
+								: 'Não consegui extrair os dados dessa vez');
+						}
+						document.getElementById('gfStatusFala').innerText = '';
+					}
+				</h:outputScript>
+			</div>
+
+			<!-- ═══ DIALOG: Revisão (RF14) ═══ -->
+			<!-- "visible" ligado ao bean só resolve a ABERTURA inicial (quando
+			     gfEnviarCapturaRemoto atualiza :dlgRevisao inteiro com os dados
+			     novos da IA). Confirmar/Descartar NÃO incluem :dlgRevisao no update
+			     — só :pnlEstadoRevisao (2 inputs hidden, sem widget nenhum) — e
+			     fecham o dialog via JS (gfSincronizarDialogRevisao, chamando
+			     PF('dlgRevisao').hide() direto). Isso evita destruir/recriar os
+			     widgets ricos (autoComplete/inputNumber/selectOneMenu) a cada
+			     tentativa de Confirmar — inclusive nas que falham por campo
+			     obrigatório vazio — que é o que causava campos "travados" (dava
+			     pra digitar mas não aparecia, e ainda assim o valor ia no próximo
+			     submit) depois de uma validação falhar. -->
+			<p:dialog header="Confira antes de salvar" widgetVar="dlgRevisao" modal="true"
+				visible="#{capturaIaMB.revisando}" responsive="true" width="70%" height="640"
+				id="dlgRevisao" closable="true" closeOnEscape="true" resizable="false" draggable="false"
+				onHide="gfDescartarSilencioso();">
+				<p:outputPanel id="pnlEstadoRevisao">
+					<input type="hidden" id="gfRevisando" value="#{capturaIaMB.revisando}" />
+					<input type="hidden" id="gfUltimoTipoSalvo" value="#{capturaIaMB.ultimoTipoSalvo}" />
+				</p:outputPanel>
+				<small style="display:block;margin-bottom:12px;">A IA preencheu os campos abaixo — corrija o que precisar antes de confirmar</small>
+
+				<h:panelGroup layout="block" styleClass="gf-alert warning" style="margin-bottom:16px;"
+					rendered="#{not empty capturaIaMB.avisoDuplicidade}">
+					<i class="fa fa-exclamation-triangle"></i>
+					<div>
+						<strong>Possível lançamento duplicado</strong>
+						<p style="margin:4px 0 0;">#{capturaIaMB.avisoDuplicidade}</p>
+					</div>
+				</h:panelGroup>
+
+				<h:form id="frmRevisao">
+					<div style="flex-direction:column;">
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo *</label>
+								<p:autoComplete style="width:100%" dropdown="true" required="true"
+									requiredMessage="Veículo é obrigatório"
+									value="#{capturaIaMB.lancamento.veiculo}" scrollHeight="170"
+									completeMethod="#{capturaIaMB.completarVeiculo}"
+									forceSelection="true" converter="#{converterVeiculo}" var="cur"
+									itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-id-badge" style="margin-right:6px;color:#1565C0;"></i>Motorista
+									<h:outputText value=" *" rendered="#{capturaIaMB.lancamento.tipo == 'Abastecimento'}" /></label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									required="#{capturaIaMB.lancamento.tipo == 'Abastecimento'}"
+									requiredMessage="Motorista é obrigatório para abastecimento"
+									value="#{capturaIaMB.lancamento.motorista}" scrollHeight="170"
+									completeMethod="#{usuarioMB.completarMotorista}"
+									forceSelection="true" converter="#{converterUsuario}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Tipo *</label>
+								<p:selectOneMenu style="width:100%" value="#{capturaIaMB.lancamento.tipo}">
+									<f:selectItem itemLabel="Abastecimento" itemValue="Abastecimento" />
+									<f:selectItem itemLabel="Despesa" itemValue="Despesa" />
+									<f:selectItem itemLabel="Serviço" itemValue="Serviço" />
+									<p:ajax update=":frmRevisao:pnlAbastecimento :frmRevisao:pnlServico :frmRevisao:pnlCategoria" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data *</label>
+								<p:calendar style="width:100%" required="true"
+									requiredMessage="Data é obrigatória"
+									value="#{capturaIaMB.lancamento.data}" pattern="dd/MM/yyyy" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<!-- p:outputPanel com display:contents (CSS) — não vira ele mesmo
+							     um item do flex; quem vira é o h:panelGroup de dentro, só
+							     quando renderizado. Assim, com Categoria escondida (Abastecimento),
+							     o Fornecedor fica sozinho na linha e cresce pra ocupar tudo
+							     (flex:1 do .gf-form-item já cuida disso sozinho). -->
+							<p:outputPanel id="pnlCategoria" style="display:contents;">
+								<h:panelGroup layout="block" styleClass="gf-form-item"
+									rendered="#{capturaIaMB.lancamento.tipo != 'Abastecimento'}">
+									<label><i class="fa fa-tags" style="margin-right:6px;color:#1565C0;"></i>Categoria</label>
+									<p:autoComplete style="width:100%" dropdown="true"
+										value="#{capturaIaMB.lancamento.categoriaDespesa}" scrollHeight="170"
+										completeMethod="#{capturaIaMB.completarCategoria}"
+										forceSelection="true" converter="#{converterCategoriaDespesa}" var="cur"
+										itemLabel="#{cur.nome}" itemValue="#{cur}" />
+								</h:panelGroup>
+							</p:outputPanel>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-building" style="margin-right:6px;color:#1565C0;"></i>Fornecedor</label>
+								<p:autoComplete style="width:100%" dropdown="true"
+									value="#{capturaIaMB.lancamento.fornecedor}" scrollHeight="170"
+									completeMethod="#{capturaIaMB.completarFornecedor}"
+									forceSelection="true" converter="#{converterFornecedor}" var="cur"
+									itemLabel="#{cur.nome}" itemValue="#{cur}" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-usd" style="margin-right:6px;color:#1565C0;"></i>Valor *</label>
+								<p:inputNumber id="valorInput" style="width:100%" required="true" decimalPlaces="2"
+									requiredMessage="Valor é obrigatório"
+									value="#{capturaIaMB.lancamento.valor}">
+									<p:ajax event="blur" listener="#{capturaIaMB.recalcularAbastecimento()}"
+										update=":frmRevisao:litrosInput :frmRevisao:valorLitroInput" />
+								</p:inputNumber>
+							</div>
+
+							<div class="gf-form-item">
+								<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km do Odômetro
+									<h:outputText value=" *" rendered="#{capturaIaMB.lancamento.tipo == 'Abastecimento'}" /></label>
+								<p:inputNumber style="width:100%" decimalPlaces="0" thousandSeparator="."
+									required="#{capturaIaMB.lancamento.tipo == 'Abastecimento'}"
+									requiredMessage="Km do odômetro é obrigatório para abastecimento"
+									value="#{capturaIaMB.lancamento.km}" />
+							</div>
+						</div>
+
+						<p:outputPanel id="pnlAbastecimento">
+							<h:panelGroup layout="block" styleClass="gf-form-group" rendered="#{capturaIaMB.lancamento.tipo == 'Abastecimento'}">
+								<div class="gf-form-item">
+									<label><i class="fa fa-flask" style="margin-right:6px;color:#1565C0;"></i>Litros *</label>
+									<p:inputNumber id="litrosInput" style="width:100%" decimalPlaces="2"
+										required="true" requiredMessage="Litros é obrigatório"
+										value="#{capturaIaMB.lancamento.litros}">
+										<p:ajax event="blur" listener="#{capturaIaMB.recalcularAbastecimento()}"
+											update=":frmRevisao:valorInput :frmRevisao:valorLitroInput" />
+									</p:inputNumber>
+								</div>
+
+								<div class="gf-form-item">
+									<label><i class="fa fa-usd" style="margin-right:6px;color:#1565C0;"></i>Valor por Litro *</label>
+									<p:inputNumber id="valorLitroInput" style="width:100%" decimalPlaces="3"
+										required="true" requiredMessage="Valor por litro é obrigatório"
+										value="#{capturaIaMB.lancamento.valorLitro}">
+										<p:ajax event="blur" listener="#{capturaIaMB.recalcularAbastecimento()}"
+											update=":frmRevisao:valorInput :frmRevisao:litrosInput" />
+									</p:inputNumber>
+								</div>
+
+								<div class="gf-form-item">
+									<label><i class="fa fa-tint" style="margin-right:6px;color:#1565C0;"></i>Combustível *</label>
+									<p:selectOneMenu style="width:100%" value="#{capturaIaMB.lancamento.combustivel}"
+										required="true" requiredMessage="Combustível é obrigatório">
+										<f:selectItem itemLabel="Selecione" itemValue="" />
+										<f:selectItem itemLabel="Diesel S10" itemValue="Diesel S10" />
+										<f:selectItem itemLabel="Diesel S500" itemValue="Diesel S500" />
+										<f:selectItem itemLabel="Gasolina" itemValue="Gasolina" />
+										<f:selectItem itemLabel="Etanol" itemValue="Etanol" />
+										<f:selectItem itemLabel="GNV" itemValue="GNV" />
+										<f:selectItem itemLabel="Arla 32" itemValue="Arla 32" />
+										<f:selectItem itemLabel="Outro" itemValue="Outro" />
+									</p:selectOneMenu>
+								</div>
+							</h:panelGroup>
+						</p:outputPanel>
+
+						<p:outputPanel id="pnlServico">
+							<h:panelGroup layout="block" styleClass="gf-form-group" rendered="#{capturaIaMB.lancamento.tipo == 'Serviço'}">
+								<div class="gf-form-item">
+									<label><i class="fa fa-wrench" style="margin-right:6px;color:#1565C0;"></i>Tipo de Manutenção</label>
+									<p:selectOneMenu style="width:100%" value="#{capturaIaMB.lancamento.tipoManutencao}">
+										<f:selectItem itemLabel="Selecione" itemValue="" />
+										<f:selectItem itemLabel="Preventiva" itemValue="Preventiva" />
+										<f:selectItem itemLabel="Corretiva" itemValue="Corretiva" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="gf-form-item">
+									<label><i class="fa fa-tachometer" style="margin-right:6px;color:#1565C0;"></i>Km da Próxima Revisão</label>
+									<p:inputNumber style="width:100%" decimalPlaces="0" thousandSeparator="."
+										value="#{capturaIaMB.lancamento.kmProximaRevisao}" />
+								</div>
+							</h:panelGroup>
+						</p:outputPanel>
+
+						<div class="gf-form-item" style="margin-top:16px;">
+							<label><i class="fa fa-comment-o" style="margin-right:6px;color:#1565C0;"></i>Observação</label>
+							<p:inputText style="width:100%" value="#{capturaIaMB.lancamento.observacao}" />
+						</div>
+
+						<div class="gf-alert" style="margin-top:16px;">
+							<strong>
+								<i class="fa fa-#{capturaIaMB.lancamento.origemLancamento == 'IA_Voz' ? 'microphone' : 'camera'}"></i>
+								Extraído por IA (#{capturaIaMB.lancamento.origemLancamento == 'IA_Voz' ? 'áudio' : 'foto'}) —
+								confiança: <h:outputText value="#{capturaIaMB.lancamento.confiancaIA}"><f:convertNumber pattern="#0%" /></h:outputText>
+							</strong>
+							<p style="margin:6px 0 0;white-space:pre-wrap;">#{capturaIaMB.lancamento.textoBrutoIA}</p>
+						</div>
+					</div>
+					<small>Campos obrigatórios *</small>
+
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Confirmar e Salvar" icon="fa fa-save"
+								actionListener="#{capturaIaMB.confirmar()}"
+								update=":dlgInformacao :pnlEstadoRevisao"
+								oncomplete="gfAoConfirmarSalvar(); gfSincronizarDialogRevisao();" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Descartar" icon="fa fa-times"
+								actionListener="#{capturaIaMB.descartar()}"
+								update=":pnlEstadoRevisao" immediate="true"
+								oncomplete="gfSincronizarDialogRevisao();" />
+						</span>
+					</div>
+
+					<!-- immediate="true" é essencial aqui: sem ele, fechar o dialog no X
+					     ou no Esc com um campo obrigatório vazio faria essa chamada
+					     passar pela validação normal do JSF, que falharia de novo (o
+					     formulário continua com o mesmo campo vazio), o
+					     actionListener nunca rodaria, e o dialog reabriria sozinho
+					     assim que a resposta do ajax voltasse com revisando ainda
+					     true — dava a impressão de "o X não fecha o dialog". -->
+					<p:remoteCommand name="gfDescartarSilencioso" immediate="true"
+						actionListener="#{capturaIaMB.descartar()}" update=":pnlEstadoRevisao" />
+				</h:form>
+			</p:dialog>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

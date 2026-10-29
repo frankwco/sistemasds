@@ -1,0 +1,36 @@
+<ion-header class="modal-header">
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-button (click)="voltar()">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Selecionar Veículo</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="select-content">
+
+    <div class="search-hint">
+        <ion-icon name="car-sport-outline"></ion-icon>
+        <span>Toque no veículo desejado para selecioná-lo</span>
+    </div>
+
+    <ion-list class="select-list" lines="none">
+        <ion-item class="select-item" button detail (click)="fechar(item)" *ngFor="let item of veiculos">
+            <div class="item-icon-badge" slot="start">
+                <ion-icon name="car-sport-outline"></ion-icon>
+            </div>
+            <ion-label>
+                <h3>{{ item.descricao }}</h3>
+                <p *ngIf="item.placa">{{ item.placa }}</p>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+
+    <div class="empty-state" *ngIf="veiculos && veiculos.length === 0">
+        <ion-icon name="car-sport-outline"></ion-icon>
+        <p>Nenhum veículo disponível</p>
+    </div>
+
+</ion-content>

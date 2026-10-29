@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+		<script type="text/javascript">
+			// Lê o JSON dos gráficos de #gfChartData (atualizado a cada busca) e
+			// (re)desenha os 4 gráficos. Chamada explícita via oncomplete do ajax
+			// em vez de depender do navegador reexecutar um script embutido no
+			// fragmento trocado — assim funciona igual em qualquer navegador/versão do PF.
+			window.gfRenderPainelVeiculosCharts = function() {
+				if (typeof Chart === 'undefined') { return; }
+				var dataEl = document.getElementById('gfChartData');
+				if (!dataEl) { return; }
+
+				if (window.gfPainelCharts) {
+					Object.keys(window.gfPainelCharts).forEach(function(k) {
+						if (window.gfPainelCharts[k]) { window.gfPainelCharts[k].destroy(); }
+					});
+				}
+				window.gfPainelCharts = {};
+
+				var custoVeiculo = JSON.parse(dataEl.getAttribute('data-custo-veiculo'));
+				var custoPorKm = JSON.parse(dataEl.getAttribute('data-custo-por-km'));
+				var categoria = JSON.parse(dataEl.getAttribute('data-categoria'));
+				var tendencia = JSON.parse(dataEl.getAttribute('data-tendencia'));
+
+				var paletaCategorias = ['#1565C0','#26A69A','#FFA726','#AB47BC','#EF5350','#66BB6A','#42A5F5','#8D6E63'];
+
+				var ctx1 = document.getElementById('chartCustoVeiculo');
+				if (ctx1) {
+					window.gfPainelCharts.custoVeiculo = new Chart(ctx1, {
+						type: 'bar',
+						data: {
+							labels: custoVeiculo.labels,
+							datasets: [{
+								label: 'Custo Total (R$)',
+								data: custoVeiculo.valores,
+								backgroundColor: '#1565C0',
+								borderRadius: 6
+							}]
+						},
+						options: {
+							indexAxis: 'y',
+							maintainAspectRatio: false,
+							plugins: { legend: { display: false } },
+							scales: { x: { beginAtZero: true } }
+						}
+					});
+				}
+
+				var ctx2 = document.getElementById('chartCustoPorKm');
+				if (ctx2) {
+					var media = custoPorKm.valores.length ? custoPorKm.valores.reduce(function(a,b){ return a+b; }, 0) / custoPorKm.valores.length : 0;
+					var cores = custoPorKm.valores.map(function(v) { return v > media ? '#EF5350' : '#66BB6A'; });
+					window.gfPainelCharts.custoPorKm = new Chart(ctx2, {
+						type: 'bar',
+						data: {
+							labels: custoPorKm.labels,
+							datasets: [{
+								label: 'Custo/Km (R$)',
+								data: custoPorKm.valores,
+								backgroundColor: cores,
+								borderRadius: 6
+							}]
+						},
+						options: {
+							indexAxis: 'y',
+							maintainAspectRatio: false,
+							plugins: { legend: { display: false } },
+							scales: { x: { beginAtZero: true } }
+						}
+					});
+				}
+
+				var ctx3 = document.getElementById('chartCategoria');
+				if (ctx3) {
+					window.gfPainelCharts.categoria = new Chart(ctx3, {
+						type: 'doughnut',
+						data: {
+							labels: categoria.labels,
+							datasets: [{
+								data: categoria.valores,
+								backgroundColor: paletaCategorias
+							}]
+						},
+						options: {
+							maintainAspectRatio: false,
+							plugins: { legend: { position: 'bottom' } }
+						}
+					});
+				}
+
+				var ctx4 = document.getElementById('chartTendencia');
+				if (ctx4) {
+					window.gfPainelCharts.tendencia = new Chart(ctx4, {
+						data: {
+							labels: tendencia.labels,
+							datasets: [
+								{
+									type: 'bar',
+									label: 'Custo Total (R$)',
+									data: tendencia.custos,
+									backgroundColor: 'rgba(21,101,192,.55)',
+									borderRadius: 6,
+									yAxisID: 'y'
+								},
+								{
+									type: 'line',
+									label: 'Custo/Km (R$)',
+									data: tendencia.custosPorKm,
+									borderColor: '#EF5350',
+									backgroundColor: '#EF5350',
+									tension: .3,
+									spanGaps: true,
+									yAxisID: 'y1'
+								}
+							]
+						},
+						options: {
+							maintainAspectRatio: false,
+							interaction: { mode: 'index', intersect: false },
+							scales: {
+								y: { beginAtZero: true, position: 'left' },
+								y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+							}
+						}
+					});
+				}
+			};
+		</script>
+
+		<style type="text/css">
+			/* ── Estilos específicos do Painel de Veículos ── */
+
+			.gf-chart-card { overflow: visible; }
+			.gf-chart-canvas-wrap { position: relative; height: 320px; margin-top: 8px; }
+			.gf-chart-canvas-wrap canvas { width: 100% !important; height: 100% !important; }
+
+			.gf-charts-grid {
+				display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+				margin-bottom: 24px;
+			}
+			@media (max-width: 991px) { .gf-charts-grid { grid-template-columns: 1fr; } }
+
+			.gf-leaderboard {
+				display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+				gap: 16px;
+			}
+			.leaderboard-card {
+				background: #fff; border: 1px solid #e8ecef; border-radius: 12px;
+				padding: 16px 18px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+				display: flex; flex-direction: column; gap: 10px;
+			}
+			.leaderboard-head { display: flex; align-items: center; gap: 10px; }
+			.leaderboard-rank {
+				width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+				display: flex; align-items: center; justify-content: center;
+				background: #eceff1; color: #455A64; font-weight: 700; font-size: 13px;
+			}
+			.leaderboard-title { font-weight: 600; font-size: 14px; color: #1a2744; line-height: 1.3; }
+			.leaderboard-metrics {
+				display: flex; justify-content: space-between; font-size: 12px; color: #607d8b;
+			}
+			.leaderboard-metrics strong { display: block; font-size: 15px; color: #263238; }
+			.leaderboard-bar-track {
+				height: 8px; border-radius: 6px; background: #eceff1; overflow: hidden;
+			}
+			.leaderboard-bar-fill { height: 100%; border-radius: 6px; }
+			.leaderboard-bar-fill.leaderboard-good { background: linear-gradient(90deg, #2E7D32, #66BB6A); }
+			.leaderboard-bar-fill.leaderboard-bad  { background: linear-gradient(90deg, #C62828, #EF5350); }
+
+			.gf-preset-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+		</style>
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-dashboard" style="margin-right:10px;"></i>Painel de Veículos</h2>
+					<p>Visão geral da frota: custo, km, alertas de manutenção e comparação entre veículos</p>
+				</div>
+				<i class="fa fa-line-chart hero-icon"></i>
+			</div>
+
+			<!-- ═══ CARD: Filtro ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-filter icon-blue"></i>
+					<div>
+						<h4>Filtro</h4>
+						<small>Por padrão mostra todo o histórico da frota</small>
+					</div>
+				</div>
+
+				<h:form id="frmFiltro">
+
+					<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+					<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+						resizable="false" showHeader="false" styleClass="gf-loading-dialog">
+						<span class="gf-loading-text">Aguarde, calculando indicadores...</span>
+						<p:graphicImage name="img/aguarde.gif" />
+					</p:dialog>
+
+					<p:remoteCommand name="carregarPainelInicial" autoRun="true"
+						actionListener="#{painelVeiculosMB.buscar}" update=":painelResultado"
+						oncomplete="gfRenderPainelVeiculosCharts();" />
+
+					<div class="gf-preset-bar">
+						<span class="#{painelVeiculosMB.presetPeriodo eq 'TODO' ? 'btn-primary-modern' : 'btn-secondary-modern'}">
+							<p:commandButton value="  Todo o Período" icon="fa fa-history"
+								actionListener="#{painelVeiculosMB.aplicarPeriodo('TODO')}" update=":painelResultado :frmFiltro"
+								oncomplete="gfRenderPainelVeiculosCharts();" />
+						</span>
+						<span class="#{painelVeiculosMB.presetPeriodo eq '90D' ? 'btn-primary-modern' : 'btn-secondary-modern'}">
+							<p:commandButton value="  Últimos 90 dias" icon="fa fa-calendar"
+								actionListener="#{painelVeiculosMB.aplicarPeriodo('90D')}" update=":painelResultado :frmFiltro"
+								oncomplete="gfRenderPainelVeiculosCharts();" />
+						</span>
+						<span class="#{painelVeiculosMB.presetPeriodo eq 'ANO' ? 'btn-primary-modern' : 'btn-secondary-modern'}">
+							<p:commandButton value="  Este Ano" icon="fa fa-calendar-check-o"
+								actionListener="#{painelVeiculosMB.aplicarPeriodo('ANO')}" update=":painelResultado :frmFiltro"
+								oncomplete="gfRenderPainelVeiculosCharts();" />
+						</span>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label><i class="fa fa-car" style="margin-right:6px;color:#1565C0;"></i>Veículo (opcional)</label>
+							<p:autoComplete style="width:100%" dropdown="true"
+								value="#{painelVeiculosMB.veiculo}" scrollHeight="170"
+								completeMethod="#{painelVeiculosMB.completarVeiculo}"
+								forceSelection="true" converter="#{converterVeiculo}" var="cur"
+								itemLabel="#{cur.descricao} (#{cur.placa})" itemValue="#{cur}" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Início</label>
+							<p:calendar style="width:100%" value="#{painelVeiculosMB.dataInicio}"
+								pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="gf-form-item">
+							<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data Fim</label>
+							<p:calendar style="width:100%" value="#{painelVeiculosMB.dataFim}"
+								pattern="dd/MM/yyyy" />
+						</div>
+
+						<div class="gf-form-item" style="flex:0 0 auto; min-width:auto;">
+							<label style="visibility:hidden;">Buscar</label>
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Buscar" icon="fa fa-search"
+									actionListener="#{painelVeiculosMB.buscar()}" update=":painelResultado"
+									oncomplete="gfRenderPainelVeiculosCharts();" />
+							</span>
+						</div>
+					</div>
+				</h:form>
+			</div>
+
+			<!-- ═══ RESULTADOS (ajax) ═══ -->
+			<h:panelGroup id="painelResultado" layout="block">
+
+				<h:panelGroup layout="block" rendered="#{not painelVeiculosMB.carregado}"
+					styleClass="gf-card" style="text-align:center;padding:60px 20px;">
+					<i class="fa fa-spinner fa-spin" style="font-size:36px;color:#1565C0;"></i>
+					<p style="margin-top:14px;color:#607d8b;font-size:14px;">Carregando indicadores da frota...</p>
+				</h:panelGroup>
+
+				<h:panelGroup layout="block" rendered="#{painelVeiculosMB.carregado}">
+
+					<!-- ═══ KPIs ═══ -->
+					<div class="row stat-cards stat-cards-5">
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-info">
+								<div class="sc-icon"><i class="fa fa-money"></i></div>
+								<div>
+									<div class="sc-label">Custo Total da Frota</div>
+									<div class="sc-value">
+										<h:outputText value="#{painelVeiculosMB.custoTotalFrota}">
+											<f:convertNumber type="currency" currencySymbol="R$ " />
+										</h:outputText>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-purple">
+								<div class="sc-icon"><i class="fa fa-road"></i></div>
+								<div>
+									<div class="sc-label">Km Total Rodado</div>
+									<div class="sc-value">
+										<h:outputText value="#{painelVeiculosMB.kmTotalFrota}" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-success">
+								<div class="sc-icon"><i class="fa fa-line-chart"></i></div>
+								<div>
+									<div class="sc-label">Custo/Km Médio</div>
+									<div class="sc-value">
+										<h:outputText value="#{painelVeiculosMB.custoPorKmMedioFrota}" rendered="#{painelVeiculosMB.custoPorKmMedioFrota != null}">
+											<f:convertNumber type="currency" currencySymbol="R$ " maxFractionDigits="2" />
+										</h:outputText>
+										<h:outputText value="—" rendered="#{painelVeiculosMB.custoPorKmMedioFrota == null}" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm sc-info">
+								<div class="sc-icon"><i class="fa fa-car"></i></div>
+								<div>
+									<div class="sc-label">Veículos Monitorados</div>
+									<div class="sc-value">
+										<h:outputText value="#{painelVeiculosMB.quantidadeVeiculos}" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+							<div class="stat-card stat-card-sm #{painelVeiculosMB.quantidadeAlertasVencidos > 0 ? 'sc-danger' : (painelVeiculosMB.quantidadeAlertasProximos > 0 ? 'sc-warning' : 'sc-success')}">
+								<div class="sc-icon"><i class="fa fa-exclamation-triangle"></i></div>
+								<div>
+									<div class="sc-label">Alertas Ativos</div>
+									<div class="sc-value">
+										<h:outputText value="#{painelVeiculosMB.quantidadeAlertasVencidos + painelVeiculosMB.quantidadeAlertasProximos}" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- ═══ COMPARATIVO POR VEÍCULO ═══ -->
+					<h:panelGroup layout="block" rendered="#{not empty painelVeiculosMB.listCusto}">
+						<div class="gf-card">
+							<div class="gf-card-header">
+								<i class="fa fa-trophy icon-green"></i>
+								<div>
+									<h4>Comparativo por Veículo</h4>
+									<small>Ordenado do maior para o menor custo/km — barra cheia mostra a posição em relação ao pior colocado</small>
+								</div>
+							</div>
+
+							<div class="gf-leaderboard">
+								<ui:repeat value="#{painelVeiculosMB.listCusto}" var="dto" varStatus="st">
+									<div class="leaderboard-card">
+										<div class="leaderboard-head">
+											<div class="leaderboard-rank">#{st.index + 1}</div>
+											<div class="leaderboard-title">#{dto.veiculo.descricao} (#{dto.veiculo.placa})</div>
+										</div>
+										<div class="leaderboard-metrics">
+											<div>
+												Custo Total
+												<strong>
+													<h:outputText value="#{dto.custoTotal}">
+														<f:convertNumber type="currency" currencySymbol="R$ " />
+													</h:outputText>
+												</strong>
+											</div>
+											<div>
+												Km Rodado
+												<strong>
+													<h:outputText value="#{dto.kmRodado}" />
+													<h:outputText value="—" rendered="#{dto.kmRodado == null}" />
+												</strong>
+											</div>
+											<div>
+												Custo/Km
+												<strong>
+													<h:outputText value="#{dto.custoPorKm}" rendered="#{dto.custoPorKm != null}">
+														<f:convertNumber type="currency" currencySymbol="R$ " maxFractionDigits="2" />
+													</h:outputText>
+													<h:outputText value="—" rendered="#{dto.custoPorKm == null}" />
+												</strong>
+											</div>
+										</div>
+										<div class="leaderboard-bar-track">
+											<div class="leaderboard-bar-fill #{dto.custoPorKm != null and painelVeiculosMB.custoPorKmMedioFrota != null and dto.custoPorKm > painelVeiculosMB.custoPorKmMedioFrota ? 'leaderboard-bad' : 'leaderboard-good'}"
+												style="width:#{dto.custoPorKm != null and painelVeiculosMB.listCusto[0].custoPorKm != null and painelVeiculosMB.listCusto[0].custoPorKm > 0 ? (dto.custoPorKm / painelVeiculosMB.listCusto[0].custoPorKm * 100) : 0}%;">
+											</div>
+										</div>
+									</div>
+								</ui:repeat>
+							</div>
+						</div>
+					</h:panelGroup>
+
+					<!-- ═══ ALERTAS ═══ -->
+					<div class="gf-card">
+						<div class="gf-card-header">
+							<i class="fa fa-bell icon-orange"></i>
+							<div>
+								<h4>Alertas da Frota</h4>
+								<small>Manutenção programada, documentos e lembretes vencidos ou próximos</small>
+							</div>
+						</div>
+
+						<h:panelGroup rendered="#{empty painelVeiculosMB.listAlertas}">
+							<div class="gf-alert info">
+								<i class="fa fa-check-circle"></i>
+								<span>Nenhum alerta pendente para o filtro selecionado.</span>
+							</div>
+						</h:panelGroup>
+
+						<ui:repeat value="#{painelVeiculosMB.listAlertas}" var="alerta">
+							<div class="gf-alert #{alerta.urgencia == 'Vencido' ? 'danger' : 'warning'}" style="margin-bottom:10px;">
+								<i class="fa #{alerta.urgencia == 'Vencido' ? 'fa-times-circle' : 'fa-clock-o'}"></i>
+								<span>
+									<strong>#{alerta.tipo}</strong> — #{alerta.descricao}
+									<h:outputText value=" (#{alerta.veiculo})" rendered="#{alerta.veiculo != null}" />
+									<h:outputText value=" · vence em " rendered="#{alerta.dataVencimento != null}" />
+									<h:outputText value="#{alerta.dataVencimento}" rendered="#{alerta.dataVencimento != null}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+									<h:outputText value=" · km alvo #{alerta.kmAlvo} (atual #{alerta.kmAtual})" rendered="#{alerta.kmAlvo != null}" />
+									<strong style="margin-left:6px;">[#{alerta.urgencia}]</strong>
+								</span>
+							</div>
+						</ui:repeat>
+					</div>
+
+					<h:panelGroup rendered="#{empty painelVeiculosMB.listCusto}">
+						<div class="gf-card" style="text-align:center;padding:50px 20px;">
+							<i class="fa fa-inbox" style="font-size:36px;color:#b0bec5;"></i>
+							<p style="margin-top:14px;color:#607d8b;font-size:14px;">
+								Nenhum lançamento encontrado para o filtro selecionado.
+							</p>
+						</div>
+					</h:panelGroup>
+
+					<h:panelGroup layout="block" rendered="#{not empty painelVeiculosMB.listCusto}">
+
+						<div id="gfChartData" style="display:none"
+							data-custo-veiculo="#{painelVeiculosMB.custoPorVeiculoChartJson}"
+							data-custo-por-km="#{painelVeiculosMB.custoPorKmChartJson}"
+							data-categoria="#{painelVeiculosMB.categoriaChartJson}"
+							data-tendencia="#{painelVeiculosMB.tendenciaChartJson}">
+						</div>
+
+						<!-- ═══ GRÁFICOS ═══ -->
+						<div class="gf-charts-grid">
+							<div class="gf-card gf-chart-card">
+								<div class="gf-card-header">
+									<i class="fa fa-bar-chart icon-blue"></i>
+									<div>
+										<h4>Custo Total por Veículo</h4>
+										<small>Ranking da frota no período</small>
+									</div>
+								</div>
+								<div class="gf-chart-canvas-wrap">
+									<canvas id="chartCustoVeiculo"></canvas>
+								</div>
+							</div>
+
+							<div class="gf-card gf-chart-card">
+								<div class="gf-card-header">
+									<i class="fa fa-balance-scale icon-red"></i>
+									<div>
+										<h4>Custo por Km</h4>
+										<small>Vermelho = acima da média da frota</small>
+									</div>
+								</div>
+								<div class="gf-chart-canvas-wrap">
+									<canvas id="chartCustoPorKm"></canvas>
+								</div>
+							</div>
+
+							<div class="gf-card gf-chart-card">
+								<div class="gf-card-header">
+									<i class="fa fa-pie-chart icon-purple"></i>
+									<div>
+										<h4>Despesas por Categoria</h4>
+										<small>Distribuição do custo da frota</small>
+									</div>
+								</div>
+								<div class="gf-chart-canvas-wrap">
+									<canvas id="chartCategoria"></canvas>
+								</div>
+							</div>
+
+							<div class="gf-card gf-chart-card">
+								<div class="gf-card-header">
+									<i class="fa fa-area-chart icon-teal"></i>
+									<div>
+										<h4>Evolução Mensal</h4>
+										<small>Custo total e custo/km ao longo do tempo</small>
+									</div>
+								</div>
+								<div class="gf-chart-canvas-wrap">
+									<canvas id="chartTendencia"></canvas>
+								</div>
+							</div>
+						</div>
+
+					</h:panelGroup>
+
+				</h:panelGroup>
+
+			</h:panelGroup>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

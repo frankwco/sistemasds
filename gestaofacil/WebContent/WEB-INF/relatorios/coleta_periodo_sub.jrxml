@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="coleta_periodo_sub" pageWidth="595" pageHeight="300" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" isIgnorePagination="true" uuid="dea1ba61-9f2a-46a0-89c1-9144588a3e6d">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GestaoFacil"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="295"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="698"/>
+	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<parameter name="PONTO_COLETA_ID" class="java.lang.Long"/>
+	<parameter name="DATA_INICIAL" class="java.lang.String"/>
+	<parameter name="DATA_FINAL" class="java.lang.String"/>
+	<parameter name="DADOS" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT cidade.nome as nomeCidade, pessoa.nomeRazaoSocial, ponto_coleta.id as idPontoColeta, ocultarRelatorio, 
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL} and  $P{DATA_FINAL} and grupo_residuos.descricao='A' and coleta.status is true and itens_coleta.status is true and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeA,
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL}  and  $P{DATA_FINAL} and grupo_residuos.descricao='E' and coleta.status is true and itens_coleta.status is true  and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeE,
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL}  and  $P{DATA_FINAL} and grupo_residuos.descricao='B' and coleta.status is true and itens_coleta.status is true  and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeB,
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL}   and  $P{DATA_FINAL} and grupo_residuos.descricao='A2' and coleta.status is true and itens_coleta.status is true  and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeA2,
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL}   and  $P{DATA_FINAL} and grupo_residuos.descricao='A3' and coleta.status is true and itens_coleta.status is true  and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeA3,
+
+(SELECT sum(itens_coleta.quantidadeColetada)FROM `grupo_residuos` inner join itens_coleta on grupo_residuos.id=itens_coleta.grupoResiduo_id INNER JOIN coleta on itens_coleta.coleta_id=coleta.id where coleta.dataColeta BETWEEN  $P{DATA_INICIAL}   and  $P{DATA_FINAL} and grupo_residuos.descricao='A4' and coleta.status is true and itens_coleta.status is true  and coleta.pontoColeta_id = idPontoColeta  GROUP BY grupo_residuos.descricao) as quantidadeA4
+ 
+from ponto_coleta INNER JOIN pessoa ON ponto_coleta.id = pessoa.id INNER JOIN cidade ON cidade.id = pessoa.cidade_id INNER JOIN cliente on cliente.id=ponto_coleta.cliente_id where (ocultarRelatorio is false or ocultarRelatorio is null) GROUP BY ponto_coleta.id ORDER BY cidade.nome, pessoa.nomeRazaoSocial]]>
+	</queryString>
+	<field name="nomeCidade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="nomeCidade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="cidade"/>
+	</field>
+	<field name="nomeRazaoSocial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nomeRazaoSocial"/>
+		<property name="com.jaspersoft.studio.field.label" value="nomeRazaoSocial"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pessoa"/>
+	</field>
+	<field name="idPontoColeta" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="idPontoColeta"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="ponto_coleta"/>
+	</field>
+	<field name="ocultarRelatorio" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="ocultarRelatorio"/>
+		<property name="com.jaspersoft.studio.field.label" value="ocultarRelatorio"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="cliente"/>
+	</field>
+	<field name="quantidadeA" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA"/>
+	</field>
+	<field name="quantidadeE" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeE"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeE"/>
+	</field>
+	<field name="quantidadeB" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeB"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeB"/>
+	</field>
+	<field name="quantidadeA2" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA2"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA2"/>
+	</field>
+	<field name="quantidadeA3" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA3"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA3"/>
+	</field>
+	<field name="quantidadeA4" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="quantidadeA4"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantidadeA4"/>
+	</field>
+	<variable name="TOTALA" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeA}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<variable name="TOTALE" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeE}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<variable name="TOTALB" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeB}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<variable name="TOTALA2" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeA2}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<variable name="TOTALA3" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeA3}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<variable name="TOTAL_GERAL" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeA}+$F{quantidadeE}+$F{quantidadeB}+$F{quantidadeA2}+$F{quantidadeA3}]]></variableExpression>
+	</variable>
+	<variable name="TOTALA4" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidadeA4}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="17" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="280" y="0" width="50" height="17" uuid="ccefaef3-7c74-499f-8f09-fdf8b6f1844b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="0" width="50" height="17" uuid="4eb59c32-3ec1-492b-b7a0-582699dd30c0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[E]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="0" width="50" height="17" uuid="45223674-2ff9-4f48-aafd-d80bb85c11b3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[B]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="0" width="40" height="17" uuid="992020b7-9fb8-4f6c-9715-38f209c49441">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A2]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="40" height="17" uuid="6a4762d8-99a2-4d00-a76c-b058b46e0372">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A3]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="17" uuid="25ba5208-f058-41b6-a214-2b22885d808b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="0" width="200" height="17" uuid="301cb5cf-789d-4227-8e77-977269663aa9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cliente/Ponto Coleta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="0" width="40" height="17" uuid="75fc0995-3d48-4721-b5aa-d591fd54e02e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A4]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="80" y="0" width="200" height="12" uuid="4f43d971-8201-4200-8110-784d0c6b6d79">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$F{nomeRazaoSocial}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="0" width="50" height="12" uuid="a832af50-ad15-40b2-8f3a-f6bfde6dcab9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeA} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeA}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="330" y="0" width="50" height="12" uuid="20d7178e-96e1-4020-a317-689b455f0b0e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeE} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeE}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="380" y="0" width="50" height="12" uuid="0b6c045b-a589-4bf7-8011-269ce5b3956d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeB} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeB}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="40" height="12" uuid="b88249a5-bf98-4381-861d-be1a60ed44b4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeA2} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeA2}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="40" height="12" uuid="993bc172-e973-4335-bc80-990d213d830d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeA3} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeA3}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="80" height="12" uuid="276662ec-11a0-414e-b33c-d32b8f3cdca3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15f4359c-5ae0-4722-a20f-dbd51ff292d7"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$F{nomeCidade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="40" height="12" uuid="d230930c-7b53-44dc-af1b-2554f50a505f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbefcb16-7254-4cd7-8664-51c017425943"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantidadeA4} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($F{quantidadeA4}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="32" splitType="Stretch">
+			<textField>
+				<reportElement x="280" y="0" width="50" height="15" uuid="6414f3b3-062b-4b68-9243-69246ced70e0"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALA}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="330" y="0" width="50" height="15" uuid="7999d43f-fdb6-4168-b59a-3e3a6ffa190a"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALE} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALE}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="380" y="0" width="50" height="15" uuid="ba5cd06b-e791-4d5a-90fe-329c878f2010"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALB} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALB}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="40" height="15" uuid="1b8f7200-2c8e-4e5f-b6d1-8412520c7026"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA2} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALA2}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="40" height="15" uuid="4373a986-6494-4ba5-bdfe-46db1b3f26dc"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA3} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALA3}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="150" y="0" width="130" height="15" uuid="5c7745fe-b91a-47cc-9b87-8732f6c21dc3"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Kg Total por Classe:&nbsp;"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="150" y="15" width="130" height="15" uuid="e1c51ac7-f20b-4cdd-a7ae-6b6d62f41e27"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Kg Total Geral:&nbsp; "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="15" width="270" height="15" uuid="d1961a39-80df-4bce-ae3d-05cf91c3f06d"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format((($V{TOTALA}== null ?  0:$V{TOTALA})+($V{TOTALE}== null ?  0:$V{TOTALE}) + ($V{TOTALB}== null ?  0:$V{TOTALB})+($V{TOTALA2}== null ?  0:$V{TOTALA2}) + ($V{TOTALA3}== null ?  0:$V{TOTALA3})+($V{TOTALA4}== null ?  0:$V{TOTALA4}))).toString()+" ";]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="0" width="40" height="15" uuid="ca1e60f5-51d2-45de-8c07-3e758bbe184e"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTALA4} == null ? new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format(0.0).toString() +"&nbsp;":
+new DecimalFormat("#,##0.000", new DecimalFormatSymbols (new Locale ("pt", "BR"))).format($V{TOTALA4}).toString()+"&nbsp;";]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

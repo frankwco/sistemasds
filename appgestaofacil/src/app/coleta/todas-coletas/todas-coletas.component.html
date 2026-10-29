@@ -1,0 +1,121 @@
+<ion-header class="tc-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="fechar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Coletas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="tc-content">
+
+  <!-- Loading -->
+  <div class="loading-area" *ngIf="buscando">
+    <ion-card class="loading-card">
+      <ion-card-content>
+        <div class="loading-icon">
+          <ion-icon name="bag-check-outline"></ion-icon>
+        </div>
+        <p>Buscando coletas...</p>
+        <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!buscando && items.length === 0">
+    <ion-icon name="file-tray-outline"></ion-icon>
+    <p>Nada encontrado</p>
+    <span>Nenhuma coleta nos últimos 365 dias.</span>
+  </div>
+
+  <!-- Info Badge -->
+  <div class="info-banner" *ngIf="!buscando && items.length > 0">
+    <div class="info-badge">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>Últimos 365 dias</span>
+    </div>
+    <div class="count-badge">
+      {{ items.length }} coleta{{ items.length > 1 ? 's' : '' }}
+    </div>
+  </div>
+
+  <!-- Lista de Coletas -->
+  <div class="coletas-list" *ngIf="!buscando && items.length > 0">
+    <ion-card class="coleta-card" *ngFor="let item of items; let idx = index">
+      <ion-card-content>
+
+        <!-- Header do card -->
+        <div class="coleta-top">
+          <div class="coleta-icon-badge">
+            <ion-icon name="bag-check-outline"></ion-icon>
+          </div>
+          <div class="coleta-info">
+            <span class="coleta-name">{{ item.pontoColetaSelecionado.nomeRazaoSocial }}</span>
+            <span class="coleta-detail" *ngIf="item.pontoColetaSelecionado.nomeFantasia">
+              {{ item.pontoColetaSelecionado.nomeFantasia }}
+              <span *ngIf="item.pontoColetaSelecionado.apelido"> - {{ item.pontoColetaSelecionado.apelido }}</span>
+            </span>
+            <span class="coleta-city">{{ item.pontoColetaSelecionado.cidade?.nome }}</span>
+          </div>
+        </div>
+
+        <!-- Usuário e Observação -->
+        <div class="coleta-meta">
+          <div class="meta-row" *ngIf="item.emailUsuario">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>{{ item.emailUsuario }}</span>
+          </div>
+          <div class="meta-row" *ngIf="item.situacao">
+            <ion-icon name="chatbubble-outline"></ion-icon>
+            <span>{{ item.situacao }}</span>
+          </div>
+        </div>
+
+        <!-- Grupos Grid -->
+        <div class="groups-grid">
+          <div class="group-col group-a" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('A;')">
+            <span class="group-name">A</span>
+            <span class="group-value">{{ item.a | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-e" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('E;')">
+            <span class="group-name">E</span>
+            <span class="group-value">{{ item.e | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-b" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('B;')">
+            <span class="group-name">B</span>
+            <span class="group-value">{{ item.b | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a2" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('A2;')">
+            <span class="group-name">A2</span>
+            <span class="group-value">{{ item.a2 | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a3" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('A3;')">
+            <span class="group-name">A3</span>
+            <span class="group-value">{{ item.a3 | number:'1.3-3' }}</span>
+          </div>
+          <div class="group-col group-a4" *ngIf="item.pontoColetaSelecionado.gruposColetados.includes('A4;')">
+            <span class="group-name">A4</span>
+            <span class="group-value">{{ item.a4 | number:'1.3-3' }}</span>
+          </div>
+        </div>
+
+        <!-- Total e Data -->
+        <div class="coleta-footer">
+          <div class="total-badge">
+            <ion-icon name="calculator-outline"></ion-icon>
+            <span>{{ item.totalColetado | number:'1.3-3' }}</span>
+          </div>
+          <div class="date-badge">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ item.dataUltimaColeta | date: 'dd/MM/yyyy' }} {{ item.horaUltimaColeta }}:{{ item.minutoUltimaColeta }}</span>
+          </div>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

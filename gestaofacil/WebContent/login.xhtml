@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="utf-8"></meta>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+	<title>Login - Gestão Empresarial - DS Transportes</title>
+	<meta
+		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+		name="viewport"></meta>
+
+	<link rel="shortcut icon"
+		href="#{request.contextPath}/resources/img/favicon.png" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/bootstrap/css/bootstrap.min.css" />
+
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/gf-public.css" />
+
+	<style>
+		/* ── Estilos específicos de login (comuns via gf-public.css) ── */
+
+		/* ── Layout principal ── */
+		.login-wrapper {
+			max-width: 1140px; margin: 0 auto; padding: 40px 24px 60px;
+			display: flex; align-items: stretch; justify-content: center;
+			gap: 48px; flex-wrap: wrap;
+		}
+
+		/* ── Painel informativo (esquerda) ── */
+		.login-info {
+			flex: 1; min-width: 300px; max-width: 520px;
+			display: flex; flex-direction: column;
+		}
+		.login-info-banner {
+			background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 40%, #43A047 80%, #66BB6A 100%);
+			border-radius: 18px;
+			padding: 40px 36px;
+			color: #fff;
+			box-shadow: 0 8px 32px rgba(27,94,32,.30);
+			position: relative; overflow: hidden;
+			flex: 1; display: flex; flex-direction: column; justify-content: center;
+		}
+		.login-info-banner::before {
+			content: '';
+			position: absolute; top: -50px; right: -50px;
+			width: 180px; height: 180px;
+			background: rgba(255,255,255,.06);
+			border-radius: 50%;
+		}
+		.login-info-banner::after {
+			content: '';
+			position: absolute; bottom: -30px; left: 20%;
+			width: 120px; height: 120px;
+			background: rgba(255,255,255,.04);
+			border-radius: 50%;
+		}
+		.login-info-banner h1 {
+			font-size: 26px; font-weight: 700; margin: 0 0 14px;
+			line-height: 1.2; position: relative; z-index: 1;
+		}
+		.login-info-banner p {
+			font-size: 14px; line-height: 1.7; color: #e8f5e9;
+			margin: 0; opacity: .92; position: relative; z-index: 1;
+		}
+		.login-info-banner .info-icon {
+			font-size: 64px; opacity: .15; margin-top: 20px;
+			position: relative; z-index: 1;
+		}
+
+		/* ── Card de login (direita) ── */
+		.login-card {
+			width: 100%; max-width: 440px;
+			background: #fff;
+			border-radius: 18px;
+			border: 1px solid #e0e6ed;
+			box-shadow: 0 4px 24px rgba(0,0,0,.08);
+			overflow: hidden;
+		}
+		.login-card-accent {
+			height: 5px; width: 100%;
+			background: linear-gradient(90deg, #1B5E20, #43A047, #66BB6A);
+		}
+		.login-card-header {
+			padding: 32px 36px 0;
+			text-align: center;
+		}
+		.login-card-header .icon-circle {
+			width: 60px; height: 60px; border-radius: 16px;
+			display: inline-flex; align-items: center; justify-content: center;
+			font-size: 24px; color: #fff; margin-bottom: 16px;
+			background: linear-gradient(135deg, #1B5E20, #43A047);
+			box-shadow: 0 4px 14px rgba(27,94,32,.25);
+		}
+		.login-card-header h2 {
+			font-size: 22px; font-weight: 700; color: #1a2744; margin: 0 0 4px;
+		}
+		.login-card-header p {
+			font-size: 13px; color: #78909c; margin: 0;
+		}
+
+		.login-card-body {
+			padding: 28px 36px 36px;
+		}
+
+		/* ── Mensagem de erro ── */
+		.login-error {
+			background: #fff3e0;
+			border: 1px solid #ffe0b2;
+			border-radius: 10px;
+			padding: 10px 14px;
+			margin-bottom: 20px;
+			display: flex; align-items: center; gap: 8px;
+			font-size: 13px; color: #e65100;
+		}
+		.login-error i { font-size: 16px; }
+
+		/* ── Campos ── */
+		.login-field { margin-bottom: 18px; }
+		.login-field label {
+			display: block; font-size: 13px; font-weight: 600;
+			color: #37474f; margin-bottom: 6px;
+		}
+		.login-field .ui-inputfield,
+		.login-field input[type="text"],
+		.login-field input[type="password"] {
+			width: 100% !important;
+			padding: 10px 14px !important;
+			border: 1px solid #cfd8dc !important;
+			border-radius: 10px !important;
+			font-size: 14px !important;
+			font-family: 'Roboto', sans-serif !important;
+			transition: border-color .2s, box-shadow .2s;
+			outline: none;
+			background: #fafafa !important;
+		}
+		.login-field .ui-inputfield:focus,
+		.login-field input:focus {
+			border-color: #43A047 !important;
+			box-shadow: 0 0 0 3px rgba(67,160,71,.15) !important;
+			background: #fff !important;
+		}
+
+		/* ── Botão ── */
+		.login-btn {
+			width: 100%;
+			padding: 12px !important;
+			font-size: 15px !important; font-weight: 600 !important;
+			color: #fff !important;
+			background: linear-gradient(135deg, #1B5E20, #2E7D32, #43A047) !important;
+			border: none !important;
+			border-radius: 10px !important;
+			cursor: pointer;
+			transition: all .25s;
+			box-shadow: 0 4px 14px rgba(27,94,32,.25);
+			letter-spacing: .3px;
+		}
+		.login-btn:hover {
+			box-shadow: 0 6px 20px rgba(27,94,32,.35);
+			transform: translateY(-1px);
+		}
+
+		/* ── Link recuperar senha ── */
+		.login-recover {
+			text-align: center; margin-top: 18px;
+		}
+		.login-recover .ui-commandlink,
+		.login-recover a {
+			font-size: 13px; color: #2E7D32 !important;
+			text-decoration: none; font-weight: 500;
+		}
+		.login-recover .ui-commandlink:hover,
+		.login-recover a:hover {
+			text-decoration: underline;
+		}
+
+		/* ── Dialog campos específicos ── */
+		.dlg-field { margin-bottom: 16px; }
+		.dlg-field label {
+			display: block; font-size: 13px; font-weight: 600;
+			color: #37474f; margin-bottom: 6px;
+		}
+		.dlg-btn-recuperar {
+			width: 100%;
+			padding: 11px !important;
+			font-size: 15px !important; font-weight: 600 !important;
+			color: #fff !important;
+			background: linear-gradient(135deg, #1B5E20, #2E7D32, #43A047) !important;
+			border: none !important;
+			border-radius: 10px !important;
+			cursor: pointer;
+			box-shadow: 0 4px 14px rgba(27,94,32,.25);
+		}
+		.dlg-btn-fechar {
+			width: 100%;
+			padding: 10px !important;
+			font-size: 14px !important;
+			background: #f5f5f5 !important;
+			color: #555 !important;
+			border: 1px solid #ddd !important;
+			border-radius: 10px !important;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+		/* ── Responsive ── */
+		@media (max-width: 768px) {
+			.login-wrapper {
+				flex-direction: column;
+				align-items: center;
+				padding: 24px 16px 40px;
+				gap: 24px;
+			}
+			.login-info { max-width: 100%; }
+			.login-card { max-width: 100%; }
+			.login-info-banner { padding: 28px 24px; }
+			.login-info-banner h1 { font-size: 22px; }
+			.login-card-body { padding: 24px 24px 28px; }
+		}
+	</style>
+
+</h:head>
+<h:body>
+
+	<!-- Loading dialog -->
+	<p:ajaxStatus onstart="PF('statusDialog').show()"
+		onsuccess="PF('statusDialog').hide()" />
+	<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+		closable="false" resizable="false" showHeader="false">
+		<h:outputText style="font-weight:bold"
+			value="Aguarde, realizando operação...." />
+		<br />
+		<center>
+			<p:graphicImage name="img/aguarde.gif" />
+		</center>
+	</p:dialog>
+
+	<!-- ── Navbar ── -->
+	<nav class="gf-navbar">
+		<div class="gf-navbar-inner">
+			<a class="nav-left" target="_blank" href="https://dsresiduos.com.br/">
+				<img src="#{request.contextPath}/resources/img/logo_nova.png" alt="DS Transportes" />
+			</a>
+			<span class="nav-badge">Sistema de Gestão</span>
+		</div>
+	</nav>
+
+	<!-- ── Conteúdo principal ── -->
+	<div class="login-wrapper">
+
+		<!-- Painel informativo -->
+		<div class="login-info anim-fade-up anim-delay-1">
+			<div class="login-info-banner">
+				<h1>Bem-vindo ao Sistema de Gestão</h1>
+				<p>
+					Aqui você terá acesso a diversas informações importantes, como seu contrato
+					conosco e histórico de coletas realizadas. Nosso sistema foi desenvolvido para
+					oferecer mais praticidade e agilidade, permitindo que você tenha tudo o que
+					precisa em um único lugar.
+				</p>
+				<i class="fa fa-recycle info-icon"></i>
+			</div>
+		</div>
+
+		<!-- Card de Login -->
+		<div class="login-card anim-fade-up anim-delay-2">
+			<div class="login-card-accent"></div>
+			<div class="login-card-header">
+				<div class="icon-circle">
+					<i class="fa fa-lock"></i>
+				</div>
+				<h2>Acessar o Sistema</h2>
+				<p>Informe suas credenciais para entrar</p>
+			</div>
+			<div class="login-card-body">
+
+				<h:panelGroup rendered="#{param.error==true}">
+					<div class="login-error">
+						<i class="fa fa-exclamation-circle"></i>
+						E-mail ou senha incorretos
+					</div>
+				</h:panelGroup>
+
+				<form id="frmLogin" action="j_spring_security_check" method="post">
+					<div class="login-field">
+						<label><i class="fa fa-envelope-o"></i> E-mail</label>
+						<p:inputText required="true" id="j_username" />
+					</div>
+					<div class="login-field">
+						<label><i class="fa fa-key"></i> Senha</label>
+						<p:password required="true" id="j_password" />
+					</div>
+					<h:commandButton value="Entrar" styleClass="login-btn" />
+				</form>
+
+				<div class="login-recover">
+					<h:form>
+						<p:commandLink
+							value="Esqueceu ou deseja criar uma nova senha?"
+							onclick="PF('dlgRecuperarSenha').show();" />
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+	<!-- ── Footer ── -->
+	<footer class="gf-footer">
+		<p>© 2026 <a href="https://dsresiduos.com.br/" target="_blank">DS Transportes</a> — Sistema de Gestão Empresarial</p>
+	</footer>
+
+	<!-- ── Dialog Recuperar Senha ── -->
+	<p:dialog header="Recuperar a Senha" widgetVar="dlgRecuperarSenha"
+		modal="true" responsive="true" id="dlgRecuperarSenha" closable="true"
+		closeOnEscape="true" resizable="false" draggable="false">
+
+		<p:messages id="messages" showDetail="true" closable="true">
+			<p:autoUpdate />
+		</p:messages>
+
+		<h:form id="frmModalRecuperarSenha">
+			<div class="dlg-field">
+				<label><i class="fa fa-envelope-o"></i> E-mail</label>
+				<p:inputText requiredMessage="Informar o e-mail" required="true"
+					id="email" type="email" style="width:100%; padding:10px 14px; border:1px solid #cfd8dc; border-radius:10px; font-size:14px;"
+					value="#{recuperSenhaLoginMB.email}" />
+			</div>
+			<p:commandButton value="Recuperar Senha"
+				styleClass="dlg-btn-recuperar" update="@form"
+				actionListener="#{recuperSenhaLoginMB.recuperarSenhaLogin()}" />
+		</h:form>
+
+		<h:form>
+			<p:commandButton value="Fechar"
+				styleClass="dlg-btn-fechar"
+				onclick="PF('dlgRecuperarSenha').hide();" />
+		</h:form>
+
+	</p:dialog>
+
+	<script type="text/javascript"
+		src="#{request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
+</h:body>
+</html>
+
+
+
+
+
+

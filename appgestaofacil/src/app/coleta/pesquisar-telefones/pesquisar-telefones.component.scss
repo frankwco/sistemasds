@@ -1,0 +1,190 @@
+// ── Content ──
+
+.pt-content {
+  --background: #f0f4fa;
+}
+
+// ── Ponto Card ──
+
+.ponto-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.ponto-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ponto-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ponto-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ponto-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.ponto-fantasy {
+  font-size: 12px;
+  font-weight: 500;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.ponto-address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 4px;
+
+  ion-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+}
+
+// ── Empty State ──
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 64px;
+    color: #a0aec0;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 4px;
+  }
+
+  span {
+    font-size: 14px;
+    color: #718096;
+  }
+}
+
+// ── Phones List ──
+
+.phones-list {
+  padding: 0 16px 24px;
+}
+
+.phone-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.phone-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.phone-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3dc2ff, #2b9cd4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.phone-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.phone-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.phone-number {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-top: 2px;
+}
+
+// ── Phone Action Buttons ──
+
+.phone-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.phone-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  text-decoration: none;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  ion-icon {
+    font-size: 22px;
+    color: #fff;
+  }
+
+  &.btn-call {
+    background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  }
+
+  &.btn-whats {
+    background: linear-gradient(135deg, #2dd36f, #1a9e54);
+  }
+}

@@ -1,0 +1,343 @@
+// ── Content ──
+
+.ass-content {
+  --background: #f0f4fa;
+}
+
+// ── Resumo Card ──
+
+.resumo-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.resumo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.resumo-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3880ff, #5b5ea6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.resumo-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+// ── Groups Grid ──
+
+.groups-grid {
+  display: flex;
+  gap: 4px;
+}
+
+.group-col {
+  flex: 1;
+  border-radius: 8px;
+  padding: 8px 2px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.group-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.group-a {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.group-e {
+  background: #fff8e1;
+  color: #f9a825;
+}
+
+.group-b {
+  background: #eceff1;
+  color: #546e7a;
+}
+
+.group-a2 {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.group-a3 {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.group-a4 {
+  background: #ffcdd2;
+  color: #880e4f;
+}
+
+// ── Email Card ──
+
+.email-card {
+  margin: 0 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.email-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.email-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #eb445a, #cf3c4f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.email-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.email-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.email-current {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3880ff;
+  margin-top: 2px;
+}
+
+.email-empty {
+  font-size: 13px;
+  font-weight: 500;
+  color: #eb445a;
+  margin-top: 2px;
+}
+
+.email-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-item {
+  --background: #f4f6fb;
+  --border-radius: 12px;
+  --padding-start: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex: 1;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.email-ok-btn {
+  --border-radius: 12px;
+  height: 44px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+// ── Signature Card ──
+
+.signature-card {
+  margin: 0 16px 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.signature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+
+.signature-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.signature-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3dc2ff, #2b9cd4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.signature-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.signature-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.sig-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #edf2f7;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  ion-icon {
+    font-size: 18px;
+    color: #718096;
+  }
+
+  &.btn-clear {
+    background: rgba(235, 68, 90, 0.1);
+
+    ion-icon {
+      color: #eb445a;
+    }
+  }
+}
+
+.signature-area {
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 12px;
+
+  signature-pad {
+    display: block;
+    width: 100%;
+  }
+
+  canvas {
+    width: 100%;
+    display: block;
+  }
+}
+
+.signer-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f4f6fb;
+  border-radius: 10px;
+
+  ion-icon {
+    font-size: 16px;
+    color: #718096;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d3748;
+  }
+}
+
+// ── Finalizar Button ──
+
+.action-area {
+  padding: 8px 16px 32px;
+}
+
+.finalizar-btn {
+  --background: linear-gradient(135deg, #2dd36f 0%, #1a9e54 100%);
+  --border-radius: 28px;
+  --box-shadow: 0 4px 14px rgba(45, 211, 111, 0.35);
+  height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: none;
+}
+// Overlay de "Salvando coleta..." — spinner em CSS puro: anima só com "transform", que roda
+// fora da thread principal (o <ion-spinner> SVG congela enquanto o app lê/grava o Storage).
+.gf-spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: gf-girar 0.8s linear infinite;
+  will-change: transform;
+}
+
+@keyframes gf-girar {
+  to { transform: rotate(360deg); }
+}
+
+.gf-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+
+  p {
+    margin-top: 12px;
+  }
+}

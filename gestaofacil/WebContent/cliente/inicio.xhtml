@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+<h:body>
+	<ui:composition template="../resources/template/template-cliente.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ══════════════════════════════════
+			     HERO BANNER
+			══════════════════════════════════ -->
+			<div class="gf-hero">
+				<div>
+					<h2><i class="fa fa-user-circle" style="margin-right:10px;"></i>Área do Cliente</h2>
+					<p>Bem-vindo ao GestãoFácil — acesse suas informações de coleta e documentos</p>
+				</div>
+			</div>
+
+			<!-- ══════════════════════════════════
+			     MENSAGEM DE BOAS-VINDAS
+			══════════════════════════════════ -->
+			<div class="welcome-msg">
+				<i class="fa fa-info-circle"></i>
+				<div>
+					<h4>Como podemos ajudá-lo hoje?</h4>
+					<p>Utilize o menu ou os atalhos abaixo para acessar rapidamente as seções disponíveis na sua área.</p>
+				</div>
+			</div>
+
+			<!-- ══════════════════════════════════
+			     CARDS DE NAVEGAÇÃO
+			══════════════════════════════════ -->
+			<div class="row nav-cards">
+
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<a href="coletasCliente.jsf" class="nav-card">
+						<div style="border-top: 4px solid #1565C0;">
+							<div class="nav-card-top">
+								<div class="nav-card-icon nc-blue">
+									<i class="fa fa-truck"></i>
+								</div>
+								<div class="nav-card-text">
+									<h3>Coletas</h3>
+									<p>Consulte o histórico e o status de todas as coletas realizadas.</p>
+								</div>
+							</div>
+							<div class="nav-card-footer">
+								<i class="fa fa-arrow-right"></i> Acessar coletas
+							</div>
+						</div>
+					</a>
+				</div>
+
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<a href="emissaoRomaneiosLaudos.jsf" class="nav-card">
+						<div style="border-top: 4px solid #2E7D32;">
+							<div class="nav-card-top">
+								<div class="nav-card-icon nc-green">
+									<i class="fa fa-file-text"></i>
+								</div>
+								<div class="nav-card-text">
+									<h3>Romaneios e Certificados</h3>
+									<p>Acesse os romaneios mensais e seus certificados de destinação.</p>
+								</div>
+							</div>
+							<div class="nav-card-footer" style="color:#2E7D32;">
+								<i class="fa fa-arrow-right"></i> Acessar documentos
+							</div>
+						</div>
+					</a>
+				</div>
+
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<a href="dadosContratos.jsf" class="nav-card">
+						<div style="border-top: 4px solid #6A1B9A;">
+							<div class="nav-card-top">
+								<div class="nav-card-icon nc-purple">
+									<i class="fa fa-file-text-o"></i>
+								</div>
+								<div class="nav-card-text">
+									<h3>Contratos</h3>
+									<p>Consulte os dados dos seus contratos ativos.</p>
+								</div>
+							</div>
+							<div class="nav-card-footer" style="color:#6A1B9A;">
+								<i class="fa fa-arrow-right"></i> Acessar contratos
+							</div>
+						</div>
+					</a>
+				</div>
+
+			</div><!-- /.row nav-cards -->
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<!-- ═══ HERO BANNER ═══ -->
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-usd" style="margin-right:10px;"></i>Excedentes em Aberto</h2>
+					<p>Detalhamento dos excedentes/faturamentos pendentes dos contratos ativos e renovados</p>
+				</div>
+			</div>
+
+			<h:form id="frmExcedentesAbertos">
+
+				<!-- Busca os dados via ajax assim que a tela termina de carregar,
+				     em vez de travar a página inteira até a consulta terminar. -->
+				<p:remoteCommand name="carregarExcedentesInicial" autoRun="true"
+					actionListener="#{excedentesAbertosMB.buscar}"
+					update="resultadoExcedentes" />
+
+				<h:panelGroup id="resultadoExcedentes" layout="block">
+
+					<h:panelGroup layout="block" rendered="#{not excedentesAbertosMB.carregado}"
+						styleClass="gf-card" style="text-align:center;padding:60px 20px;">
+						<i class="fa fa-spinner fa-spin" style="font-size:36px;color:#1565C0;"></i>
+						<p style="margin-top:14px;color:#607d8b;font-size:14px;">Carregando excedentes em aberto...</p>
+					</h:panelGroup>
+
+					<h:panelGroup layout="block" rendered="#{excedentesAbertosMB.carregado}">
+
+						<!-- ═══ RESUMO ═══ -->
+						<div class="row stat-cards">
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-purple">
+									<div class="sc-icon"><i class="fa fa-usd"></i></div>
+									<div>
+										<div class="sc-label">Total em Aberto (Ativos + Renovados)</div>
+										<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(excedentesAbertosMB.valorTotalGeral)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-success">
+									<div class="sc-icon"><i class="fa fa-check-circle"></i></div>
+									<div>
+										<div class="sc-label">Total em Aberto - Só Ativos</div>
+										<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(excedentesAbertosMB.valorTotalAtivos)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-info">
+									<div class="sc-icon"><i class="fa fa-refresh"></i></div>
+									<div>
+										<div class="sc-label">Total em Aberto - Só Renovados</div>
+										<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(excedentesAbertosMB.valorTotalRenovados)}</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
+								<div class="stat-card sc-warning" title="Inclui contratos Ativos, Renovados, Inativos/Cancelados e sem situação definida">
+									<div class="sc-icon"><i class="fa fa-globe"></i></div>
+									<div>
+										<div class="sc-label">Total Geral (todos os contratos)</div>
+										<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(excedentesAbertosMB.valorTotalTodosContratos)}</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- ═══ TABELA DETALHADA ═══ -->
+						<div class="gf-card">
+							<div class="gf-card-header">
+								<i class="fa fa-table icon-purple"></i>
+								<div>
+									<h4>Detalhamento dos Excedentes em Aberto</h4>
+									<small>Um registro por contrato, com todos os meses pendentes agrupados na mesma célula</small>
+								</div>
+							</div>
+
+							<div class="gf-filter-bar">
+								<label><i class="fa fa-filter" style="margin-right:6px;"></i>Situação do Contrato:</label>
+								<p:selectOneMenu style="width:220px" value="#{excedentesAbertosMB.filtroSituacao}">
+									<f:selectItem itemLabel="Todos" itemValue="TODOS" />
+									<f:selectItem itemLabel="Ativos" itemValue="Ativo" />
+									<f:selectItem itemLabel="Renovados" itemValue="Renovado" />
+									<f:selectItem itemLabel="Outros (Inativo/Cancelado)" itemValue="Outros" />
+									<p:ajax update="tabelaExcedentes" />
+								</p:selectOneMenu>
+							</div>
+
+							<p:dataTable id="tabelaExcedentes" var="list"
+								value="#{excedentesAbertosMB.listaExcedentesFiltrada}"
+								resizableColumns="true" reflow="true" rows="20"
+								paginator="true" paginatorPosition="bottom"
+								emptyMessage="Nenhum excedente em aberto encontrado."
+								rowsPerPageTemplate="20,30,50,100"
+								sortBy="#{list.valorTotal}" sortOrder="descending">
+
+								<p:column headerText="Cliente (devedor)"
+									style="white-space:normal !important;"
+									sortBy="#{list.clienteNome}"
+									filterBy="#{list.clienteNome}"
+									filterMatchMode="contains">
+									<h:outputText value="#{list.clienteNome}" />
+									<br />
+									<small style="color:#78909c;">
+										<i class="fa fa-phone" style="margin-right:3px;"></i>
+										<h:outputText value="#{list.clienteTelefone}" />
+									</small>
+								</p:column>
+
+								<p:column headerText="Excedente/Fat." width="150"
+									sortBy="#{list.valorTotal}">
+									<h:outputText value="#{list.detalheHtml}" escape="false" />
+								</p:column>
+
+								<p:column headerText="Qtd. Meses" width="90"
+									sortBy="#{list.quantidadeMeses}">
+									<h:outputText value="#{list.quantidadeMeses}" />
+								</p:column>
+
+								<p:column headerText="Situação do Contrato" width="140">
+									<h:outputText value="#{list.situacaoContrato}" />
+								</p:column>
+
+								<p:column headerText="Início / Fim do Contrato" width="200">
+									<h:outputText value="#{formataDataMB.formatarData(list.dataInicial)}" />
+									<span style="color:#90a4ae;margin:0 4px;">até</span>
+									<h:outputText value="#{formataDataMB.formatarData(list.dataFinal)}" />
+								</p:column>
+
+							</p:dataTable>
+						</div>
+
+						<div class="gf-card" style="text-align:center;padding:16px;">
+							<a href="fechamentoMes.jsf"><i class="fa fa-arrow-right" style="margin-right:6px;"></i>Ir para Fechamento do Mês</a>
+						</div>
+
+					</h:panelGroup>
+
+				</h:panelGroup>
+
+			</h:form>
+
+		</div><!-- /.gf-page -->
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

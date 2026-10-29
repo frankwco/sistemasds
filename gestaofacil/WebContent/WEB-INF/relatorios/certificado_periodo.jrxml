@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="certificado_periodo" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e7eebaa4-068b-407f-bf7a-d4c2e72a1292">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GestaoFacil"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="197"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="796"/>
+	<style name="Title" fontName="Arial" fontSize="26" isBold="true"/>
+	<style name="SubTitle" forecolor="#666666" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<parameter name="DADOS" class="java.lang.String"/>
+	<parameter name="DATA_INICIAL" class="java.lang.String"/>
+	<parameter name="DATA_FINAL" class="java.lang.String"/>
+	<parameter name="PONTO_COLETA_ID" class="java.lang.Long"/>
+	<queryString>
+		<![CDATA[select 1]]>
+	</queryString>
+	<field name="1" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="1"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="233" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="555" height="233" uuid="5580f4b3-cb01-4a15-8232-d3a78e1cdd64"/>
+				<imageExpression><![CDATA["laudos_jpg_tudo.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="69" splitType="Stretch">
+			<textField>
+				<reportElement x="2" y="23" width="553" height="44" uuid="6e7dcc28-689c-4fdc-8ee3-d3f4029f9d3c"/>
+				<textElement textAlignment="Justified" markup="html">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["A <b>D. SORTI & SORTI LTDA</b>, CNPJ: 00.173.763/0001-34, sediada no endereço acima, CERTIFICA que efetuou a COLETA e ENCAMINHAMENTO PARA TRATAMENTO (A e E autoclavagem e aterro; B, A2 e A3 incineração e aterro) e DESTINAÇÃO FINAL dos resíduos de saúde descritos a seguir:"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="310" y="0" width="244" height="20" uuid="9c00b7b3-4203-4db3-a38b-3610c5b04e94"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[LICENÇA DE OPERAÇÃO Nº 138193-R1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="-1" y="0" width="244" height="20" uuid="2a25ac24-a8ba-4748-9fd0-31b139d88e26"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[dsresiduos.com.br]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<subreport>
+				<reportElement x="2" y="0" width="553" height="20" uuid="1840e275-29ef-44a1-b731-3de9ce58fbbb"/>
+				<subreportParameter name="DADOS">
+					<subreportParameterExpression><![CDATA[$P{DADOS}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DATA_INICIAL">
+					<subreportParameterExpression><![CDATA[$P{DATA_INICIAL}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DATA_FINAL">
+					<subreportParameterExpression><![CDATA[$P{DATA_FINAL}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="PONTO_COLETA_ID">
+					<subreportParameterExpression><![CDATA[$P{PONTO_COLETA_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["certificado_periodo_sub.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="191" splitType="Stretch">
+			<textField>
+				<reportElement x="-1" y="127" width="281" height="40" uuid="e7df59c4-8662-4a8c-891e-a242cfc01c98"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" D. SORTI & SORTI LTDA (DS TRANSPORTES) <br/>Daniel Sorti / Diretor"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="127" width="263" height="40" uuid="5ccbb1f0-b256-4241-a2f7-158b03d06472"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" DANIEL SORTI - CFQ: 193596 <br/>Técnico em Meio Ambiente"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="2" width="553" height="41" uuid="fe600b56-0c77-4ba9-bed2-43f9a45f7720"/>
+				<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Para constar, emitimos o presente <b>CERTIFICADO (LAUDO TÉCNICO)</b> de TRATAMENTO E DESTINAÇÃO FINAL DE RESIDUOS DE SERVIÇOS DE SAUDE."]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement style="Column header" x="-1" y="43" width="271" height="20" forecolor="#030303" uuid="ef9fc35f-c45f-4ec6-a5cc-ec2020109ea7"/>
+				<textElement>
+					<font fontName="SansSerif" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["NOVA ESPERANÇA - PR, "+new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="20" y="73" width="210" height="51" uuid="1d6e9204-66e5-4a69-8f6a-88939ac10d6c"/>
+				<imageExpression><![CDATA["assinaturaDS.png"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="311" y="73" width="210" height="51" uuid="d8d2859e-2a25-4255-9c8b-3cf44b0f2b8e"/>
+				<imageExpression><![CDATA["assinaturaDS.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="0" y="170" width="553" height="20" uuid="f7713544-f990-42a4-9ebb-cbc983fa081d"/>
+				<textElement verticalAlignment="Middle" markup="html">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>DESTINAÇÃO FINAL</b>: Servioeste Soluções Ambientais LTDA - CNPJ 03.392.348/0006-74 - Maringá/PR"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement style="Column header" x="480" y="0" width="73" height="20" forecolor="#000000" uuid="6f13e17d-4b46-4ede-ab63-9d2685ec9c16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="2" width="478" height="18" uuid="b217f158-248f-4feb-8673-ae391ecfbe1f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Verifique a autenticidade deste certificado em dsresiduos.com.br -> Sistema Gestão -> Verificar Autenticidade]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

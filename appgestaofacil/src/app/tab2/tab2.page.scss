@@ -1,0 +1,346 @@
+.t2-toolbar {
+  --border-width: 0;
+
+  ion-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+}
+
+.t2-content {
+  --background: #f0f4fa;
+  padding: 16px;
+}
+
+/* Vehicle filter card */
+.vehicle-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  gap: 12px;
+}
+
+.vehicle-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3880ff 0%, #5b5ea6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 22px;
+    color: #fff;
+  }
+}
+
+.vehicle-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2d3748;
+}
+
+.vehicle-plate {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.vehicle-search-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3880ff 0%, #5b5ea6 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 20px;
+    color: #fff;
+  }
+}
+
+/* Counter */
+.counter-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.counter-badge {
+  background: linear-gradient(135deg, #3880ff 0%, #5b5ea6 100%);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #a0aec0;
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e8ecf4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    ion-icon {
+      font-size: 32px;
+      color: #a0aec0;
+    }
+  }
+
+  p {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+}
+
+/* Coleta cards */
+.coleta-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  transition: transform 0.15s;
+
+  &.selected {
+    border-left: 4px solid #3880ff;
+  }
+}
+
+.coleta-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.coleta-title {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #2d3748;
+  line-height: 1.35;
+}
+
+.coleta-subtitle {
+  font-weight: 400;
+  color: #718096;
+}
+
+.sync-badge {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 22px;
+  }
+
+  &.synced {
+    background: #e8f5e9;
+
+    ion-icon {
+      color: #2dd36f;
+    }
+  }
+
+  &.not-synced {
+    background: #ffebee;
+
+    ion-icon {
+      color: #eb445a;
+    }
+  }
+}
+
+.coleta-city {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #718096;
+  margin-bottom: 10px;
+
+  ion-icon {
+    font-size: 14px;
+    color: #a0aec0;
+  }
+}
+
+/* Groups grid */
+.groups-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.group-cell {
+  flex: 1;
+  min-width: 48px;
+  border-radius: 10px;
+  padding: 8px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #2d3748;
+}
+
+.group-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.group-a {
+  background: #e8f5e9;
+}
+
+.group-e {
+  background: #fff8e1;
+}
+
+.group-b {
+  background: #eceff1;
+}
+
+.group-a2 {
+  background: #fce4ec;
+}
+
+.group-a3 {
+  background: #ffebee;
+}
+
+.group-a4 {
+  background: #ffcdd2;
+}
+
+/* Footer */
+.coleta-footer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.footer-left {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.total-badge,
+.date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.total-badge {
+  background: linear-gradient(135deg, #2dd36f 0%, #1a9e54 100%);
+  color: #fff;
+
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+.date-badge {
+  background: #e8ecf4;
+  color: #4a5568;
+
+  ion-icon {
+    font-size: 14px;
+    color: #718096;
+  }
+}
+
+/* Meta info */
+.coleta-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f4fa;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #718096;
+
+  ion-icon {
+    font-size: 14px;
+    color: #a0aec0;
+  }
+}
+
+// Spinner em CSS puro: anima só com "transform", que roda fora da thread principal
+// (o <ion-spinner> SVG congela enquanto o app lê o array grande de coletas).
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 0;
+  color: #666;
+}
+
+.gf-spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid rgba(var(--ion-color-primary-rgb), 0.25);
+  border-top-color: var(--ion-color-primary);
+  border-radius: 50%;
+  animation: gf-girar 0.8s linear infinite;
+  will-change: transform;
+}
+
+@keyframes gf-girar {
+  to { transform: rotate(360deg); }
+}
