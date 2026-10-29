@@ -123,11 +123,6 @@
 				<i class="fa fa-recycle hero-icon"></i>
 			</div>
 
-			<div id="gfFiltrosLoading" class="gf-loading-inline">
-				<i class="fa fa-spinner fa-spin"></i>
-				<span>Buscando dados de clientes, pontos de coleta e cidades...</span>
-			</div>
-
 			<p:ajaxStatus onstart="PF('statusDialog').show()"
 				onsuccess="PF('statusDialog').hide()" />
 
@@ -207,10 +202,9 @@
 					</div>
 				</div>
 				<h:form id="frmAutoLoad">
-					<p:remoteCommand name="carregarFiltros" global="false"
+					<p:remoteCommand name="carregarFiltros"
 						autoRun="true"
 						actionListener="#{coletaAppMB.carregarFiltros()}"
-						oncomplete="document.getElementById('gfFiltrosLoading').style.display='none'"
 						update=":frmFiltros" />
 				</h:form>
 
