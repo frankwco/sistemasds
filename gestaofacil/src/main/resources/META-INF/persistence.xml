@@ -15,6 +15,7 @@
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.default_batch_fetch_size" value="50" />
 <!-- 			<property name="hibernate.hbm2ddl.auto" value="none" /> -->
 			
 <!-- 			<property name = "hibernate.show_sql" value = "true" /> -->

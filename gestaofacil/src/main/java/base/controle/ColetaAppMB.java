@@ -105,8 +105,16 @@ public class ColetaAppMB implements Serializable {
 		if (filtrosCarregados) {
 			return;
 		}
-		listaClientesFiltro = daoCliente.listaComStatus(Cliente.class, "cidade.nome, nomeRazaoSocial");
-		listaPontosColetaFiltro = daoPontoColeta.listaComStatus(PontoColeta.class, " nomeRota, ordem asc");
+		// join fetch evita uma consulta extra por linha (N+1) nos @ManyToOne eager
+		listaClientesFiltro = manager.createQuery(
+				"select c from Cliente c join fetch c.cidade ci left join fetch ci.estado "
+						+ "where c.status is true order by ci.nome, c.nomeRazaoSocial",
+				Cliente.class).getResultList();
+		listaPontosColetaFiltro = manager.createQuery(
+				"select p from PontoColeta p left join fetch p.cliente cl left join fetch cl.cidade "
+						+ "left join fetch p.cidade left join fetch p.rota "
+						+ "where p.status is true order by p.nomeRota, p.ordem asc",
+				PontoColeta.class).getResultList();
 		listaCidadesFiltro = daoCidade.listar(Cidade.class, "selecionada is true");
 		filtrosCarregados = true;
 	}
@@ -252,37 +260,40 @@ public class ColetaAppMB implements Serializable {
 		StringBuilder query = new StringBuilder();
 		if (dataInicialConsulta != null && dataFinalConsulta != null) {
 //			/ConverteStringDate.retornaD
-			query.append("dataUltimaColeta BETWEEN '" + ConverteStringDate.retornaData(dataInicialConsulta)
+			query.append("c.dataUltimaColeta BETWEEN '" + ConverteStringDate.retornaData(dataInicialConsulta)
 					+ " 00:00:00' and '" + ConverteStringDate.retornaData(dataFinalConsulta) + " 23:59:59'");
 		}
 		if (clienteSelecionadoConsulta != null && clienteSelecionadoConsulta.getId() != null) {
 			if (query.toString().length() > 2) {
 				query.append(" and ");
 			}
-			query.append("pontoColetaSelecionado.cliente.id=" + clienteSelecionadoConsulta.getId());
+			query.append("p.cliente.id=" + clienteSelecionadoConsulta.getId());
 		}
 
 		if (pontoColetaSelecionadoConsulta != null && pontoColetaSelecionadoConsulta.getId() != null) {
 			if (query.toString().length() > 2) {
 				query.append(" and ");
 			}
-			query.append("pontoColetaSelecionado.id=" + pontoColetaSelecionadoConsulta.getId());
+			query.append("p.id=" + pontoColetaSelecionadoConsulta.getId());
 		}
 
 		if (cidadeSelecionadaConsulta != null) {
 			if (query.toString().length() > 2) {
 				query.append(" and ");
 			}
-			query.append("pontoColetaSelecionado.cidade.id=" + cidadeSelecionadaConsulta.getId());
+			query.append("p.cidade.id=" + cidadeSelecionadaConsulta.getId());
 		}
 
 		if (query.toString().length() < 2) {
-			query.append(" and id>0");
+			query.append("c.id>0");
 		}
 
-		listaColetaApp = new ArrayList<>();
-		listaColetaApp = daoColetaApp.listar(ColetaApp.class, query.toString() + " order by dataUltimaColeta desc");
-//		listaColetaApp = daoColetaApp.listar(ColetaApp.class, query.toString() + " order by id desc");
+		// join fetch traz ponto de coleta, cliente e veiculo numa unica consulta (evita N+1)
+		listaColetaApp = manager.createQuery(
+				"select c from ColetaApp c left join fetch c.pontoColetaSelecionado p "
+						+ "left join fetch p.cliente cl left join fetch c.veiculo "
+						+ "where c.status is true and " + query + " order by c.dataUltimaColeta desc",
+				ColetaApp.class).getResultList();
 
 	}
 
