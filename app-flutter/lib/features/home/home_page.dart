@@ -13,7 +13,6 @@ import '../coleta/coleta_page.dart';
 import '../alertas/alertas_page.dart';
 import '../pontos/dados_ponto_page.dart';
 import '../cobranca/cobranca_page.dart';
-import '../relatorio/coletas_excluidas_page.dart';
 import '../relatorio/relatorio_coletas_page.dart';
 import '../veiculo/abastecimento_page.dart';
 import '../veiculo/captura_ia_page.dart';
@@ -234,10 +233,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             _Atalho(Icons.info_outline, 'Dados de pontos', corPrimaria, () => _abrir(const DadosPontoPage())),
             _Atalho(Icons.highlight_off, 'Pontos sem coletas', corAlerta, () => _abrir(const PontosSemColetaPage())),
             _Atalho(Icons.bar_chart, 'Relatório de coletas', corPrimaria, () => _abrir(const RelatorioColetasPage())),
-            _Atalho(Icons.error_outline, 'Pontos com avisos', corPerigo, () => _abrir(const PontosComAvisosPage())),
-            _Atalho(Icons.restore_from_trash_outlined, 'Coletas excluídas (29/10)', corAlerta,
-                () => _abrir(const ColetasExcluidasPage())),
-          ]),
+            _Atalho(Icons.error_outline, 'Pontos com avisos', corPerigo, () => _abrir(const PontosComAvisosPage())),          ]),
           const SizedBox(height: 12),
           ValueListenableBuilder<SyncEstado>(
             valueListenable: sync.estado,
