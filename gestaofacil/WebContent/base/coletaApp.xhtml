@@ -129,7 +129,7 @@
 			<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
 				closable="false" resizable="false" showHeader="false"
 				styleClass="gf-loading-dialog">
-				<span class="gf-loading-text">Aguarde, realizando operação...</span>
+				<span id="statusDialogTexto" class="gf-loading-text">Buscando clientes, pontos de coleta e cidades...</span>
 				<p:graphicImage name="img/aguarde.gif" />
 			</p:dialog>
 
@@ -205,6 +205,7 @@
 					<p:remoteCommand name="carregarFiltros"
 						autoRun="true"
 						actionListener="#{coletaAppMB.carregarFiltros()}"
+						oncomplete="document.getElementById('statusDialogTexto').textContent='Aguarde, realizando operação...'"
 						update=":frmFiltros" />
 				</h:form>
 
