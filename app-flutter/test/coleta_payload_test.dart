@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gestaofacil/data/coleta_item.dart';
 import 'package:gestaofacil/data/coleta_payload.dart';
+import 'package:gestaofacil/data/localizacao.dart';
 import 'package:gestaofacil/data/models.dart';
 
 Ponto _ponto() => Ponto({
@@ -23,6 +24,26 @@ void main() {
   final agora = DateTime(2026, 10, 27, 14, 5, 9);
 
   group('payload da coleta', () {
+    test('inclui latitude/longitude como texto só quando há posição', () {
+      Map<String, dynamic> monta(Posicao? pos) => montarPayloadColeta(
+            identificador: 'abc',
+            ponto: _ponto(),
+            situacao: 'Coletado',
+            valores: {'a': 1000},
+            agora: agora,
+            usuario: _usuario(),
+            posicao: pos,
+          );
+
+      final com = monta(const Posicao(-23.5505, -46.6333));
+      expect(com['latitude'], '-23.5505');
+      expect(com['longitude'], '-46.6333');
+
+      final sem = monta(null);
+      expect(sem.containsKey('latitude'), isFalse);
+      expect(sem.containsKey('longitude'), isFalse);
+    });
+
     test('monta os campos que o backend espera', () {
       final p = montarPayloadColeta(
         identificador: 'abc',

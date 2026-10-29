@@ -9,13 +9,16 @@ import 'coletas_repo.dart';
 import 'db.dart';
 import 'espelho_firebase.dart';
 import 'firebase_backup.dart';
+import 'localizacao.dart';
 import 'models.dart';
 import 'pontos_repo.dart';
 
 /// Registra uma coleta finalizada no aparelho.
 class ColetaService {
-  ColetaService(this._db, this._pontos, this._coletas, this._backup, this._espelho);
+  ColetaService(this._db, this._pontos, this._coletas, this._backup, this._espelho,
+      [this._localizador = const SemLocalizador()]);
 
+  final Localizador _localizador;
   final BackupRemoto _backup;
   final EspelhoFirebase _espelho;
   final AppDatabase _db;
@@ -40,6 +43,7 @@ class ColetaService {
     final id = gerarIdentificador(ponto.id, agora);
     final arquivo = File(p.join(_db.pastaAssinaturas.path, '$id.png'));
     await arquivo.writeAsBytes(assinaturaPng, flush: true);
+    final posicao = await _localizador.obter();
 
     final payload = montarPayloadColeta(
       identificador: id,
@@ -51,6 +55,7 @@ class ColetaService {
       veiculo: veiculo,
       motorista: motorista,
       emailNovo: emailNovo,
+      posicao: posicao,
     );
 
     try {

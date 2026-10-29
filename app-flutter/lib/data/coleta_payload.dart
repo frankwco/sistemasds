@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../core/config.dart';
 import '../core/conversao.dart';
+import 'localizacao.dart';
 import 'models.dart';
 
 /// Identificador único da coleta no aparelho (`identificadorApp`). É a chave de
@@ -43,6 +44,7 @@ Map<String, dynamic> montarPayloadColeta({
   Veiculo? veiculo,
   Motorista? motorista,
   String emailNovo = '',
+  Posicao? posicao,
 }) {
   final efetivos = valoresEfetivos(situacao, valores);
   // Instante em UTC com precisão de milissegundos (o Dart às vezes emite microssegundos).
@@ -65,6 +67,9 @@ Map<String, dynamic> montarPayloadColeta({
     'minutoUltimaColeta': agora.minute,
     'segundoUltimaColeta': agora.second,
     'emailNovo': emailNovo.trim(),
+    // O backend guarda latitude/longitude como texto; sem localização, nem vão no JSON.
+    if (posicao != null) 'latitude': posicao.latitude.toString(),
+    if (posicao != null) 'longitude': posicao.longitude.toString(),
     'veiculo': veiculo?.raw ?? {'id': null, 'descricao': '', 'placa': ''},
     'nomeMotorista': motorista?.nome ?? '',
     'emailMotorista': motorista?.email ?? '',

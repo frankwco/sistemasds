@@ -8,6 +8,7 @@ import 'data/db.dart';
 import 'data/espelho_firebase.dart';
 import 'data/firebase_backup.dart';
 import 'data/lancamento_service.dart';
+import 'data/localizacao.dart';
 import 'data/models.dart';
 import 'data/pontos_repo.dart';
 import 'data/sessao_repo.dart';
@@ -39,6 +40,7 @@ final coletaServiceProvider = Provider((ref) => ColetaService(
       ref.watch(coletasRepoProvider),
       ref.watch(firebaseBackupProvider),
       ref.watch(espelhoProvider),
+      const LocalizadorGps(),
     ));
 
 final lancamentoServiceProvider =
