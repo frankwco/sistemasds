@@ -113,6 +113,18 @@ class FirebaseBackup implements BackupRemoto {
     ];
   }
 
+  /// Documentos do dia excluídos (`status: false`), com o conteúdo intacto: a exclusão no app é
+  /// só lógica. Usado pela tela provisória de recuperação. A falha SOBE.
+  Future<List<Map<String, dynamic>>> coletasExcluidasDoDia(DateTime dia) async {
+    if (!_ativo) throw StateError('Firebase desligado neste build');
+    await _garantirLogin();
+    final r = await _dia(dia.day, dia.month, dia.year).get();
+    return [
+      for (final d in r.docs)
+        if (d.data()['status'] == false) d.data(),
+    ];
+  }
+
   /// Espera o Firestore enviar o que ficou na fila local (escritas feitas sem internet). Usado
   /// pela tarefa em segundo plano, que termina logo depois e mataria o envio no meio.
   @override
