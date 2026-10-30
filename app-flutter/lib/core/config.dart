@@ -15,7 +15,7 @@ class Config {
   );
 
   /// Vai em cada coleta (campo `versaoApp`) para o backend saber qual app a enviou.
-  static const versaoApp = 'Flutter1';
+  static const versaoApp = 'Flutter2';
 
   static const timeoutHttp = Duration(seconds: 30);
   /// Envio de coleta: o servidor grava (e responde) com calma; 30 s era curto e gerava reenvio à toa.
