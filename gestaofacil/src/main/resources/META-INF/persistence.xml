@@ -7,7 +7,7 @@
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gestaofacil?sessionVariables=time_zone='-03:00'" />
 			<property name="javax.persistence.jdbc.user" value="root" />
-			<property name="javax.persistence.jdbc.password" value="" />
+<!-- 			<property name="javax.persistence.jdbc.password" value="" /> -->
 <!-- 						<property name="javax.persistence.jdbc.password" value="!@#gwh28ALC1" /> -->
 			
 <!-- 			<property name="javax.persistence.jdbc.password" value="!@#gestao159/*" /> -->
