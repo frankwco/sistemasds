@@ -20,8 +20,11 @@ class PontosRepo {
   // ─── Consulta ──────────────────────────────────────────
 
   /// Cláusula WHERE dos pontos ativos de uma cidade. [coletados] true/false separa os
-  /// já coletados dos a coletar; null devolve todos. "Coleta Única" fica coletada até o
-  /// contrato ser renovado (o backend zera a data), não só no dia da coleta.
+  /// já coletados hoje dos a coletar; null devolve todos (tela de consulta).
+  ///
+  /// "Coleta Única" já coletada (qualquer data) não aparece para o motorista em nenhuma
+  /// das duas listas, nem nos dias seguintes: só volta quando o contrato é renovado e o
+  /// backend zera a data da última coleta.
   ({String where, List<Object?> args}) _filtro({
     required int cidadeId,
     required DateTime hoje,
@@ -33,9 +36,9 @@ class PontosRepo {
     final args = <Object?>[cidadeId];
 
     if (coletados != null) {
-      const jaColetado = '(CASE WHEN coleta_unica = 1 THEN (dia > 0 AND mes > 0 AND ano > 0) '
-          'ELSE (dia = ? AND mes = ? AND ano = ?) END)';
-      where.write(coletados ? ' AND $jaColetado' : ' AND NOT $jaColetado');
+      where.write(' AND NOT (coleta_unica = 1 AND (dia > 0 OR mes > 0 OR ano > 0))');
+      const coletadoHoje = '(dia = ? AND mes = ? AND ano = ?)';
+      where.write(coletados ? ' AND $coletadoHoje' : ' AND NOT $coletadoHoje');
       args.addAll([hoje.day, hoje.month, hoje.year]);
     }
     final n = normalizar(nome).trim();
@@ -106,7 +109,7 @@ class PontosRepo {
       'id': id,
       'id_cidade': idCidade == null ? null : inteiro(idCidade),
       'ativo': inativo ? 0 : 1,
-      'coleta_unica': texto(p['periodicidadeColeta']) == 'Coleta Única' ? 1 : 0,
+      'coleta_unica': ehColetaUnica(p['periodicidadeColeta']) ? 1 : 0,
       'aviso': verdadeiro(p['situacaoAviso']) ? 1 : 0,
       'dia': inteiro(p['diaUltimaColeta']),
       'mes': inteiro(p['mesUltimaColeta']),

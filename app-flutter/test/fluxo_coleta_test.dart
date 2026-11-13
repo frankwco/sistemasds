@@ -576,16 +576,42 @@ void main() {
       expect(await ids(nome: '100%'), isEmpty, reason: 'curinga do LIKE é escapado');
     });
 
-    test('Coleta Única fica coletada em qualquer dia, até a data ser zerada', () async {
+    test('Coleta Única já coletada some das listas do motorista (em qualquer dia) até a data ser zerada', () async {
       await a.carregarPontos([
         pontoJson(1, periodicidade: 'Coleta Única', extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
         pontoJson(2, extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(3, periodicidade: 'COLETA UNICA ', extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(4, periodicidade: 'Coleta Única'), // ainda não coletada
       ]);
       final hoje = DateTime.now();
-      final coletados = await a.pontos.pagina(cidadeId: 1, hoje: hoje, coletados: true, limite: 10, offset: 0);
-      final coletar = await a.pontos.pagina(cidadeId: 1, hoje: hoje, coletados: false, limite: 10, offset: 0);
-      expect(coletados.map((p) => p.id), [1]);
-      expect(coletar.map((p) => p.id), [2], reason: 'ponto comum só conta como coletado no próprio dia');
+      Future<List<int>> ids(bool? coletados) async =>
+          (await a.pontos.pagina(cidadeId: 1, hoje: hoje, coletados: coletados, limite: 10, offset: 0))
+              .map((p) => p.id)
+              .toList();
+      expect(await ids(true), isEmpty);
+      expect(await ids(false), [2, 4], reason: 'ponto comum só conta como coletado no próprio dia');
+      expect(await ids(null), [1, 2, 3, 4], reason: 'a tela de consulta mostra todos');
+
+      // Renovação do contrato: o backend zera a data e o ponto volta a aparecer.
+      await a.pontos.mesclar([pontoJson(1, periodicidade: 'Coleta Única')], completo: false);
+      expect(await ids(false), [1, 2, 4]);
+    });
+
+    test('Coleta Única: depois de coletar não aparece nem em "coletados", nem no dia seguinte', () async {
+      await a.carregarPontos([pontoJson(1, periodicidade: 'Coleta Única'), pontoJson(2)]);
+      await a.registrar(1);
+      final hoje = DateTime.now();
+      final amanha = hoje.add(const Duration(days: 1));
+      for (final dia in [hoje, amanha]) {
+        expect((await a.pontos.pagina(cidadeId: 1, hoje: dia, coletados: false, limite: 10, offset: 0)).map((p) => p.id), [2]);
+        expect(await a.pontos.contar(cidadeId: 1, hoje: dia, coletados: true), 0);
+      }
+
+      // Servidor já processou a coleta (sem pendência local): continua escondido.
+      await a.pontos.mesclar([
+        pontoJson(1, periodicidade: 'Coleta Única', extra: {'diaUltimaColeta': hoje.day, 'mesUltimaColeta': hoje.month, 'anoUltimaColeta': hoje.year}),
+      ], completo: false);
+      expect((await a.pontos.pagina(cidadeId: 1, hoje: amanha, coletados: false, limite: 10, offset: 0)).map((p) => p.id), [2]);
     });
 
     test('paginação: offset e limite respeitam a ordem do servidor', () async {

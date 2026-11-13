@@ -3,6 +3,14 @@ import 'dart:convert';
 import 'package:flutter/painting.dart' show Color;
 
 import '../core/conversao.dart';
+import '../core/formato.dart';
+
+/// "Coleta Única" vinda do servidor, tolerando acento, maiúsculas e espaços
+/// ("Coleta Unica", "COLETA ÚNICA ", texto com acento mal codificado no banco etc.).
+bool ehColetaUnica(Object? periodicidade) {
+  final t = normalizar(periodicidade).replaceAll(RegExp(r'\s+'), ' ').trim();
+  return t == 'coleta unica' || (t.startsWith('coleta ') && t.endsWith('nica'));
+}
 
 /// Grupo de resíduo coletado. `campo` é o nome do campo no JSON da coleta e `nome` o
 /// código que aparece em `gruposColetados` do ponto ("A;E;A2;").
@@ -104,7 +112,7 @@ class Ponto {
   String get periodicidadeColeta => texto(raw['periodicidadeColeta']);
   String get aviso => texto(raw['aviso']);
   bool get situacaoAviso => verdadeiro(raw['situacaoAviso']);
-  bool get coletaUnica => periodicidadeColeta == 'Coleta Única';
+  bool get coletaUnica => ehColetaUnica(periodicidadeColeta);
   int get quantidadeColetadaMes => inteiro(raw['quantidadeColetadaMes']);
   int get quantidadeColetaMes => inteiro(raw['quantidadeColetaMes']);
   String get email => texto(raw['email']);

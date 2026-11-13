@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'models.dart';
 
 /// Banco local (SQLite) no lugar do Ionic Storage.
 ///
@@ -23,7 +26,7 @@ class AppDatabase {
   /// do aparelho assim que a coleta é confirmada pelo servidor.
   final Directory pastaAssinaturas;
 
-  static const versaoEsquema = 4;
+  static const versaoEsquema = 5;
   static const _versao = versaoEsquema;
 
   static Future<AppDatabase> abrir() async {
@@ -113,6 +116,19 @@ class AppDatabase {
     if (de < 4) {
       // Backup no Firebase com garantia: 0 = em dia, 1 = falta gravar a coleta, 2 = falta gravar a exclusão.
       await db.execute('ALTER TABLE coletas ADD COLUMN fb INTEGER NOT NULL DEFAULT 0');
+    }
+    final temPontos = (await db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'pontos'")).isNotEmpty;
+    if (de < 5 && temPontos) {
+      // "Coleta Única" passou a ser reconhecida sem depender de acento/maiúsculas: recalcula
+      // a coluna dos pontos já gravados (a sync incremental só reenvia o que mudou).
+      final linhas = await db.query('pontos', columns: ['id', 'json']);
+      final b = db.batch();
+      for (final l in linhas) {
+        final json = jsonDecode(l['json'] as String);
+        final unica = json is Map && ehColetaUnica(json['periodicidadeColeta']);
+        b.update('pontos', {'coleta_unica': unica ? 1 : 0}, where: 'id = ?', whereArgs: [l['id']]);
+      }
+      await b.commit(noResult: true);
     }
   }
 
