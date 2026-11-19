@@ -115,7 +115,10 @@ public class GenericDAO<T> implements Serializable {
 		        "where iff.status = true " +
 		        "  and pc.status = true " +
 		        "  and iff.situacaoContrato = 'Ativo' " +
-		        "  and " + parametro + " " +
+		        // Entre parênteses: um filtro com OR (ex.: "(data BETWEEN ...) or data is null")
+		        // escaparia das condições de ponto/contrato ativo e traria pontos de contratos
+		        // inativos para o app.
+		        "  and (" + parametro + ") " +
 		        "order by " +
 		        "  case when pc.periodicidadeColeta = 'Coleta Única' then 0 else 1 end, " +
 		        "  case when pc.primeiraColeta = true then 0 else 1 end, " +
