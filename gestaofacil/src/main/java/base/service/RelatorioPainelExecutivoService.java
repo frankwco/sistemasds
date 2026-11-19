@@ -77,9 +77,18 @@ public class RelatorioPainelExecutivoService implements Serializable {
 				Long.class).getSingleResult();
 	}
 
+	/**
+	 * Pontos atendidos hoje: ponto ativo vinculado a pelo menos um contrato
+	 * ativo (mesmo critério da lista de pontos do app). Contar só
+	 * PontoColeta.status incluía centenas de pontos cujo contrato foi
+	 * inativado/renovado sem continuação, mas cujo cadastro nunca foi inativado.
+	 */
 	private Long contarPontosColetaAtivos() {
-		return manager.createQuery("select count(p) from PontoColeta p where p.status = true", Long.class)
-				.getSingleResult();
+		return manager.createQuery(
+				"select count(distinct pc.id) from ItensInformacaoFinanceiraPontoColeta iif "
+				+ "join iif.pontoColeta pc join iif.informacoesFinanceiras iff "
+				+ "where iff.status = true and pc.status = true and iff.situacaoContrato = 'Ativo'",
+				Long.class).getSingleResult();
 	}
 
 	private Long contarContratosNovosNoAno(int ano) {
