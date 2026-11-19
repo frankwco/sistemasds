@@ -296,6 +296,23 @@ public class ServicoApp {
 		return Response.status(200).entity(lista).build();
 	}
 
+	/**
+	 * IDs dos pontos com contrato ativo. O app compara com os pontos guardados no
+	 * aparelho e esconde os que não estão aqui (contrato inativado, ponto inativado),
+	 * o que a sincronização incremental de todosPontosColetaReduzidos não consegue
+	 * informar porque só devolve pontos ativos.
+	 */
+	@GET
+	@Produces("application/json;charset=UTF-8")
+	@Consumes("application/json;charset=UTF-8")
+	@Path("/idsPontosColetaAtivos")
+	public Response buscarIdsPontosColetaAtivos() {
+		List<Long> ids = daoPontoColeta.idsPontosColetaAtivos();
+		GenericEntity<List<Long>> lista = new GenericEntity<List<Long>>(ids) {
+		};
+		return Response.status(200).entity(lista).build();
+	}
+
 	@GET
 	@Produces("application/json;charset=UTF-8")
 	@Consumes("application/json;charset=UTF-8")

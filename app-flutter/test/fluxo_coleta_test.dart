@@ -813,6 +813,66 @@ void main() {
       expect(consultas.first.url.toString(), contains('%20'), reason: 'espaço codificado como %20, não +');
     });
 
+    Future<List<int>> visiveis() async => [
+          for (final p in await a.pontos.pagina(cidadeId: 1, hoje: DateTime.now(), coletados: false, limite: 50, offset: 0)) p.id
+        ];
+
+    test('contrato inativado no sistema: o ponto some do app mesmo sem vir na sync incremental', () async {
+      await a.carregarPontos([pontoJson(1), pontoJson(2), pontoJson(3, extra: {'situacaoAviso': true})]);
+      a.servidor = (r) async {
+        if (r.url.path.endsWith('idsPontosColetaAtivos')) return http.Response(jsonEncode([1]), 200);
+        return http.Response('[]', 200); // incremental não traz nada
+      };
+
+      await a.sync.sincronizar();
+
+      expect(await visiveis(), [1]);
+      expect(await a.pontos.contar(cidadeId: 1, hoje: DateTime.now()), 1, reason: 'tela de consulta também');
+      expect(await a.pontos.todosComAviso(), isEmpty);
+      expect(a.sync.estado.value.erro, isNull);
+    });
+
+    test('contrato reativado: ponto ativo no servidor que o aparelho não mostra força a carga completa', () async {
+      await a.carregarPontos([pontoJson(1)]);
+      a.servidor = (r) async {
+        final path = r.url.path;
+        if (path.endsWith('idsPontosColetaAtivos')) return http.Response(jsonEncode([1, 9]), 200);
+        if (path.endsWith('todosPontosColetaReduzidos') && r.url.queryParameters['dataUltimaAtualizacao'] == 'nao') {
+          return http.Response(jsonEncode([pontoJson(1), pontoJson(9)]), 200);
+        }
+        return http.Response('[]', 200);
+      };
+
+      await a.sync.sincronizar();
+
+      expect(await visiveis(), containsAll([1, 9]));
+    });
+
+    test('lista de ativos vazia (falha do servidor) não esconde os pontos', () async {
+      await a.carregarPontos([pontoJson(1), pontoJson(2)]);
+      a.servidor = (r) async => http.Response('[]', 200);
+
+      await a.sync.sincronizar();
+
+      expect(await visiveis(), [1, 2]);
+    });
+
+    test('servidor sem o endpoint de ativos: cai para a carga completa, que remove os inativos', () async {
+      await a.carregarPontos([pontoJson(1), pontoJson(2)]);
+      a.servidor = (r) async {
+        final path = r.url.path;
+        if (path.endsWith('idsPontosColetaAtivos')) return http.Response('', 404);
+        if (path.endsWith('todosPontosColetaReduzidos') && r.url.queryParameters['dataUltimaAtualizacao'] == 'nao') {
+          return http.Response(jsonEncode([pontoJson(1)]), 200);
+        }
+        return http.Response('[]', 200);
+      };
+
+      await a.sync.sincronizar();
+
+      expect(await visiveis(), [1]);
+    });
+
     test('servidor fora do ar: a rodada termina com erro visível e nada é perdido', () async {
       await a.carregarPontos([pontoJson(1)]);
       final id = await a.registrar(1);

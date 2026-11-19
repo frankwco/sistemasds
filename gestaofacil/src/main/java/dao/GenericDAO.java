@@ -142,6 +142,25 @@ public class GenericDAO<T> implements Serializable {
 		
 	}
 	
+	/**
+	 * IDs de todos os pontos que podem aparecer para coleta no app: ponto ativo com
+	 * pelo menos um contrato ativo (mesmo critério de listaPontosColetaAtivos). O app
+	 * usa esta lista para tirar da tela os pontos cujo contrato foi inativado, já que
+	 * a sincronização incremental só devolve pontos ativos e nunca avisaria a inativação.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Long> idsPontosColetaAtivos() {
+		return manager.createQuery(
+				"select distinct pc.id " +
+				"from ItensInformacaoFinanceiraPontoColeta iif " +
+				"  join iif.pontoColeta pc " +
+				"  join iif.informacoesFinanceiras iff " +
+				"where iff.status = true " +
+				"  and pc.status = true " +
+				"  and iff.situacaoContrato = 'Ativo'"
+		).getResultList();
+	}
+
 	public List<T> listaPontosColetaAtivosReduzidos(Class classeEntidade, String parametro) {
 	
 		if (parametro.length() > 3) {

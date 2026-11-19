@@ -93,8 +93,30 @@ class PontosRepo {
 
   /// Todos os pontos com aviso, de qualquer cidade (tela "Pontos com avisos").
   Future<List<Ponto>> todosComAviso() async {
-    final r = await _d.rawQuery('SELECT json FROM pontos WHERE aviso = 1 ORDER BY busca_nome');
+    final r = await _d.rawQuery('SELECT json FROM pontos WHERE ativo = 1 AND aviso = 1 ORDER BY busca_nome');
     return [for (final linha in r) Ponto.deJson(linha['json'] as String)];
+  }
+
+  /// IDs dos pontos marcados como ativos no aparelho.
+  Future<Set<int>> idsAtivos() async => {
+        for (final r in await _d.rawQuery('SELECT id FROM pontos WHERE ativo = 1')) r['id'] as int,
+      };
+
+  /// Esconde (ativo = 0) todo ponto que não está em [ativosNoServidor], a lista de pontos
+  /// com contrato ativo. A sincronização incremental só traz pontos ativos, então um
+  /// contrato inativado no GestãoFácil nunca chegaria ao aparelho por ela. Devolve quantos
+  /// pontos foram escondidos.
+  Future<int> desativarForaDe(Set<int> ativosNoServidor) async {
+    final sobrando = (await idsAtivos()).difference(ativosNoServidor);
+    if (sobrando.isEmpty) return 0;
+    await _d.transaction((txn) async {
+      final b = txn.batch();
+      for (final id in sobrando) {
+        b.update('pontos', {'ativo': 0}, where: 'id = ?', whereArgs: [id]);
+      }
+      await b.commit(noResult: true);
+    });
+    return sobrando.length;
   }
 
   // ─── Escrita ───────────────────────────────────────────

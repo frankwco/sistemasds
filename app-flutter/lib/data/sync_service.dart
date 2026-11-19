@@ -223,6 +223,7 @@ class SyncService {
       await _baixarColetas();
       final completo = pontosCompleto || await _pontos.total() == 0;
       await _baixarPontos(completo: completo);
+      await _conferirContratosAtivos(jaBaixouCompleto: completo);
       if (catalogos || completo || await _catalogos.vazio(CatalogoRepo.cidades)) {
         await _baixarCatalogos();
       }
@@ -283,6 +284,37 @@ class SyncService {
     }
     await _sessao.gravarUltimaAtualizacaoPontos(_fmtApi.format(inicio));
   }
+
+  /// Garante que só pontos de contratos ativos aparecem para coleta. A sincronização
+  /// incremental só devolve pontos ativos que mudaram, então nunca avisa que um contrato
+  /// foi inativado: aqui o servidor manda os IDs de todos os pontos ativos e o resto é
+  /// escondido. Se o servidor tem ponto ativo que o aparelho não tem (contrato reativado),
+  /// baixa a lista inteira.
+  Future<void> _conferirContratosAtivos({required bool jaBaixouCompleto}) async {
+    Set<int> ativos;
+    try {
+      ativos = await _api.idsPontosAtivos();
+    } on ApiException catch (e) {
+      if (e.status != 404) rethrow;
+      // Servidor ainda sem o endpoint: a carga completa também remove os inativos.
+      final agora = DateTime.now();
+      final ultima = _ultimaCargaCompletaSemEndpoint;
+      if (!jaBaixouCompleto && (ultima == null || agora.difference(ultima) > const Duration(minutes: 30))) {
+        _ultimaCargaCompletaSemEndpoint = agora;
+        await _baixarPontos(completo: true);
+      }
+      return;
+    }
+    // Lista vazia é quase certamente falha do servidor: não esconde tudo por causa disso.
+    if (ativos.isEmpty && await _pontos.total() > 0) return;
+    if (!jaBaixouCompleto && ativos.difference(await _pontos.idsAtivos()).isNotEmpty) {
+      await _baixarPontos(completo: true);
+    }
+    final escondidos = await _pontos.desativarForaDe(ativos);
+    if (escondidos > 0) debugPrint('[Sync] $escondidos ponto(s) de contrato inativo escondido(s)');
+  }
+
+  DateTime? _ultimaCargaCompletaSemEndpoint;
 
   Future<void> _baixarCatalogos() async {
     // Cada lista é independente: uma falha não impede as outras (e só a primeira é relatada).

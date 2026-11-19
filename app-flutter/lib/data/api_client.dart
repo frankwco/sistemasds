@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/config.dart';
+import '../core/conversao.dart';
 
 /// Falha de chamada ao backend. `status` 0 = sem resposta (sem internet, DNS, timeout).
 class ApiException implements Exception {
@@ -116,6 +117,13 @@ class ApiClient {
         'todosPontosColetaReduzidos?dataUltimaAtualizacao=${Uri.encodeComponent(dataUltimaAtualizacao)}');
     if (r is! List) throw ApiException(200, 'resposta de pontos inválida');
     return r;
+  }
+
+  /// IDs dos pontos com contrato ativo no servidor. Só eles podem aparecer para coleta.
+  Future<Set<int>> idsPontosAtivos() async {
+    final r = await _get('idsPontosColetaAtivos');
+    if (r is! List) throw ApiException(200, 'resposta de pontos ativos inválida');
+    return {for (final id in r) inteiro(id)}..remove(0);
   }
 
   // ─── Coletas ───────────────────────────────────────────
