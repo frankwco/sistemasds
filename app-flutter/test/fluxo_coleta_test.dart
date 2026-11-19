@@ -589,12 +589,35 @@ void main() {
               .map((p) => p.id)
               .toList();
       expect(await ids(true), isEmpty);
-      expect(await ids(false), [2, 4], reason: 'ponto comum só conta como coletado no próprio dia');
+      expect(await ids(false), [4, 2], reason: 'ponto comum só conta como coletado no próprio dia; Coleta Única no topo');
       expect(await ids(null), [1, 2, 3, 4], reason: 'a tela de consulta mostra todos');
 
       // Renovação do contrato: o backend zera a data e o ponto volta a aparecer.
       await a.pontos.mesclar([pontoJson(1, periodicidade: 'Coleta Única')], completo: false);
-      expect(await ids(false), [1, 2, 4]);
+      expect(await ids(false), [1, 4, 2]);
+    });
+
+    test('a coletar: Coleta Única, depois 1ª coleta, depois última coleta mais antiga primeiro', () async {
+      await a.carregarPontos([
+        pontoJson(1, extra: {'diaUltimaColeta': 10, 'mesUltimaColeta': 5, 'anoUltimaColeta': 2020}),
+        pontoJson(2, extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(3, periodicidade: 'Coleta Única'),
+        pontoJson(4, extra: {'diaUltimaColeta': 1, 'mesUltimaColeta': 12, 'anoUltimaColeta': 2019}),
+      ]);
+      // Ponto novo chegando pela sincronização incremental (entra no fim do seq), 1ª coleta.
+      await a.pontos.mesclar([pontoJson(5)], completo: false);
+      final hoje = DateTime.now();
+      Future<List<int>> ids(int limite, int offset) async =>
+          (await a.pontos.pagina(cidadeId: 1, hoje: hoje, coletados: false, limite: limite, offset: offset))
+              .map((p) => p.id)
+              .toList();
+      expect(await ids(10, 0), [3, 5, 4, 2, 1]);
+      expect([...await ids(2, 0), ...await ids(2, 2), ...await ids(2, 4)], [3, 5, 4, 2, 1]);
+      expect(
+        (await a.pontos.pagina(cidadeId: 1, hoje: hoje, limite: 10, offset: 0)).map((p) => p.id),
+        [1, 2, 3, 4, 5],
+        reason: 'tela de consulta segue a ordem do servidor',
+      );
     });
 
     test('Coleta Única: depois de coletar não aparece nem em "coletados", nem no dia seguinte', () async {

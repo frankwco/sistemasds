@@ -75,8 +75,17 @@ class PontosRepo {
     required int offset,
   }) async {
     final f = _filtro(cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco);
+    // Listas do motorista: primeiro as Coletas Únicas, depois os pontos de 1ª coleta (sem
+    // data de última coleta), e o resto da última coleta mais antiga para a mais recente.
+    // O desempate pela ordem do servidor (seq) mantém a hora da coleta dentro do mesmo dia.
+    // A tela de consulta continua na ordem do servidor.
+    final ordem = coletados == null
+        ? 'seq'
+        : 'CASE WHEN coleta_unica = 1 THEN 0 '
+            'WHEN dia = 0 AND mes = 0 AND ano = 0 THEN 1 ELSE 2 END, '
+            'ano, mes, dia, seq';
     final r = await _d.rawQuery(
-      'SELECT json FROM pontos WHERE ${f.where} ORDER BY seq LIMIT ? OFFSET ?',
+      'SELECT json FROM pontos WHERE ${f.where} ORDER BY $ordem LIMIT ? OFFSET ?',
       [...f.args, limite, offset],
     );
     return [for (final linha in r) Ponto.deJson(linha['json'] as String)];
