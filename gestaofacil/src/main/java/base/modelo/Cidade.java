@@ -31,6 +31,18 @@ public class Cidade implements Serializable {
 	private Boolean status;
 	
 	private Boolean selecionada=false;
+
+	// Código IBGE do município (7 dígitos) - usado na emissão da NFS-e Nacional
+	@Column(length = 7)
+	private String codigoIbge;
+
+	public String getCodigoIbge() {
+		return codigoIbge;
+	}
+
+	public void setCodigoIbge(String codigoIbge) {
+		this.codigoIbge = codigoIbge;
+	}
 	
 	
 	

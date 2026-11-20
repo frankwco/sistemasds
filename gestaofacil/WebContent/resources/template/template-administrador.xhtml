@@ -136,6 +136,8 @@
 										aria-hidden="true"></i> <span>Categorias de Despesa</span></a></li>
 								<li><a href="configuracaoAjustes.jsf"><i
 										class="fa fa-cog" aria-hidden="true"></i> <span>Configurações</span></a></li>
+								<li><a href="nfseConfiguracao.jsf"><i
+										class="fa fa-cogs" aria-hidden="true"></i> <span>Configuração NFS-e</span></a></li>
 							</ul></li>
 					</p:panelGrid>
 
@@ -230,6 +232,12 @@
 						rendered="#{usuarioSessaoMB.usuario.permissao=='responsavel'}">
 						<li><a href="fechamentoMes.jsf"><i class="fa fa-calendar"
 								aria-hidden="true"></i> <span>Fechamento Mês</span></a></li>
+					</p:panelGrid>
+
+					<p:panelGrid
+						rendered="#{usuarioSessaoMB.usuario.permissao=='responsavel'}">
+						<li><a href="nfse.jsf"><i class="fa fa-file-text"
+								aria-hidden="true"></i> <span>Notas Fiscais (NFS-e)</span></a></li>
 					</p:panelGrid>
 
 					<p:panelGrid

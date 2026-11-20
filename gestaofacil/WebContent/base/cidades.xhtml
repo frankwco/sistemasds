@@ -123,6 +123,15 @@
 						</div>
 
 						<div class="gf-form-item">
+							<label><i class="fa fa-barcode" style="margin-right:6px;color:#1565C0;"></i>Código IBGE (7 dígitos - usado na NFS-e)</label>
+							<p:inputText style="width:100%" maxlength="7"
+								value="#{cidadeMB.cidade.codigoIbge}"
+								validatorMessage="Código IBGE deve ter 7 dígitos">
+								<f:validateRegex pattern="^$|^[0-9]{7}$" />
+							</p:inputText>
+						</div>
+
+						<div class="gf-form-item">
 							<label><i class="fa fa-check-square-o" style="margin-right:6px;color:#1565C0;"></i>Selecionar Cidade?</label>
 							<p:selectOneMenu style="width:100%" value="#{cidadeMB.cidade.selecionada}">
 								<f:selectItem itemLabel="Não" itemValue="false" />

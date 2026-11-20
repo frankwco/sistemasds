@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:body id="entirePage">
+	<ui:composition
+		template="../resources/template/template-administrador.xhtml">
+		<ui:define name="mensagem">
+			<ui:include src="../componentes/mensagem.xhtml" />
+		</ui:define>
+		<ui:define name="modal-confirmacao">
+			<ui:include src="../componentes/dialog-confirmacao.xhtml" />
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+		<div class="gf-page">
+
+			<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" onerror="PF('statusDialog').hide()" />
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+				resizable="false" showHeader="false" styleClass="gf-loading-dialog">
+				<span class="gf-loading-text">Aguarde, realizando operação...</span>
+				<p:graphicImage name="img/aguarde.gif" />
+			</p:dialog>
+
+			<div class="gf-hero hero-compact">
+				<div>
+					<h2><i class="fa fa-cogs" style="margin-right:10px;"></i>Configuração NFS-e</h2>
+					<p>Dados do prestador, certificado digital e valores padrão usados em toda nota</p>
+				</div>
+			</div>
+
+			<h:form id="frmConfig">
+
+				<!-- ═══ CARD: Ambiente e prestador ═══ -->
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-building icon-blue"></i>
+						<div>
+							<h4>Prestador (sua empresa)</h4>
+							<small>Os mesmos dados usados no Emissor Nacional</small>
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label><i class="fa fa-server" style="margin-right:6px;color:#1565C0;"></i>Ambiente</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.ambiente}">
+								<f:selectItem itemLabel="Testes (produção restrita - sem valor fiscal)" itemValue="2" />
+								<f:selectItem itemLabel="PRODUÇÃO (notas com valor fiscal)" itemValue="1" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>CNPJ *</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.cnpjPrestador}" maxlength="18"
+								required="true" requiredMessage="Informe o CNPJ do prestador" />
+						</div>
+						<div class="gf-form-item">
+							<label>Inscrição municipal (opcional)</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.inscricaoMunicipal}" maxlength="15" />
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Razão social</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.razaoSocialPrestador}" />
+						</div>
+						<div class="gf-form-item">
+							<label>Município do prestador - código IBGE *</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.codigoMunicipioEmissor}" maxlength="7"
+								required="true" requiredMessage="Informe o código IBGE do município do prestador"
+								validatorMessage="Código IBGE deve ter 7 dígitos">
+								<f:validateRegex pattern="^[0-9]{7}$" />
+							</p:inputText>
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Telefone</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.telefonePrestador}" maxlength="20" />
+						</div>
+						<div class="gf-form-item">
+							<label>E-mail</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.emailPrestador}" />
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Simples Nacional</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.opcaoSimplesNacional}">
+								<f:selectItem itemLabel="Não optante" itemValue="1" />
+								<f:selectItem itemLabel="Optante - MEI" itemValue="2" />
+								<f:selectItem itemLabel="Optante - ME/EPP" itemValue="3" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>Regime de apuração (só ME/EPP)</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.regimeApuracaoSimplesNacional}">
+								<f:selectItem itemLabel="Tributos federais e municipal pelo SN" itemValue="1" />
+								<f:selectItem itemLabel="Federais pelo SN e ISSQN fora do SN" itemValue="2" />
+								<f:selectItem itemLabel="Federais e municipal fora do SN" itemValue="3" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>Regime especial de tributação</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.regimeEspecialTributacao}">
+								<f:selectItem itemLabel="Nenhum" itemValue="0" />
+								<f:selectItem itemLabel="Ato cooperado (cooperativa)" itemValue="1" />
+								<f:selectItem itemLabel="Estimativa" itemValue="2" />
+								<f:selectItem itemLabel="Microempresa municipal" itemValue="3" />
+								<f:selectItem itemLabel="Notário ou registrador" itemValue="4" />
+								<f:selectItem itemLabel="Profissional autônomo" itemValue="5" />
+								<f:selectItem itemLabel="Sociedade de profissionais" itemValue="6" />
+								<f:selectItem itemLabel="Outros" itemValue="9" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ CARD: Serviço padrão ═══ -->
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-list-alt icon-purple"></i>
+						<div>
+							<h4>Serviço padrão</h4>
+							<small>Os itens que se repetem em toda nota - copie do Emissor Nacional</small>
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Cód. tributação nacional (6 dígitos) *</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.codigoTributacaoNacional}" maxlength="8"
+								required="true" requiredMessage="Informe o código de tributação nacional"
+								placeholder="ex.: 070901" />
+						</div>
+						<div class="gf-form-item">
+							<label>Cód. tributação municipal (3 dígitos)</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.codigoTributacaoMunicipal}" maxlength="3" />
+						</div>
+						<div class="gf-form-item">
+							<label>Código NBS (9 dígitos)</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.codigoNbs}" maxlength="11" />
+						</div>
+					</div>
+
+					<div class="gf-form-group" style="flex-direction:column;">
+						<div class="gf-form-item">
+							<label>Descrição padrão do serviço - pode usar {MES_NOME}, {MES}, {ANO} e {CLIENTE}</label>
+							<p:inputTextarea value="#{nfseConfiguracaoMB.configuracao.descricaoServicoPadrao}" rows="3"
+								maxlength="2000" autoResize="false" />
+						</div>
+						<div class="gf-form-item">
+							<label>Informações complementares (vão em toda nota, opcional)</label>
+							<p:inputTextarea value="#{nfseConfiguracaoMB.configuracao.informacoesComplementares}" rows="2"
+								maxlength="2000" autoResize="false" />
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Município de prestação padrão</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.localPrestacaoPadrao}">
+								<f:selectItem itemLabel="Município do prestador" itemValue="EMITENTE" />
+								<f:selectItem itemLabel="Município do cliente (tomador)" itemValue="TOMADOR" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>Tributação do ISSQN</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.tributacaoIssqn}">
+								<f:selectItem itemLabel="Operação tributável" itemValue="1" />
+								<f:selectItem itemLabel="Imunidade" itemValue="2" />
+								<f:selectItem itemLabel="Exportação de serviço" itemValue="3" />
+								<f:selectItem itemLabel="Não incidência" itemValue="4" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>ISS retido (padrão)</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.configuracao.retencaoIssqnPadrao}">
+								<f:selectItem itemLabel="Não retido" itemValue="1" />
+								<f:selectItem itemLabel="Retido pelo tomador" itemValue="2" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Alíquota ISS (%) - 0 = não informar</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.aliquotaIss}" decimalPlaces="2"
+								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99" />
+						</div>
+						<div class="gf-form-item">
+							<label>% aproximado de tributos do Simples (0 = não informar)</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.percentualTributosSimples}" decimalPlaces="2"
+								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="99.99" />
+						</div>
+						<div class="gf-form-item">
+							<label>Série da DPS</label>
+							<p:inputText value="#{nfseConfiguracaoMB.configuracao.serieDps}" maxlength="5" />
+						</div>
+						<div class="gf-form-item">
+							<label>Último nº de DPS usado</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.ultimoNumeroDps}" decimalPlaces="0"
+								thousandSeparator="" minValue="0" />
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ CARD: Certificado ═══ -->
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-key icon-orange"></i>
+						<div>
+							<h4>Certificado digital A1</h4>
+							<small>Arquivo .pfx/.p12 do e-CNPJ - o mesmo usado para entrar no Emissor Nacional</small>
+						</div>
+					</div>
+
+					<h:panelGroup id="infoCert" layout="block" styleClass="gf-alert info" style="margin-bottom:12px;">
+						<i class="fa fa-certificate"></i>
+						<span>#{nfseConfiguracaoMB.infoCertificado}</span>
+					</h:panelGroup>
+
+					<div class="gf-form-group">
+						<div class="gf-form-item">
+							<label>Senha do certificado (deixe em branco para manter a atual)</label>
+							<p:password id="senhaCert" value="#{nfseConfiguracaoMB.novaSenha}" redisplay="false" feedback="false" />
+						</div>
+						<div class="gf-form-item">
+							<label>Assinatura</label>
+							<p:selectOneMenu id="algAssinatura" value="#{nfseConfiguracaoMB.configuracao.algoritmoAssinatura}">
+								<f:selectItem itemLabel="RSA-SHA256 (padrão)" itemValue="SHA256" />
+								<f:selectItem itemLabel="RSA-SHA1" itemValue="SHA1" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<div class="gf-modal-footer" style="justify-content:flex-start;">
+						<span class="btn-purple-modern">
+							<p:commandButton value="  Testar certificado" icon="fa fa-check"
+								actionListener="#{nfseConfiguracaoMB.testarCertificado()}"
+								process="@this senhaCert algAssinatura" update="infoCert :dlgInformacao" />
+						</span>
+					</div>
+				</div>
+
+				<div class="gf-card">
+					<div class="gf-modal-footer">
+						<span class="btn-primary-modern">
+							<p:commandButton value="  Salvar configuração" icon="fa fa-save"
+								actionListener="#{nfseConfiguracaoMB.salvar()}"
+								update="@form :dlgInformacao" />
+						</span>
+						<span class="btn-secondary-modern">
+							<p:button value="  Ir para emissão" icon="fa fa-file-text" outcome="nfse" />
+						</span>
+					</div>
+				</div>
+			</h:form>
+
+			<!-- Upload fica num form próprio (multipart, fora do form de configuração) -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-upload icon-orange"></i>
+					<div>
+						<h4>Enviar / trocar o arquivo do certificado</h4>
+						<small>Depois de enviar, informe a senha acima e clique em Salvar configuração</small>
+					</div>
+				</div>
+				<h:form id="frmUpload" enctype="multipart/form-data">
+					<p:fileUpload fileUploadListener="#{nfseConfiguracaoMB.uploadCertificado}" mode="advanced"
+						auto="true" dragDropSupport="true" update=":frmConfig:infoCert :dlgInformacao"
+						allowTypes="/(\.|\/)(pfx|p12)$/" sizeLimit="200000"
+						label="Selecionar certificado (.pfx)" invalidFileMessage="Envie o arquivo .pfx ou .p12"
+						invalidSizeMessage="Arquivo muito grande" />
+				</h:form>
+			</div>
+
+		</div><!-- /.gf-page -->
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>
