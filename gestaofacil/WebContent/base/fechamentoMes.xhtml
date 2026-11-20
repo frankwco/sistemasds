@@ -69,39 +69,46 @@
 				<i class="fa fa-bar-chart hero-icon"></i>
 			</div>
 
-			<!-- ═══ VISÃO GERAL (independe de busca) ═══ -->
-			<div class="row stat-cards" style="margin-bottom:8px;">
-				<div class="col-md-4 col-sm-12 col-xs-12" style="margin-bottom:16px;">
-					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple"
-						title="Soma tudo que está em aberto no sistema inteiro (excedente + faturamento mensal, qualquer situação de contrato) — não depende da busca abaixo. Clique para ver o detalhamento.">
-						<div class="sc-icon"><i class="fa fa-globe"></i></div>
+			<!-- ═══ EM ABERTO NO SISTEMA (independe de busca) ═══
+			     Ativos + Renovados + Inativos/Outros = Total: cada contrato entra numa só situação
+			     (Ativo > Renovado > Outros), mesma regra de excedentesAbertos.jsf. -->
+			<h:form id="frmResumoAberto">
+				<div class="gf-card">
+					<div class="gf-card-header">
+						<i class="fa fa-globe icon-purple"></i>
 						<div>
-							<div class="sc-label">Visão Geral — Todo o Sistema</div>
-							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoSistema)}</div>
+							<h4>Em aberto no sistema</h4>
+							<small>Valores já gerados e ainda não faturados, de todos os contratos — não depende da busca abaixo.
+								Calculado em #{fechamentoMesMB.horaResumoEmAbertoSistema}.</small>
 						</div>
-					</a>
+						<span class="btn-secondary-modern gf-card-header-acao">
+							<p:commandButton value="  Atualizar" icon="fa fa-refresh"
+								actionListener="#{fechamentoMesMB.atualizarResumoEmAbertoSistema()}"
+								update="@form" title="Recalcular os valores em aberto agora" />
+						</span>
+					</div>
+
+					<div class="row stat-cards" style="margin-bottom:0;">
+						<ui:repeat value="#{fechamentoMesMB.situacoesResumoEmAberto}" var="sit">
+							<div class="col-md-3 col-sm-6 col-xs-12">
+								<div class="stat-card stat-card-sm #{sit eq 'Total' ? 'sc-purple' : sit eq 'Ativo' ? 'sc-success' : sit eq 'Renovado' ? 'sc-info' : 'sc-warning'}">
+									<div class="sc-icon"><i class="fa #{sit eq 'Total' ? 'fa-globe' : sit eq 'Ativo' ? 'fa-check-circle' : sit eq 'Renovado' ? 'fa-refresh' : 'fa-ban'}"></i></div>
+									<div style="min-width:0;">
+										<div class="sc-label">#{sit eq 'Total' ? 'Total em aberto' : sit eq 'Ativo' ? 'Contratos ativos' : sit eq 'Renovado' ? 'Contratos renovados' : 'Inativos / sem situação'}</div>
+										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].total)}</div>
+										<div class="sc-detalhe">
+											<span title="Contratos cobrados todo mês: a fatura inteira do mês está em aberto">Mensais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorMensal)}</span>
+											<a href="excedentesAbertos.jsf#{sit eq 'Total' ? '' : '?situacao='}#{sit eq 'Total' ? '' : sit}"
+												title="Contratos anuais: só o excedente (o que passou da franquia) está em aberto. Clique para ver o detalhamento.">Anuais (excedente): R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorAnual)} <i class="fa fa-angle-right"></i></a>
+											<span>#{fechamentoMesMB.resumoEmAbertoSistema[sit].quantidadeContratos} contrato(s)</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</ui:repeat>
+					</div>
 				</div>
-				<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-success"
-						title="Soma tudo que está em aberto (excedente + faturamento mensal) dos contratos com situação Ativo — não depende da busca abaixo. Clique para ver o detalhamento.">
-						<div class="sc-icon"><i class="fa fa-check-circle"></i></div>
-						<div>
-							<div class="sc-label">Contratos Ativos — Total em Aberto</div>
-							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoAtivos)}</div>
-						</div>
-					</a>
-				</div>
-				<div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-					<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-info"
-						title="Soma tudo que está em aberto (excedente + faturamento mensal) dos contratos com situação Renovado — não depende da busca abaixo. Clique para ver o detalhamento.">
-						<div class="sc-icon"><i class="fa fa-refresh"></i></div>
-						<div>
-							<div class="sc-label">Contratos Renovados — Total em Aberto</div>
-							<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.totalGeralAbertoRenovados)}</div>
-						</div>
-					</a>
-				</div>
-			</div>
+			</h:form>
 
 			<!-- ═══ FORM PRINCIPAL ═══ -->
 			<h:form id="frmCadastrar">
@@ -407,53 +414,53 @@
 				<h:form id="frmTabela">
 
 					<!-- ── Resumo do resultado listado ── -->
-					<h:panelGroup layout="block" styleClass="row stat-cards stat-cards-5"
-						style="margin-bottom:8px;"
+					<h:panelGroup layout="block" styleClass="gf-resumo-busca"
 						rendered="#{not empty fechamentoMesMB.listaFechamentoMes}">
-						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-							<div class="stat-card stat-card-sm sc-info">
-								<div class="sc-icon"><i class="fa fa-usd"></i></div>
-								<div>
-									<div class="sc-label">Faturamento do Mês (resultado listado)</div>
-									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoTotalListado)}</div>
-								</div>
-							</div>
+						<div class="gf-resumo-busca-titulo">
+							<strong>A faturar nesta busca</strong>
+							<span>#{fechamentoMesMB.quantidadeLinhasListadas} linha(s) · #{fechamentoMesMB.quantidadeContratosListados} contrato(s)</span>
 						</div>
-						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-							<div class="stat-card stat-card-sm sc-warning" title="Contratos Mensal — cobrança mensal recorrente normal (não é excedente). Soma só o(s) mês(es) que aparecem nas linhas da busca atual.">
-								<div class="sc-icon"><i class="fa fa-calendar-o"></i></div>
-								<div>
-									<div class="sc-label">Faturamento Mensal do Mês Pesquisado</div>
-									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoMensalTotalListado)}</div>
-								</div>
-							</div>
+						<div class="gf-resumo-tabela-wrap">
+							<table class="gf-resumo-tabela">
+								<thead>
+									<tr>
+										<th></th>
+										<th title="Soma só os meses que aparecem nas linhas abaixo">Nos meses listados</th>
+										<th title="Soma todos os meses ainda não faturados dos contratos que aparecem abaixo — mesmo valor da coluna Excedente/Fat., sem repetir contrato">Tudo pendente desses contratos</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<span class="gf-resumo-rotulo">Contratos mensais</span>
+											<small>fatura inteira do mês</small>
+										</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaNosMeses.valorMensal)}</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaTodosPendentes.valorMensal)}</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="gf-resumo-rotulo">Contratos anuais</span>
+											<small>só o excedente (passou da franquia)</small>
+										</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaNosMeses.valorAnual)}</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaTodosPendentes.valorAnual)}</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Total a faturar</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaNosMeses.total)}</td>
+										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaTodosPendentes.total)}</td>
+									</tr>
+								</tfoot>
+							</table>
 						</div>
-						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-							<div class="stat-card stat-card-sm sc-warning" title="Contratos Mensal — soma o total em aberto (todos os meses pendentes) de cada contrato listado, sem repetir o mesmo contrato duas vezes.">
-								<div class="sc-icon"><i class="fa fa-stack-exchange"></i></div>
-								<div>
-									<div class="sc-label">Faturamento Mensal Geral dos Contratos Listados</div>
-									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoMensalTotalGeralContratosListados)}</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-							<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple" title="Contratos Anual — cobrança além da mensalidade fixa. Soma só o(s) mês(es) que aparecem nas linhas da busca atual. Clique para ver o detalhamento completo.">
-								<div class="sc-icon"><i class="fa fa-exclamation-circle"></i></div>
-								<div>
-									<div class="sc-label">Excedente do Mês Pesquisado</div>
-									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.excedenteTotalListado)}</div>
-								</div>
-							</a>
-						</div>
-						<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-							<a href="excedentesAbertos.jsf" class="stat-card stat-card-sm sc-purple" title="Contratos Anual — soma o total em aberto (todos os meses pendentes) de cada contrato listado, sem repetir o mesmo contrato duas vezes. Clique para ver o detalhamento completo.">
-								<div class="sc-icon"><i class="fa fa-stack-exchange"></i></div>
-								<div>
-									<div class="sc-label">Excedente Geral dos Contratos Listados</div>
-									<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.excedenteTotalGeralContratosListados)}</div>
-								</div>
-							</a>
+						<div class="gf-resumo-busca-rodape"
+							title="Soma do Valor Final de todas as linhas listadas: inclui o que já foi faturado e a parte fixa dos contratos anuais (paga pelas parcelas). Serve de referência do período, não é valor a faturar.">
+							<i class="fa fa-info-circle"></i>
+							Valor apurado nas linhas listadas (inclui o que já foi faturado e a parte fixa dos anuais):
+							<strong>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.faturamentoTotalListado)}</strong>
 						</div>
 					</h:panelGroup>
 

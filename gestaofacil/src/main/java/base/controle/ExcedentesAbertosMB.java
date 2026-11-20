@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,6 +42,14 @@ public class ExcedentesAbertosMB implements Serializable {
 		// A busca real só roda em buscar(), disparado via ajax (p:remoteCommand autoRun)
 		// depois que a tela já apareceu com o indicador de carregamento — evita travar o
 		// primeiro carregamento da página com a query pesada.
+
+		// Link vindo dos cards de fechamentoMes.xhtml (ex.: excedentesAbertos.jsf?situacao=Ativo)
+		// já abre a tabela filtrada pela mesma situação do card clicado.
+		String situacao = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
+				.get("situacao");
+		if ("Ativo".equals(situacao) || "Renovado".equals(situacao) || "Outros".equals(situacao)) {
+			filtroSituacao = situacao;
+		}
 	}
 
 	public void buscar() {

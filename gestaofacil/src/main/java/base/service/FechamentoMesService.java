@@ -2,10 +2,13 @@ package base.service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -14,6 +17,7 @@ import javax.persistence.Query;
 import base.modelo.CategoriaIndicador;
 import base.modelo.ExcedenteAbertoDTO;
 import base.modelo.FechamentoMes;
+import base.modelo.ResumoEmAbertoDTO;
 import base.modelo.Tipo;
 import dao.GenericDAO;
 import util.FormataDataMB;
@@ -124,45 +128,98 @@ public class FechamentoMesService implements Serializable {
 	}
 
 	/**
-	 * Soma TUDO que está em aberto no sistema, sem filtro nenhum além dos critérios básicos de
-	 * "em aberto" (não faturado, valor > 0, ativo) — inclui excedente (Anual) e faturamento
-	 * mensal (Mensal) juntos, de qualquer situação de contrato. É o número mais bruto possível,
-	 * usado só como visão geral de referência (ex.: card fixo em fechamentoMes.jsf), sem
-	 * depender de nenhuma busca/filtro que o usuário tenha feito na tela.
+	 * Resumo de TUDO que está em aberto no sistema (não faturado, valorFaturar > 0, ativo),
+	 * independente de qualquer busca feita na tela. Usado no bloco "Em aberto no sistema" de
+	 * fechamentoMes.xhtml.
+	 *
+	 * Devolve 4 chaves: "Total", "Ativo", "Renovado" e "Outros". Cada contrato
+	 * (idInformacaoFinanceiraUnico) entra em UMA só situação, com prioridade
+	 * Ativo > Renovado > Outros — mesma regra de ExcedentesAbertosMB. Assim
+	 * Ativo + Renovado + Outros = Total sempre. (Antes cada card usava "o grupo já teve alguma
+	 * versão X", e como a renovação marca a versão antiga como Renovado e cria a nova como
+	 * Ativo, quase todo contrato renovado era somado nos dois cards.)
+	 *
+	 * Em cada chave o valor vem separado em Mensal (fatura inteira) e Anual (só o excedente),
+	 * pela formaCobranca da versão do contrato à qual o fechamento está ligado.
 	 */
-	public Double buscarTotalGeralAbertoSistema() {
-		try {
-			Query q = manager.createNativeQuery(
-					"SELECT COALESCE(SUM(valorFaturar), 0) FROM fechamento_mes "
-							+ "WHERE (faturado is false or faturado is null) AND valorFaturar > 0 AND status is true");
-			Object resultado = q.getSingleResult();
-			return resultado != null ? ((Number) resultado).doubleValue() : 0.;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0.;
+	public Map<String, ResumoEmAbertoDTO> buscarResumoEmAbertoPorSituacao() {
+		Map<String, ResumoEmAbertoDTO> resultado = new HashMap<>();
+		resultado.put("Total", new ResumoEmAbertoDTO());
+		resultado.put("Ativo", new ResumoEmAbertoDTO());
+		resultado.put("Renovado", new ResumoEmAbertoDTO());
+		resultado.put("Outros", new ResumoEmAbertoDTO());
+
+		Set<Long> idsAtivos = new HashSet<>(listarIdsContratosComVersaoAtiva());
+		Set<Long> idsRenovados = new HashSet<>(listarIdsContratosComVersaoRenovada());
+
+		for (Object[] row : listarAbertoAgrupadoPorContratoEForma(null)) {
+			Long idUnico = row[0] != null ? ((Number) row[0]).longValue() : null;
+			String forma = (String) row[1];
+			Double valor = row[2] != null ? ((Number) row[2]).doubleValue() : 0.;
+
+			String situacao;
+			if (idUnico != null && idsAtivos.contains(idUnico)) {
+				situacao = "Ativo";
+			} else if (idUnico != null && idsRenovados.contains(idUnico)) {
+				situacao = "Renovado";
+			} else {
+				situacao = "Outros";
+			}
+			resultado.get("Total").adicionar(idUnico, forma, valor);
+			resultado.get(situacao).adicionar(idUnico, forma, valor);
 		}
+		return resultado;
 	}
 
 	/**
-	 * Soma TUDO que está em aberto (excedente + faturamento mensal juntos, sem excluir Mensal)
-	 * dos contratos cujo GRUPO (idInformacaoFinanceiraUnico) tem, em algum ponto do histórico,
-	 * a situação informada — mesmo critério "por grupo" de buscarTotalExcedentesAbertos(), só
-	 * que sem o filtro de formaCobranca. Usado nos cards fixos "Contratos Ativos"/"Contratos
-	 * Renovados" de fechamentoMes.jsf, que ficam ao lado da Visão Geral.
+	 * Total em aberto (todos os meses pendentes, não só os que a busca trouxe) dos contratos
+	 * informados, separado em Mensal/Anual. Usado na coluna "Tudo pendente desses contratos"
+	 * do resumo da busca em fechamentoMes.xhtml.
 	 */
-	public Double buscarTotalGeralAbertoPorSituacao(String situacao) {
+	public ResumoEmAbertoDTO buscarResumoEmAbertoDosContratos(Collection<Long> idsUnicos) {
+		ResumoEmAbertoDTO resumo = new ResumoEmAbertoDTO();
+		if (idsUnicos == null || idsUnicos.isEmpty()) {
+			return resumo;
+		}
+		for (Object[] row : listarAbertoAgrupadoPorContratoEForma(idsUnicos)) {
+			Long idUnico = row[0] != null ? ((Number) row[0]).longValue() : null;
+			resumo.adicionar(idUnico, (String) row[1], row[2] != null ? ((Number) row[2]).doubleValue() : 0.);
+		}
+		return resumo;
+	}
+
+	/**
+	 * Linhas [idInformacaoFinanceiraUnico, formaCobranca, soma valorFaturar] dos fechamentos em
+	 * aberto. LEFT JOIN pra não perder fechamento sem versão de contrato ligada (cai como Anual
+	 * no DTO). idsUnicos null = sistema inteiro.
+	 */
+	@SuppressWarnings("unchecked")
+	private List<Object[]> listarAbertoAgrupadoPorContratoEForma(Collection<Long> idsUnicos) {
 		try {
+			String filtroIds = "";
+			if (idsUnicos != null) {
+				StringBuilder sb = new StringBuilder();
+				for (Long id : idsUnicos) {
+					if (id == null) continue;
+					if (sb.length() > 0) sb.append(",");
+					sb.append(id);
+				}
+				if (sb.length() == 0) {
+					return new ArrayList<>();
+				}
+				filtroIds = "AND fm.idInformacaoFinanceiraUnico IN (" + sb + ") ";
+			}
 			Query q = manager.createNativeQuery(
-					"SELECT COALESCE(SUM(fm.valorFaturar), 0) FROM fechamento_mes fm "
-							+ "JOIN (SELECT DISTINCT idInformacaoFinanceiraUnico FROM informacoes_financeiras "
-							+ "      WHERE situacaoContrato = '" + situacao + "') inf "
-							+ "  ON inf.idInformacaoFinanceiraUnico = fm.idInformacaoFinanceiraUnico "
-							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true");
-			Object resultado = q.getSingleResult();
-			return resultado != null ? ((Number) resultado).doubleValue() : 0.;
+					"SELECT fm.idInformacaoFinanceiraUnico, inf.formaCobranca, SUM(fm.valorFaturar) "
+							+ "FROM fechamento_mes fm "
+							+ "LEFT JOIN informacoes_financeiras inf ON inf.id = fm.informacaoFinanceira_id "
+							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true "
+							+ filtroIds
+							+ "GROUP BY fm.idInformacaoFinanceiraUnico, inf.formaCobranca");
+			return q.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return 0.;
+			return new ArrayList<>();
 		}
 	}
 

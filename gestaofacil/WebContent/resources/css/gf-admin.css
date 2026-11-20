@@ -761,6 +761,7 @@
    ══════════════════════════════════ */
 .stat-cards { margin-bottom: 24px; display: flex; flex-wrap: wrap; }
 .stat-cards > [class*="col-"] { display: flex; margin-bottom: 16px; }
+.stat-cards > [class*="col-"] > .stat-card { flex: 1 1 auto; min-width: 0; }
 .stat-card {
 	border-radius: 12px; padding: 20px 22px; color: #fff;
 	box-shadow: 0 4px 14px rgba(0,0,0,.12);
@@ -805,6 +806,61 @@ a.stat-card:hover {
 		flex: 0 0 20%; max-width: 20%;
 	}
 }
+
+/* Linhas de detalhe embaixo do valor de um stat-card (ex.: "Mensais: R$ …" / "Anuais: R$ …"
+   nos cards "Em aberto no sistema" de fechamentoMes.xhtml). Pode conter link. */
+.stat-card .sc-detalhe {
+	margin-top: 8px; font-size: 11.5px; line-height: 1.55; color: #fff; opacity: .92;
+}
+.stat-card .sc-detalhe > span,
+.stat-card .sc-detalhe > a { display: block; color: #fff; }
+.stat-card .sc-detalhe > a { text-decoration: underline; text-underline-offset: 2px; }
+.stat-card .sc-detalhe > a:hover { opacity: 1; color: #fff; }
+
+/* Botão de ação alinhado à direita dentro do gf-card-header (ex.: "Atualizar") */
+.gf-card-header .gf-card-header-acao { margin-left: auto; flex-shrink: 0; }
+
+/* ══════════════════════════════════
+   RESUMO DA BUSCA (tabela pequena de totais acima de uma dataTable)
+   Usado por: base/fechamentoMes.xhtml ("A faturar nesta busca")
+   Linhas = tipo de contrato, colunas = período, rodapé = total.
+   ══════════════════════════════════ */
+.gf-resumo-busca {
+	background: #f5f7fa; border: 1px solid #e0e6ed; border-radius: 10px;
+	padding: 14px 18px; margin-bottom: 18px;
+}
+.gf-resumo-busca-titulo {
+	display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 10px;
+}
+.gf-resumo-busca-titulo strong { font-size: 15px; color: #1a2744; }
+.gf-resumo-busca-titulo span { font-size: 12px; color: #78909c; }
+.gf-resumo-tabela-wrap { overflow-x: auto; }
+.gf-resumo-tabela { width: 100%; max-width: 760px; border-collapse: collapse; font-size: 13px; }
+.gf-resumo-tabela th {
+	text-align: right; font-weight: 600; font-size: 12px; color: #546e7a;
+	padding: 6px 10px; border-bottom: 2px solid #e0e6ed; white-space: nowrap;
+}
+.gf-resumo-tabela td {
+	text-align: right; padding: 8px 10px; border-bottom: 1px solid #e8ecef;
+	color: #263238; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.gf-resumo-tabela th:first-child,
+.gf-resumo-tabela td:first-child { text-align: left; white-space: normal; }
+.gf-resumo-tabela .gf-resumo-rotulo { font-weight: 600; color: #37474f; }
+.gf-resumo-tabela td small { display: block; font-size: 11px; color: #90a4ae; }
+.gf-resumo-tabela tfoot td {
+	font-weight: 700; font-size: 14px; color: #1a2744;
+	border-top: 2px solid #cfd8dc; border-bottom: none;
+}
+@media (max-width: 600px) {
+	.gf-resumo-busca { padding: 12px; }
+	.gf-resumo-tabela th { white-space: normal; padding: 6px 4px; }
+	.gf-resumo-tabela td { padding: 8px 4px; font-size: 12px; }
+	.gf-resumo-tabela tfoot td { font-size: 13px; }
+}
+.gf-resumo-busca-rodape { margin-top: 10px; font-size: 12px; color: #607d8b; }
+.gf-resumo-busca-rodape i { margin-right: 4px; color: #90a4ae; }
+.gf-resumo-busca-rodape strong { color: #37474f; }
 
 /* ══════════════════════════════════
    TOGGLE "É WHATSAPP" (marcar telefone como WhatsApp em formulários de cadastro)

@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,6 +43,7 @@ import base.modelo.InformacaoFinanceira;
 import base.modelo.ItensColeta;
 import base.modelo.ItensInformacaoFinanceiraGrupo;
 import base.modelo.ItensInformacaoFinanceiraPontoColeta;
+import base.modelo.ResumoEmAbertoDTO;
 import base.service.ColetaService;
 import base.service.ContasReceberParcelasService;
 import base.service.ContasReceberService;
@@ -77,9 +80,6 @@ public class FechamentoMesMB implements Serializable {
 	private List<FechamentoMes> listaFechamentoMesFaturadoSemObservacao;
 	private List<InformacaoFinanceira> listInformacoesFinanceiras;
 	private Double totalAberto = 0.;
-	private Double totalGeralAbertoSistema;
-	private Double totalGeralAbertoAtivos;
-	private Double totalGeralAbertoRenovados;
 	private Double totalDesconto = 0.;
 	private FechamentoMes fechamentoMesFaturamento;
 	private FechamentoMesCertificadoPeriodo certificadoPeriodo = new FechamentoMesCertificadoPeriodo();
@@ -1231,43 +1231,101 @@ public class FechamentoMesMB implements Serializable {
 		this.listaFechamentoMes = listaFechamentoMes;
 	}
 
-	/**
-	 * Soma de TUDO que está em aberto no sistema (excedente + faturamento mensal, qualquer
-	 * situação de contrato) — não depende de nenhuma busca feita na tela, é uma visão geral
-	 * fixa. Calculado uma vez e mantido em cache (o bean é @SessionScoped) pra não rodar essa
-	 * consulta a cada re-render da página; some com um novo login/sessão.
+	/*
+	 * ═══ Cards de resumo de fechamentoMes.xhtml ═══
+	 *
+	 * Os valores são guardados no request map (e não em campo do bean, que é @SessionScoped):
+	 * calcula uma vez por requisição — o JSF chama o getter várias vezes no mesmo render — e
+	 * recalcula sozinho a cada carregamento da tela, a cada busca e ao clicar em "Atualizar".
+	 * Antes ficava em cache na sessão e só mudava depois de sair e entrar de novo.
 	 */
-	public Double getTotalGeralAbertoSistema() {
-		if (totalGeralAbertoSistema == null) {
-			totalGeralAbertoSistema = fechamentoMesService.buscarTotalGeralAbertoSistema();
+
+	@SuppressWarnings("unchecked")
+	private <T> T cacheDaRequisicao(String chave, Supplier<T> calculo) {
+		Map<String, Object> req = FacesContext.getCurrentInstance().getExternalContext().getRequestMap();
+		String k = "fechamentoMesMB." + chave;
+		if (!req.containsKey(k)) {
+			req.put(k, calculo.get());
 		}
-		return totalGeralAbertoSistema;
+		return (T) req.get(k);
+	}
+
+	/** Em aberto no sistema inteiro, por situação: "Total", "Ativo", "Renovado", "Outros". */
+	public Map<String, ResumoEmAbertoDTO> getResumoEmAbertoSistema() {
+		return cacheDaRequisicao("resumoSistema", () -> fechamentoMesService.buscarResumoEmAbertoPorSituacao());
+	}
+
+	/** Ordem dos cards do bloco "Em aberto no sistema" (chaves de getResumoEmAbertoSistema()). */
+	public List<String> getSituacoesResumoEmAberto() {
+		return java.util.Arrays.asList("Total", "Ativo", "Renovado", "Outros");
+	}
+
+	/** Hora em que o resumo "Em aberto no sistema" foi calculado (exibida na tela). */
+	public String getHoraResumoEmAbertoSistema() {
+		return cacheDaRequisicao("horaResumoSistema",
+				() -> new java.text.SimpleDateFormat("dd/MM/yyyy 'às' HH:mm").format(new Date()));
+	}
+
+	/** Ação do botão "Atualizar" — o recálculo acontece no próprio render. */
+	public void atualizarResumoEmAbertoSistema() {
 	}
 
 	/**
-	 * Mesmo espírito de getTotalGeralAbertoSistema(), mas só dos contratos com situação Ativo
-	 * (agrupados por idInformacaoFinanceiraUnico) — excedente + faturamento mensal juntos.
+	 * Em aberto SÓ nas linhas listadas (só o(s) mês(es) que a busca trouxe), separado em
+	 * Mensal (fatura inteira) e Anual (só o excedente).
 	 */
-	public Double getTotalGeralAbertoAtivos() {
-		if (totalGeralAbertoAtivos == null) {
-			totalGeralAbertoAtivos = fechamentoMesService.buscarTotalGeralAbertoPorSituacao("Ativo");
-		}
-		return totalGeralAbertoAtivos;
+	public ResumoEmAbertoDTO getResumoBuscaNosMeses() {
+		return cacheDaRequisicao("resumoBuscaNosMeses", () -> {
+			ResumoEmAbertoDTO r = new ResumoEmAbertoDTO();
+			if (listaFechamentoMes != null) {
+				for (FechamentoMes fm : listaFechamentoMes) {
+					if (fm.getValorFaturar() != null && fm.getValorFaturar() > 0
+							&& (fm.getFaturado() == null || !fm.getFaturado())) {
+						String forma = fm.getInformacaoFinanceira() != null
+								? fm.getInformacaoFinanceira().getFormaCobranca()
+								: null;
+						r.adicionar(fm.getIdInformacaoFinanceiraUnico(), forma, fm.getValorFaturar());
+					}
+				}
+			}
+			return r;
+		});
 	}
 
 	/**
-	 * Mesmo espírito de getTotalGeralAbertoAtivos(), mas só dos contratos com situação
-	 * Renovado.
+	 * Em aberto em TODOS os meses pendentes dos contratos que aparecem na busca (não só os
+	 * meses listados) — o mesmo total que aparece empilhado na coluna "Excedente/Fat." de cada
+	 * linha, sem repetir contrato que aparece em mais de uma linha.
 	 */
-	public Double getTotalGeralAbertoRenovados() {
-		if (totalGeralAbertoRenovados == null) {
-			totalGeralAbertoRenovados = fechamentoMesService.buscarTotalGeralAbertoPorSituacao("Renovado");
+	public ResumoEmAbertoDTO getResumoBuscaTodosPendentes() {
+		return cacheDaRequisicao("resumoBuscaTodosPendentes",
+				() -> fechamentoMesService.buscarResumoEmAbertoDosContratos(getIdsContratosListados()));
+	}
+
+	private Set<Long> getIdsContratosListados() {
+		Set<Long> ids = new HashSet<>();
+		if (listaFechamentoMes != null) {
+			for (FechamentoMes fm : listaFechamentoMes) {
+				if (fm.getIdInformacaoFinanceiraUnico() != null) {
+					ids.add(fm.getIdInformacaoFinanceiraUnico());
+				}
+			}
 		}
-		return totalGeralAbertoRenovados;
+		return ids;
+	}
+
+	public int getQuantidadeLinhasListadas() {
+		return listaFechamentoMes != null ? listaFechamentoMes.size() : 0;
+	}
+
+	public int getQuantidadeContratosListados() {
+		return getIdsContratosListados().size();
 	}
 
 	/**
-	 * Soma do valorFinal de todos os fechamentos atualmente listados (resultado da busca).
+	 * Valor apurado no período: soma do valorFinal de todas as linhas listadas, INCLUSIVE as já
+	 * faturadas e a parte fixa dos contratos Anuais (que é paga pelas parcelas). Não é "em
+	 * aberto" — por isso fica separado do resumo de valores a faturar.
 	 */
 	public Double getFaturamentoTotalListado() {
 		Double total = 0.;
@@ -1279,69 +1337,6 @@ public class FechamentoMesMB implements Serializable {
 			}
 		}
 		return total;
-	}
-
-	/**
-	 * Soma do valorFaturar DAS LINHAS listadas (só o(s) mês(es) que a busca atual trouxe pra
-	 * cada contrato), filtrado pela formaCobranca da versão de informacaoFinanceira à qual
-	 * cada fechamento está ligado. 'Anual' é excedente de verdade (cobrança além da
-	 * mensalidade fixa do contrato); 'Mensal' é a cobrança mensal recorrente normal — não é
-	 * excedente, mas ainda é dinheiro em aberto, por isso mostramos os dois separados.
-	 */
-	private Double somarValorFaturarListado(String formaCobranca) {
-		Double total = 0.;
-		if (listaFechamentoMes != null) {
-			for (FechamentoMes fm : listaFechamentoMes) {
-				if (fm.getValorFaturar() != null && fm.getValorFaturar() > 0
-						&& (fm.getFaturado() == null || !fm.getFaturado())
-						&& fm.getInformacaoFinanceira() != null
-						&& formaCobranca.equals(fm.getInformacaoFinanceira().getFormaCobranca())) {
-					total += fm.getValorFaturar();
-				}
-			}
-		}
-		return total;
-	}
-
-	public Double getExcedenteTotalListado() {
-		return somarValorFaturarListado("Anual");
-	}
-
-	public Double getFaturamentoMensalTotalListado() {
-		return somarValorFaturarListado("Mensal");
-	}
-
-	/**
-	 * Soma do total em aberto (todos os meses pendentes, não só o(s) que aparece(m) na busca
-	 * atual) dos contratos que estão listados, filtrado por formaCobranca — o mesmo total que
-	 * já aparece empilhado na coluna "Excedente/Fat." de cada linha, sem repetir o mesmo
-	 * contrato duas vezes caso ele apareça em mais de uma linha da busca (ex.: Mês/Ano=Todos).
-	 */
-	private Double somarTotalGeralContratosListados(String formaCobranca) {
-		if (listaFechamentoMes == null || listaFechamentoMes.isEmpty()) {
-			return 0.;
-		}
-		Set<Long> idsUnicos = new HashSet<>();
-		for (FechamentoMes fm : listaFechamentoMes) {
-			if (fm.getIdInformacaoFinanceiraUnico() != null) {
-				idsUnicos.add(fm.getIdInformacaoFinanceiraUnico());
-			}
-		}
-		Map<Long, Double> totais = fechamentoMesService.buscarTotaisAbertosEmLote(new ArrayList<>(idsUnicos),
-				formaCobranca);
-		Double total = 0.;
-		for (Double v : totais.values()) {
-			total += v;
-		}
-		return total;
-	}
-
-	public Double getExcedenteTotalGeralContratosListados() {
-		return somarTotalGeralContratosListados("Anual");
-	}
-
-	public Double getFaturamentoMensalTotalGeralContratosListados() {
-		return somarTotalGeralContratosListados("Mensal");
 	}
 
 	public Long getIdFechamentoAutenticidade() {
