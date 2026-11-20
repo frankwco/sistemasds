@@ -110,11 +110,16 @@
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
-					<a href="excedentesAbertos.jsf" class="stat-card sc-purple" title="Contratos Ativos e Renovados. Clique para ver o detalhamento.">
+					<a href="fechamentoMes.jsf" class="stat-card sc-purple"
+						title="Valores já gerados e ainda não faturados, de todos os contratos. Mensais = fatura inteira do mês; Anuais = só o excedente (o que passou da franquia). Clique para ver por situação do contrato.">
 						<div class="sc-icon"><i class="fa fa-usd"></i></div>
-						<div>
-							<div class="sc-label">Excedentes/Faturamentos Abertos</div>
-							<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.totalExcedentesAbertos)}</div>
+						<div style="min-width:0;">
+							<div class="sc-label">Em aberto (a faturar)</div>
+							<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.total)}</div>
+							<div class="sc-detalhe">
+								<span>Mensais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorMensal)}</span>
+								<span>Anuais (excedente): R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorAnual)}</span>
+							</div>
 						</div>
 					</a>
 				</div>

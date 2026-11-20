@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import base.modelo.Pessoa;
+import base.modelo.ResumoEmAbertoDTO;
 import base.modelo.PontoColeta;
 import base.modelo.Cliente;
 import base.modelo.Contrato;
@@ -128,7 +129,11 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 	private List<MensagemSite> mensagensAtualizarEmail;
 	private MensagemSite mensagemSite;
 
-	private Double totalExcedentesAbertos = 0.;
+	// Mesmo número do card "Total em aberto" de fechamentoMes.xhtml (sistema inteiro, Mensais +
+	// Anuais). Antes o card da tela inicial somava só o excedente dos contratos Anuais
+	// ativos/renovados, mas tinha o nome "Excedentes/Faturamentos Abertos" — parecia incluir
+	// a fatura dos contratos Mensais e não incluía.
+	private ResumoEmAbertoDTO resumoEmAberto = new ResumoEmAbertoDTO();
 
 	private int numero=0;
 
@@ -150,7 +155,7 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 		dadosCarregados = true;
 		preencherMensagemSite();
 		buscarContratosVencidos();
-		totalExcedentesAbertos = fechamentoMesService.buscarTotalExcedentesAbertos();
+		resumoEmAberto = fechamentoMesService.buscarResumoEmAbertoPorSituacao().get("Total");
 	}
 	 public void incrementar() {
 		 //System.out.println("AAAA");
@@ -379,9 +384,9 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 		this.clienteSelecionado = clienteSelecionado;
 	}
 
-	public Double getTotalExcedentesAbertos() {
+	public ResumoEmAbertoDTO getResumoEmAberto() {
 		garantirCarregado();
-		return totalExcedentesAbertos;
+		return resumoEmAberto;
 	}
 	   public int getNumero() {
 	        return numero;
