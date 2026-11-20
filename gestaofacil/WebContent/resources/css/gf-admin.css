@@ -816,6 +816,8 @@ a.stat-card:hover {
 .stat-card .sc-detalhe > a { display: block; color: #fff; }
 .stat-card .sc-detalhe > a { text-decoration: underline; text-underline-offset: 2px; }
 .stat-card .sc-detalhe > a:hover { opacity: 1; color: #fff; }
+.stat-card .sc-detalhe > .sc-destaque { font-weight: 700; font-size: 12.5px; opacity: 1; }
+.stat-card .sc-detalhe > .sc-detalhe-sep { height: 0; border-top: 1px solid rgba(255,255,255,.35); margin: 5px 0; }
 
 /* Botão de ação alinhado à direita dentro do gf-card-header (ex.: "Atualizar") */
 .gf-card-header .gf-card-header-acao { margin-left: auto; flex-shrink: 0; }

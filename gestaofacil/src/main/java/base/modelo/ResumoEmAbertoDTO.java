@@ -1,6 +1,7 @@
 package base.modelo;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,34 @@ public class ResumoEmAbertoDTO implements Serializable {
 	private double valorAnual = 0.;
 	private Integer desdeMensal;
 	private Integer desdeAnual;
+	private double valorAtrasado = 0.;
 	private final Set<Long> contratos = new HashSet<>();
+
+	/**
+	 * Último mês fechado (aaaamm) = mês anterior ao atual. O fechamento de um mês é feito e
+	 * faturado no mês seguinte, então o que é desse mês (ou do mês atual) está "em
+	 * faturamento"; o que é de antes dele está atrasado.
+	 */
+	public static int periodoCorteAtraso() {
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.MONTH, -1);
+		return c.get(Calendar.YEAR) * 100 + c.get(Calendar.MONTH) + 1;
+	}
+
+	/** Último mês fechado, "mm/aaaa" (ex.: "10/2026"). */
+	public String getMesCorteAtraso() {
+		return formatarPeriodo(periodoCorteAtraso());
+	}
+
+	/** Valor de meses anteriores ao último mês fechado: deveria já ter sido faturado. */
+	public double getValorAtrasado() {
+		return valorAtrasado;
+	}
+
+	/** Valor do último mês fechado em diante: faturamento normal do ciclo atual. */
+	public double getValorEmFaturamento() {
+		return getTotal() - valorAtrasado;
+	}
 
 	public static boolean isAnual(String formaCobranca) {
 		return "Anual".equals(formaCobranca);
@@ -42,8 +70,20 @@ public class ResumoEmAbertoDTO implements Serializable {
 
 	/** @param periodo mês mais antigo do valor, no formato aaaamm (ex.: 202403), ou null. */
 	public void adicionar(Long idInformacaoFinanceiraUnico, String formaCobranca, Double valor, Integer periodo) {
+		adicionar(idInformacaoFinanceiraUnico, formaCobranca, valor, periodo, 0.);
+	}
+
+	/**
+	 * @param atrasado parte do valor que é de meses anteriores ao último mês fechado
+	 *                 (ver periodoCorteAtraso()).
+	 */
+	public void adicionar(Long idInformacaoFinanceiraUnico, String formaCobranca, Double valor, Integer periodo,
+			Double atrasado) {
 		if (valor == null) {
 			return;
+		}
+		if (atrasado != null) {
+			valorAtrasado += atrasado;
 		}
 		if (isAnual(formaCobranca)) {
 			valorAnual += valor;

@@ -166,8 +166,9 @@ public class FechamentoMesService implements Serializable {
 				situacao = "Outros";
 			}
 			Integer desde = row[3] != null ? ((Number) row[3]).intValue() : null;
-			resultado.get("Total").adicionar(idUnico, forma, valor, desde);
-			resultado.get(situacao).adicionar(idUnico, forma, valor, desde);
+			Double atrasado = row[4] != null ? ((Number) row[4]).doubleValue() : 0.;
+			resultado.get("Total").adicionar(idUnico, forma, valor, desde, atrasado);
+			resultado.get(situacao).adicionar(idUnico, forma, valor, desde, atrasado);
 		}
 		return resultado;
 	}
@@ -185,14 +186,16 @@ public class FechamentoMesService implements Serializable {
 		for (Object[] row : listarAbertoAgrupadoPorContratoEForma(idsUnicos)) {
 			Long idUnico = row[0] != null ? ((Number) row[0]).longValue() : null;
 			resumo.adicionar(idUnico, (String) row[1], row[2] != null ? ((Number) row[2]).doubleValue() : 0.,
-					row[3] != null ? ((Number) row[3]).intValue() : null);
+					row[3] != null ? ((Number) row[3]).intValue() : null,
+					row[4] != null ? ((Number) row[4]).doubleValue() : 0.);
 		}
 		return resumo;
 	}
 
 	/**
 	 * Linhas [idInformacaoFinanceiraUnico, formaCobranca, soma valorFaturar] dos fechamentos em
-	 * aberto, com o mês mais antigo (aaaamm). LEFT JOIN pra não perder fechamento sem versão de contrato ligada (cai como fatura inteira
+	 * aberto, com o mês mais antigo (aaaamm) e quanto disso é de antes do último mês fechado
+	 * (atrasado). LEFT JOIN pra não perder fechamento sem versão de contrato ligada (cai como fatura inteira
 	 * no DTO). idsUnicos null = sistema inteiro.
 	 */
 	@SuppressWarnings("unchecked")
@@ -212,7 +215,8 @@ public class FechamentoMesService implements Serializable {
 				filtroIds = "AND fm.idInformacaoFinanceiraUnico IN (" + sb + ") ";
 			}
 			Query q = manager.createNativeQuery(
-					"SELECT fm.idInformacaoFinanceiraUnico, inf.formaCobranca, SUM(fm.valorFaturar), MIN(fm.ano * 100 + fm.mes) "
+					"SELECT fm.idInformacaoFinanceiraUnico, inf.formaCobranca, SUM(fm.valorFaturar), MIN(fm.ano * 100 + fm.mes), "
+							+ "SUM(CASE WHEN fm.ano * 100 + fm.mes < " + ResumoEmAbertoDTO.periodoCorteAtraso() + " THEN fm.valorFaturar ELSE 0 END) "
 							+ "FROM fechamento_mes fm "
 							+ "LEFT JOIN informacoes_financeiras inf ON inf.id = fm.informacaoFinanceira_id "
 							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true "

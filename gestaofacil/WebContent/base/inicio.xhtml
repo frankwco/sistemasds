@@ -111,12 +111,15 @@
 				</div>
 				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
 					<a href="fechamentoMes.jsf" class="stat-card sc-purple"
-						title="Valores já gerados e ainda não faturados, de todos os contratos. Faturas mensais = contratos não anuais, a fatura inteira ainda precisa ser feita; Excedentes de anuais = o fixo dos anuais já vai por boleto, só o excedente fica em aberto. 'Desde' = mês mais antigo não faturado. Clique para ver por situação do contrato.">
+						title="Valores já gerados e ainda não faturados, de todos os contratos. Faturas mensais = contratos não anuais, a fatura inteira ainda precisa ser feita; Excedentes de anuais = o fixo dos anuais já vai por boleto, só o excedente fica em aberto. 'Desde' = mês mais antigo não faturado. Em faturamento = do último mês fechado em diante (ciclo normal); Atrasado = meses anteriores ainda não faturados. Clique para ver por situação do contrato.">
 						<div class="sc-icon"><i class="fa fa-usd"></i></div>
 						<div style="min-width:0;">
 							<div class="sc-label">Em aberto (a faturar)</div>
 							<div class="sc-value" style="font-size:24px;">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.total)}</div>
 							<div class="sc-detalhe">
+								<span class="sc-destaque">Em faturamento: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorEmFaturamento)}</span>
+								<span class="sc-destaque">Atrasado (antes de #{informacoesFinanceirasPaginaInicioMB.resumoEmAberto.mesCorteAtraso}): R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorAtrasado)}</span>
+								<span class="sc-detalhe-sep"></span>
 								<span>Faturas mensais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorMensal)}<h:outputText rendered="#{not empty informacoesFinanceirasPaginaInicioMB.resumoEmAberto.desdeMensal}" value=" (desde #{informacoesFinanceirasPaginaInicioMB.resumoEmAberto.desdeMensal})" /></span>
 								<span>Excedentes de anuais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(informacoesFinanceirasPaginaInicioMB.resumoEmAberto.valorAnual)}<h:outputText rendered="#{not empty informacoesFinanceirasPaginaInicioMB.resumoEmAberto.desdeAnual}" value=" (desde #{informacoesFinanceirasPaginaInicioMB.resumoEmAberto.desdeAnual})" /></span>
 							</div>
