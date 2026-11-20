@@ -97,9 +97,9 @@
 										<div class="sc-label">#{sit eq 'Total' ? 'Total em aberto' : sit eq 'Ativo' ? 'Contratos ativos' : sit eq 'Renovado' ? 'Contratos renovados' : 'Inativos / sem situação'}</div>
 										<div class="sc-value">R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].total)}</div>
 										<div class="sc-detalhe">
-											<span title="Contratos cobrados todo mês: a fatura inteira do mês está em aberto">Mensais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorMensal)}</span>
+											<span title="Contratos que não são anuais: a fatura inteira do mês ainda precisa ser feita. 'Desde' = mês mais antigo ainda não faturado.">Faturas mensais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorMensal)}<h:outputText rendered="#{not empty fechamentoMesMB.resumoEmAbertoSistema[sit].desdeMensal}" value=" (desde #{fechamentoMesMB.resumoEmAbertoSistema[sit].desdeMensal})" /></span>
 											<a href="excedentesAbertos.jsf#{sit eq 'Total' ? '' : '?situacao='}#{sit eq 'Total' ? '' : sit}"
-												title="Contratos anuais: só o excedente (o que passou da franquia) está em aberto. Clique para ver o detalhamento.">Anuais (excedente): R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorAnual)} <i class="fa fa-angle-right"></i></a>
+												title="Contratos anuais: o valor fixo já é cobrado por boleto, fica em aberto só o excedente (o que passou da franquia). 'Desde' = mês mais antigo ainda não faturado. Clique para ver o detalhamento.">Excedentes de anuais: R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoEmAbertoSistema[sit].valorAnual)}<h:outputText rendered="#{not empty fechamentoMesMB.resumoEmAbertoSistema[sit].desdeAnual}" value=" (desde #{fechamentoMesMB.resumoEmAbertoSistema[sit].desdeAnual})" /> <i class="fa fa-angle-right"></i></a>
 											<span>#{fechamentoMesMB.resumoEmAbertoSistema[sit].quantidadeContratos} contrato(s)</span>
 										</div>
 									</div>
@@ -432,16 +432,16 @@
 								<tbody>
 									<tr>
 										<td>
-											<span class="gf-resumo-rotulo">Contratos mensais</span>
-											<small>fatura inteira do mês</small>
+											<span class="gf-resumo-rotulo">Faturas mensais</span>
+											<small>contratos não anuais: fatura inteira a fazer</small>
 										</td>
 										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaNosMeses.valorMensal)}</td>
 										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaTodosPendentes.valorMensal)}</td>
 									</tr>
 									<tr>
 										<td>
-											<span class="gf-resumo-rotulo">Contratos anuais</span>
-											<small>só o excedente (passou da franquia)</small>
+											<span class="gf-resumo-rotulo">Excedentes de anuais</span>
+											<small>o fixo já vai por boleto; só o que passou da franquia</small>
 										</td>
 										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaNosMeses.valorAnual)}</td>
 										<td>R$ #{formatarMB.formatarNumeroDuasCasasDecimais(fechamentoMesMB.resumoBuscaTodosPendentes.valorAnual)}</td>

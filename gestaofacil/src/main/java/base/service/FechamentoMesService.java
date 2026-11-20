@@ -95,7 +95,7 @@ public class FechamentoMesService implements Serializable {
 							+ "      WHERE situacaoContrato IN ('Ativo', 'Renovado')) inf "
 							+ "  ON inf.idInformacaoFinanceiraUnico = fm.idInformacaoFinanceiraUnico "
 							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true "
-							+ "AND infRow.formaCobranca <> 'Mensal'");
+							+ "AND infRow.formaCobranca = 'Anual'");
 			Object resultado = q.getSingleResult();
 			return resultado != null ? ((Number) resultado).doubleValue() : 0.;
 		} catch (Exception e) {
@@ -118,7 +118,7 @@ public class FechamentoMesService implements Serializable {
 					"SELECT COALESCE(SUM(fm.valorFaturar), 0) FROM fechamento_mes fm "
 							+ "JOIN informacoes_financeiras inf ON inf.id = fm.informacaoFinanceira_id "
 							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true "
-							+ "AND inf.formaCobranca <> 'Mensal'");
+							+ "AND inf.formaCobranca = 'Anual'");
 			Object resultado = q.getSingleResult();
 			return resultado != null ? ((Number) resultado).doubleValue() : 0.;
 		} catch (Exception e) {
@@ -165,8 +165,9 @@ public class FechamentoMesService implements Serializable {
 			} else {
 				situacao = "Outros";
 			}
-			resultado.get("Total").adicionar(idUnico, forma, valor);
-			resultado.get(situacao).adicionar(idUnico, forma, valor);
+			Integer desde = row[3] != null ? ((Number) row[3]).intValue() : null;
+			resultado.get("Total").adicionar(idUnico, forma, valor, desde);
+			resultado.get(situacao).adicionar(idUnico, forma, valor, desde);
 		}
 		return resultado;
 	}
@@ -183,14 +184,15 @@ public class FechamentoMesService implements Serializable {
 		}
 		for (Object[] row : listarAbertoAgrupadoPorContratoEForma(idsUnicos)) {
 			Long idUnico = row[0] != null ? ((Number) row[0]).longValue() : null;
-			resumo.adicionar(idUnico, (String) row[1], row[2] != null ? ((Number) row[2]).doubleValue() : 0.);
+			resumo.adicionar(idUnico, (String) row[1], row[2] != null ? ((Number) row[2]).doubleValue() : 0.,
+					row[3] != null ? ((Number) row[3]).intValue() : null);
 		}
 		return resumo;
 	}
 
 	/**
 	 * Linhas [idInformacaoFinanceiraUnico, formaCobranca, soma valorFaturar] dos fechamentos em
-	 * aberto. LEFT JOIN pra não perder fechamento sem versão de contrato ligada (cai como Anual
+	 * aberto, com o mês mais antigo (aaaamm). LEFT JOIN pra não perder fechamento sem versão de contrato ligada (cai como fatura inteira
 	 * no DTO). idsUnicos null = sistema inteiro.
 	 */
 	@SuppressWarnings("unchecked")
@@ -210,7 +212,7 @@ public class FechamentoMesService implements Serializable {
 				filtroIds = "AND fm.idInformacaoFinanceiraUnico IN (" + sb + ") ";
 			}
 			Query q = manager.createNativeQuery(
-					"SELECT fm.idInformacaoFinanceiraUnico, inf.formaCobranca, SUM(fm.valorFaturar) "
+					"SELECT fm.idInformacaoFinanceiraUnico, inf.formaCobranca, SUM(fm.valorFaturar), MIN(fm.ano * 100 + fm.mes) "
 							+ "FROM fechamento_mes fm "
 							+ "LEFT JOIN informacoes_financeiras inf ON inf.id = fm.informacaoFinanceira_id "
 							+ "WHERE (fm.faturado is false or fm.faturado is null) AND fm.valorFaturar > 0 AND fm.status is true "
@@ -256,7 +258,7 @@ public class FechamentoMesService implements Serializable {
 							+ "JOIN pessoa p ON p.id = inf.cliente_id "
 							+ "WHERE fm.status = true AND fm.valorFaturar > 0 "
 							+ "AND (fm.faturado = false OR fm.faturado IS NULL) "
-							+ "AND inf.formaCobranca <> 'Mensal' "
+							+ "AND inf.formaCobranca = 'Anual' "
 							+ "ORDER BY fm.idInformacaoFinanceiraUnico, fm.ano, fm.mes");
 
 			@SuppressWarnings("unchecked")
