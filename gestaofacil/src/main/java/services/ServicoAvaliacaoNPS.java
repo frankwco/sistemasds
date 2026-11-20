@@ -1,7 +1,6 @@
 package services;
 
 import java.net.URI;
-import java.util.Date;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -18,10 +17,7 @@ import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import base.modelo.AvaliacaoNPS;
-import base.modelo.ColetaApp;
 import base.service.AvaliacaoNPSService;
-import dao.GenericDAO;
 
 @RequestScoped
 @Path("/avaliacaoNPS")
@@ -30,11 +26,11 @@ public class ServicoAvaliacaoNPS {
 	private static final String SITE_URL  = "https://dsresiduos.com.br/avaliacao.php";
 	//private static final String SITE_URL  = "http://localhost/dsresiduos_2026_claude/avaliacao.php";
 
-	@Inject
-	private AvaliacaoNPSService avaliacaoNPSService;
+	/** Serializa as gravações de NPS (volume baixo; evita duplicar por cliques simultâneos). */
+	private static final Object LOCK_REGISTRO = new Object();
 
 	@Inject
-	private GenericDAO<ColetaApp> daoColetaApp;
+	private AvaliacaoNPSService avaliacaoNPSService;
 
 	/**
 	 * Chamado quando o cliente clica em uma nota no e-mail de coleta.
@@ -52,32 +48,16 @@ public class ServicoAvaliacaoNPS {
 			return Response.seeOther(URI.create(SITE_URL)).build();
 		}
 
-		// Verifica se já existe avaliação deste ColetaApp hoje — se sim, atualiza a nota
-		if (coletaId != null && coletaId > 0) {
-			AvaliacaoNPS existente = avaliacaoNPSService.buscarAvaliacaoHoje(coletaId);
-			if (existente != null) {
-				existente.setNota(nota);
-				existente.setDataAvaliacao(new Date());
-				avaliacaoNPSService.inserirAlterar(existente);
-				String redirect = SITE_URL + "?nota=" + nota + "&id=" + existente.getId();
-				return Response.seeOther(URI.create(redirect)).build();
-			}
-		}
-
-		// Nova avaliação
-		AvaliacaoNPS av = new AvaliacaoNPS();
-		av.setNota(nota);
-		av.setDataAvaliacao(new Date());
-		av.setStatus(true);
-
-		if (coletaId != null && coletaId > 0) {
-			ColetaApp co = daoColetaApp.buscarPorId(ColetaApp.class, coletaId);
-			av.setColetaApp(co);
-		}
-
+		// Uma única avaliação por coleta: cliques repetidos sobrescrevem a nota.
+		// A trava evita que cliques simultâneos (duplo clique, ou o antivírus do
+		// e-mail abrindo os links) criem várias avaliações para a mesma coleta —
+		// o commit acontece ao sair do método do service, ainda dentro da trava.
 		try {
-			avaliacaoNPSService.inserirAlterar(av);
-			String redirect = SITE_URL + "?nota=" + nota + "&id=" + av.getId();
+			Long id;
+			synchronized (LOCK_REGISTRO) {
+				id = avaliacaoNPSService.registrarNota(coletaId, nota);
+			}
+			String redirect = SITE_URL + "?nota=" + nota + "&id=" + id;
 			return Response.seeOther(URI.create(redirect)).build();
 		} catch (Exception e) {
 			return Response.seeOther(URI.create(SITE_URL + "?nota=" + nota)).build();
@@ -104,7 +84,9 @@ public class ServicoAvaliacaoNPS {
 				comentario = comentario.substring(0, 2000);
 			}
 
-			avaliacaoNPSService.atualizarComentario(id, comentario);
+			synchronized (LOCK_REGISTRO) {
+				avaliacaoNPSService.atualizarComentario(id, comentario);
+			}
 
 			return Response.ok("{\"status\":\"ok\"}", MediaType.APPLICATION_JSON).build();
 		} catch (Exception e) {
@@ -132,7 +114,9 @@ public class ServicoAvaliacaoNPS {
 				return Response.status(400).entity("{\"status\":\"nota invalida\"}").build();
 			}
 
-			avaliacaoNPSService.atualizarNota(id, nota);
+			synchronized (LOCK_REGISTRO) {
+				avaliacaoNPSService.atualizarNota(id, nota);
+			}
 
 			return Response.ok("{\"status\":\"ok\"}", MediaType.APPLICATION_JSON).build();
 		} catch (Exception e) {
