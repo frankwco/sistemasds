@@ -1515,6 +1515,7 @@ public class InformacoesFinanceirasMB implements Serializable {
 	public void inativar(InformacaoFinanceira t) {
 		t.setStatus(false);
 		t.setSituacaoContrato("Inativo");
+		t.setDataInativacao(new Date());
 		informacoesFinanceirasService.inserirAlterar(t);
 		// informacoesFinanceirasService.update(" InformacaoFinanceira set status =
 		// false where id = " +

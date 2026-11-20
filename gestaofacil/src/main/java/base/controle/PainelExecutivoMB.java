@@ -1,9 +1,12 @@
 package base.controle;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
@@ -33,7 +36,11 @@ public class PainelExecutivoMB implements Serializable {
 
 	@PostConstruct
 	public void inicializar() {
+		// Abre no mês anterior: o fechamento de um mês só é feito no mês
+		// seguinte, então o mês corrente apareceria com faturamento ~0,
+		// variação ~-100% e quase todos os contratos "sem fechamento".
 		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, -1);
 		mes = cal.get(Calendar.MONTH) + 1;
 		ano = cal.get(Calendar.YEAR);
 		// Não busca aqui: a tela abre com o "shell" (filtro, menu) e um
@@ -55,6 +62,44 @@ public class PainelExecutivoMB implements Serializable {
 		return NOMES_MESES[mes - 1];
 	}
 
+	/** Ex.: "Out/2026". */
+	public String getRotuloMes() {
+		return abreviar(mes) + "/" + ano;
+	}
+
+	/** Ex.: "Out/2025". */
+	public String getRotuloMesAnoAnterior() {
+		return abreviar(mes) + "/" + (ano - 1);
+	}
+
+	/** Ex.: "Jan–Out/2026" (ou "Jan/2026" quando o mês selecionado é janeiro). */
+	public String getRotuloAcumulado() {
+		return rotuloAcumulado(ano);
+	}
+
+	/** Ex.: "Jan–Out/2025". */
+	public String getRotuloAcumuladoAnoAnterior() {
+		return rotuloAcumulado(ano - 1);
+	}
+
+	private String rotuloAcumulado(int a) {
+		if (mes == 1) {
+			return "Jan/" + a;
+		}
+		return "Jan–" + abreviar(mes) + "/" + a;
+	}
+
+	private static String abreviar(int m) {
+		return NOMES_MESES[m - 1].substring(0, 3);
+	}
+
+	/** Mês selecionado é o mês corrente (ou futuro): fechamento ainda não foi feito. */
+	public boolean isMesEmAndamento() {
+		Calendar hoje = Calendar.getInstance();
+		int atual = hoje.get(Calendar.YEAR) * 12 + hoje.get(Calendar.MONTH) + 1;
+		return ano * 12 + mes >= atual;
+	}
+
 	public List<Integer> getAnosDisponiveis() {
 		int anoAtual = Calendar.getInstance().get(Calendar.YEAR);
 		List<Integer> anos = new ArrayList<>();
@@ -65,7 +110,7 @@ public class PainelExecutivoMB implements Serializable {
 	}
 
 	public String getVariacaoContratosStatCard() {
-		long v = dados.getVariacaoContratosAno();
+		long v = dados.getSaldoClientes();
 		if (v > 0) {
 			return "sc-success";
 		}
@@ -97,6 +142,21 @@ public class PainelExecutivoMB implements Serializable {
 
 	public String getVariacaoFaturamentoPorQuiloMesStatCard() {
 		return statCardPorPercentual(dados.getVariacaoFaturamentoPorQuiloMesPercentual());
+	}
+
+	/** "+5,3%", "-12,0%" ou "sem base de comparação" quando não dá pra comparar. */
+	public String formatarVariacao(Double percentual) {
+		if (percentual == null) {
+			return "sem base de comparação";
+		}
+		DecimalFormat df = new DecimalFormat("#,##0.0", new DecimalFormatSymbols(new Locale("pt", "BR")));
+		return (percentual > 0 ? "+" : "") + df.format(percentual) + "%";
+	}
+
+	/** Saldo de clientes com sinal: "+3", "-2", "0". */
+	public String getSaldoClientesFormatado() {
+		long v = dados.getSaldoClientes();
+		return (v > 0 ? "+" : "") + v;
 	}
 
 	private String statCardPorPercentual(Double percentual) {

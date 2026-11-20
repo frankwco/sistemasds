@@ -19,6 +19,9 @@ import base.modelo.PainelExecutivoDTO;
  * agregadas (COUNT/SUM) direto no banco — nunca trazemos ItensColeta,
  * FechamentoMes ou InformacaoFinanceira linha a linha pra somar em Java (foi
  * isso que deixou o relatório de Coletas por Grupo lento antes de corrigir).
+ *
+ * "Acumulado" = de janeiro até o mês selecionado, no ano selecionado e no
+ * ano anterior (mesma quantidade de meses dos dois lados).
  */
 public class RelatorioPainelExecutivoService implements Serializable {
 
@@ -31,38 +34,26 @@ public class RelatorioPainelExecutivoService implements Serializable {
 
 		int anoAnterior = ano - 1;
 
+		Date inicioMes = new GregorianCalendar(ano, mes - 1, 1).getTime();
+		Date fimMes = ultimoDiaDoMes(mes, ano);
+		Date inicioMesAnoAnterior = new GregorianCalendar(anoAnterior, mes - 1, 1).getTime();
+		Date fimMesAnoAnterior = ultimoDiaDoMes(mes, anoAnterior);
+		Date inicioAno = new GregorianCalendar(ano, Calendar.JANUARY, 1).getTime();
+		Date inicioAnoAnterior = new GregorianCalendar(anoAnterior, Calendar.JANUARY, 1).getTime();
+
 		PainelExecutivoDTO dto = new PainelExecutivoDTO();
 
 		dto.setContratosAtivos(contarContratosAtivos());
 		dto.setPontosColetaAtivos(contarPontosColetaAtivos());
-		dto.setContratosNovosAno(contarContratosNovosNoAno(ano));
-		dto.setContratosEncerradosAno(contarContratosEncerradosNoAno(ano));
+		dto.setClientesNovos(contarClientesNovos(inicioAno, fimMes));
+		dto.setClientesSaida(contarClientesQueSairam(inicioAno, fimMes));
 
-		dto.setFaturamentoMes(somarFaturamento(mes, ano));
-		dto.setFaturamentoMesAnoAnterior(somarFaturamento(mes, anoAnterior));
-		dto.setFaturamentoAno(somarFaturamentoAno(ano));
-		dto.setFaturamentoAnoAnterior(somarFaturamentoAno(anoAnterior));
-
-		Calendar calInicioMes = new GregorianCalendar(ano, mes - 1, 1);
-		Date inicioMes = calInicioMes.getTime();
-		Date fimMes = new GregorianCalendar(ano, mes - 1, calInicioMes.getActualMaximum(Calendar.DAY_OF_MONTH))
-				.getTime();
-
-		Calendar calInicioMesAnoAnterior = new GregorianCalendar(anoAnterior, mes - 1, 1);
-		Date inicioMesAnoAnterior = calInicioMesAnoAnterior.getTime();
-		Date fimMesAnoAnterior = new GregorianCalendar(anoAnterior, mes - 1,
-				calInicioMesAnoAnterior.getActualMaximum(Calendar.DAY_OF_MONTH)).getTime();
-
-		Date inicioAno = new GregorianCalendar(ano, Calendar.JANUARY, 1).getTime();
-		Date fimAno = new GregorianCalendar(ano, Calendar.DECEMBER, 31).getTime();
-
-		Date inicioAnoAnterior = new GregorianCalendar(anoAnterior, Calendar.JANUARY, 1).getTime();
-		Date fimAnoAnterior = new GregorianCalendar(anoAnterior, Calendar.DECEMBER, 31).getTime();
+		preencherFaturamento(dto, mes, ano);
 
 		dto.setPesoColetadoMes(somarPesoColetado(inicioMes, fimMes));
 		dto.setPesoColetadoMesAnoAnterior(somarPesoColetado(inicioMesAnoAnterior, fimMesAnoAnterior));
-		dto.setPesoColetadoAno(somarPesoColetado(inicioAno, fimAno));
-		dto.setPesoColetadoAnoAnterior(somarPesoColetado(inicioAnoAnterior, fimAnoAnterior));
+		dto.setPesoColetadoAno(somarPesoColetado(inicioAno, fimMes));
+		dto.setPesoColetadoAnoAnterior(somarPesoColetado(inicioAnoAnterior, fimMesAnoAnterior));
 
 		List<InformacaoFinanceira> semFechamento = listarContratosAtivosSemFechamento(mes, ano, fimMes);
 		dto.setContratosSemFechamentoLista(semFechamento);
@@ -71,10 +62,23 @@ public class RelatorioPainelExecutivoService implements Serializable {
 		return dto;
 	}
 
+	private static Date ultimoDiaDoMes(int mes, int ano) {
+		Calendar cal = new GregorianCalendar(ano, mes - 1, 1);
+		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+		return cal.getTime();
+	}
+
+	/**
+	 * Contratos ativos hoje, contando cada contrato uma vez só (todas as
+	 * versões de renovação compartilham o idInformacaoFinanceiraUnico).
+	 * Registros antigos sem idInformacaoFinanceiraUnico contam pelo próprio id.
+	 */
 	private Long contarContratosAtivos() {
-		return manager.createQuery(
-				"select count(i) from InformacaoFinanceira i where i.status = true and i.situacaoContrato = 'Ativo'",
-				Long.class).getSingleResult();
+		Number total = (Number) manager.createNativeQuery(
+				"SELECT COUNT(DISTINCT COALESCE(idInformacaoFinanceiraUnico, id)) FROM informacoes_financeiras "
+						+ "WHERE status = 1 AND situacaoContrato = 'Ativo'")
+				.getSingleResult();
+		return total == null ? 0L : total.longValue();
 	}
 
 	/**
@@ -91,53 +95,106 @@ public class RelatorioPainelExecutivoService implements Serializable {
 				Long.class).getSingleResult();
 	}
 
-	private Long contarContratosNovosNoAno(int ano) {
-		Date inicio = new GregorianCalendar(ano, Calendar.JANUARY, 1).getTime();
-		Date fim = new GregorianCalendar(ano, Calendar.DECEMBER, 31).getTime();
-
-		// "Novo" = primeiro contrato (InformacaoFinanceira) do cliente. Uma
-		// renovação gera um novo registro pro mesmo cliente com dataInicial
-		// nova, então contar todo registro com dataInicial no ano inflava
-		// muito o número (contava renovação como cliente novo).
+	/**
+	 * "Novo" = cliente cujo PRIMEIRO contrato começou no período. Uma renovação
+	 * gera outro registro pro mesmo cliente com dataInicial nova, então contar
+	 * todo registro com dataInicial no período contaria renovação como cliente
+	 * novo. Entram também os contratos já inativados (status = false): um
+	 * cliente que entrou e saiu no mesmo ano continua sendo uma entrada.
+	 */
+	private Long contarClientesNovos(Date inicio, Date fim) {
 		TypedQuery<Long> query = manager.createQuery(
 				"select count(distinct i.cliente) from InformacaoFinanceira i "
-				+ "where i.status = true and i.dataInicial between :inicio and :fim "
+				+ "where (i.status = true or i.situacaoContrato = 'Inativo') "
+				+ "and i.dataInicial between :inicio and :fim "
 				+ "and i.dataInicial = (select min(i2.dataInicial) from InformacaoFinanceira i2 "
-				+ "where i2.cliente = i.cliente and i2.status = true)",
+				+ "where i2.cliente = i.cliente and (i2.status = true or i2.situacaoContrato = 'Inativo'))",
 				Long.class);
 		query.setParameter("inicio", inicio, TemporalType.DATE);
 		query.setParameter("fim", fim, TemporalType.DATE);
 		return query.getSingleResult();
 	}
 
-	private Long contarContratosEncerradosNoAno(int ano) {
-		Date inicio = new GregorianCalendar(ano, Calendar.JANUARY, 1).getTime();
-		Date fim = new GregorianCalendar(ano, Calendar.DECEMBER, 31).getTime();
-
-		TypedQuery<Long> query = manager.createQuery("select count(i) from InformacaoFinanceira i "
-				+ "where i.status = true and i.situacaoContrato = 'Inativo' and i.dataFinal between :inicio and :fim",
+	/**
+	 * Clientes que saíram no período: o último contrato inativado do cliente
+	 * caiu no período e ele não tem nenhum contrato ativo hoje.
+	 *
+	 * Inativar grava status = false (InformacoesFinanceirasMB.inativar), então
+	 * aqui NÃO se filtra status = true (era por isso que essa contagem dava
+	 * sempre zero). A data usada é dataInativacao; contratos inativados antes
+	 * desse campo existir usam a dataFinal do contrato como aproximação.
+	 */
+	private Long contarClientesQueSairam(Date inicio, Date fim) {
+		TypedQuery<Long> query = manager.createQuery(
+				"select count(distinct i.cliente) from InformacaoFinanceira i "
+				+ "where i.situacaoContrato = 'Inativo' "
+				+ "and coalesce(i.dataInativacao, i.dataFinal) between :inicio and :fim "
+				+ "and not exists (select a.id from InformacaoFinanceira a "
+				+ "  where a.cliente = i.cliente and a.status = true and a.situacaoContrato = 'Ativo') "
+				+ "and not exists (select b.id from InformacaoFinanceira b "
+				+ "  where b.cliente = i.cliente and b.situacaoContrato = 'Inativo' "
+				+ "  and coalesce(b.dataInativacao, b.dataFinal) > coalesce(i.dataInativacao, i.dataFinal))",
 				Long.class);
 		query.setParameter("inicio", inicio, TemporalType.DATE);
 		query.setParameter("fim", fim, TemporalType.DATE);
 		return query.getSingleResult();
 	}
 
-	private Double somarFaturamento(int mes, int ano) {
-		TypedQuery<Double> query = manager.createQuery(
-				"select sum(f.valorFinal) from FechamentoMes f where f.status = true and f.ano = :ano and f.mes = :mes",
-				Double.class);
-		query.setParameter("ano", ano);
-		query.setParameter("mes", mes);
-		Double resultado = query.getSingleResult();
-		return resultado == null ? 0. : resultado;
-	}
+	/**
+	 * Soma o valor apurado (valorFinal) dos fechamentos de janeiro até o mês
+	 * selecionado, no ano selecionado e no anterior, numa única consulta
+	 * agrupada por ano/mês. Para cada mês sai também a soma sem os clientes
+	 * com ocultarRelatorio = true, que é a base usada no R$/kg (o peso
+	 * coletado já exclui esses clientes).
+	 */
+	private void preencherFaturamento(PainelExecutivoDTO dto, int mes, int ano) {
+		int anoAnterior = ano - 1;
 
-	private Double somarFaturamentoAno(int ano) {
-		TypedQuery<Double> query = manager.createQuery(
-				"select sum(f.valorFinal) from FechamentoMes f where f.status = true and f.ano = :ano", Double.class);
-		query.setParameter("ano", ano);
-		Double resultado = query.getSingleResult();
-		return resultado == null ? 0. : resultado;
+		@SuppressWarnings("unchecked")
+		List<Object[]> linhas = manager.createNativeQuery(
+				"SELECT fm.ano, fm.mes, SUM(fm.valorFinal), "
+						+ "SUM(CASE WHEN c.ocultarRelatorio = 1 THEN 0 ELSE fm.valorFinal END) "
+						+ "FROM fechamento_mes fm "
+						+ "LEFT JOIN informacoes_financeiras inf ON inf.id = fm.informacaoFinanceira_id "
+						+ "LEFT JOIN cliente c ON c.id = inf.cliente_id "
+						+ "WHERE fm.status = 1 AND fm.ano IN (?1, ?2) AND fm.mes <= ?3 "
+						+ "GROUP BY fm.ano, fm.mes")
+				.setParameter(1, ano).setParameter(2, anoAnterior).setParameter(3, mes).getResultList();
+
+		double mesAtual = 0, mesAnterior = 0, acumAtual = 0, acumAnterior = 0;
+		double mesAtualBase = 0, mesAnteriorBase = 0, acumAtualBase = 0, acumAnteriorBase = 0;
+
+		for (Object[] l : linhas) {
+			int anoLinha = ((Number) l[0]).intValue();
+			int mesLinha = ((Number) l[1]).intValue();
+			double total = l[2] == null ? 0 : ((Number) l[2]).doubleValue();
+			double base = l[3] == null ? 0 : ((Number) l[3]).doubleValue();
+
+			if (anoLinha == ano) {
+				acumAtual += total;
+				acumAtualBase += base;
+				if (mesLinha == mes) {
+					mesAtual = total;
+					mesAtualBase = base;
+				}
+			} else {
+				acumAnterior += total;
+				acumAnteriorBase += base;
+				if (mesLinha == mes) {
+					mesAnterior = total;
+					mesAnteriorBase = base;
+				}
+			}
+		}
+
+		dto.setFaturamentoMes(mesAtual);
+		dto.setFaturamentoMesAnoAnterior(mesAnterior);
+		dto.setFaturamentoAno(acumAtual);
+		dto.setFaturamentoAnoAnterior(acumAnterior);
+		dto.setFaturamentoMesBasePeso(mesAtualBase);
+		dto.setFaturamentoMesAnoAnteriorBasePeso(mesAnteriorBase);
+		dto.setFaturamentoAnoBasePeso(acumAtualBase);
+		dto.setFaturamentoAnoAnteriorBasePeso(acumAnteriorBase);
 	}
 
 	/**
@@ -155,21 +212,17 @@ public class RelatorioPainelExecutivoService implements Serializable {
 	 * FechamentoMesMB.fazerFechamentoMes reconhece "esse contrato já tem
 	 * fechamento nesse mês".
 	 *
-	 * Só entram contratos com dataInicial até o último dia do mês
-	 * selecionado, igual à regra que o fechamento em lote ("todos") usa pra
-	 * decidir quem é elegível — senão um contrato que só começou depois do
-	 * período apareceria aqui como "sem fechamento" por engano.
-	 *
-	 * Traz a lista (não só a contagem) com o cliente já carregado via join
-	 * fetch, pra tela poder mostrar o nome de quem está faltando fechar. A
-	 * lista tende a ser pequena (poucos contratos por mês), então trazer as
-	 * entidades aqui não tem o problema de volume do relatório de Coletas por
-	 * Grupo.
+	 * Só entram contratos que já existiam no mês selecionado: alguma versão do
+	 * contrato (não necessariamente a atual) começou até o último dia do mês.
+	 * Olhar só a dataInicial da versão atual deixava de fora, em meses
+	 * passados, contratos que foram renovados depois.
 	 */
 	private List<InformacaoFinanceira> listarContratosAtivosSemFechamento(int mes, int ano, Date fimMes) {
 		TypedQuery<InformacaoFinanceira> query = manager.createQuery("select i from InformacaoFinanceira i "
 				+ "join fetch i.cliente c "
-				+ "where i.status = true and i.situacaoContrato = 'Ativo' and i.dataInicial <= :fimMes "
+				+ "where i.status = true and i.situacaoContrato = 'Ativo' "
+				+ "and (i.dataInicial <= :fimMes or exists (select v.id from InformacaoFinanceira v "
+				+ "  where v.idInformacaoFinanceiraUnico = i.idInformacaoFinanceiraUnico and v.dataInicial <= :fimMes)) "
 				+ "and not exists (select 1 from FechamentoMes f "
 				+ "where f.idInformacaoFinanceiraUnico = i.idInformacaoFinanceiraUnico "
 				+ "and f.mes = :mes and f.ano = :ano and f.status = true) "

@@ -91,6 +91,10 @@ public class InformacaoFinanceira implements Serializable {
 	private Integer diaFechamento = 0;
 	@Temporal(TemporalType.DATE)
 	private Date dataUltimoFechamento;
+	// Dia em que o contrato foi inativado (InformacoesFinanceirasMB.inativar).
+	// Usado pelo Painel Executivo pra contar clientes que saíram no período.
+	@Temporal(TemporalType.DATE)
+	private Date dataInativacao;
 	private Integer mesInicio = 0;
 	private Integer anoInicio = 0;
 
@@ -182,6 +186,14 @@ public class InformacaoFinanceira implements Serializable {
 
 	public void setDiaFechamento(Integer diaFechamento) {
 		this.diaFechamento = diaFechamento;
+	}
+
+	public Date getDataInativacao() {
+		return dataInativacao;
+	}
+
+	public void setDataInativacao(Date dataInativacao) {
+		this.dataInativacao = dataInativacao;
 	}
 
 	public Date getDataUltimoFechamento() {

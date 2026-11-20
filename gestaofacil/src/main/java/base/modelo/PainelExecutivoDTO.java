@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Não é entidade JPA. Guarda os indicadores do "Painel Executivo": carteira
- * de clientes, faturamento e peso coletado, no mês/ano selecionado, com as
- * respectivas comparações (variação de contratos no ano, faturamento vs
- * mesmo mês/ano anterior).
+ * Não é entidade JPA. Guarda os indicadores do "Painel Executivo" para o mês
+ * selecionado e para o acumulado do ano (janeiro até o mês selecionado),
+ * sempre comparados com o mesmo período do ano anterior.
+ *
+ * Os valores "acumulados" (faturamentoAno, pesoColetadoAno...) NÃO são o ano
+ * inteiro: vão de janeiro até o mês selecionado, nos dois anos. Comparar um
+ * ano incompleto com o ano anterior inteiro fazia a variação sair sempre
+ * negativa até dezembro.
  */
 public class PainelExecutivoDTO implements Serializable {
 
@@ -16,20 +20,93 @@ public class PainelExecutivoDTO implements Serializable {
 
 	private Long contratosAtivos = 0L;
 	private Long pontosColetaAtivos = 0L;
-	private Long contratosNovosAno = 0L;
-	private Long contratosEncerradosAno = 0L;
+	/** Clientes cujo primeiro contrato começou no acumulado do ano. */
+	private Long clientesNovos = 0L;
+	/** Clientes que tiveram o último contrato inativado no acumulado do ano e não têm contrato ativo hoje. */
+	private Long clientesSaida = 0L;
 	private Long contratosSemFechamentoMes = 0L;
 	private List<InformacaoFinanceira> contratosSemFechamentoLista = new ArrayList<>();
 
+	/** Valor apurado (valorFinal) nos fechamentos, todos os clientes. */
 	private Double faturamentoMes = 0.;
 	private Double faturamentoMesAnoAnterior = 0.;
 	private Double faturamentoAno = 0.;
 	private Double faturamentoAnoAnterior = 0.;
 
+	/**
+	 * Mesmo valor apurado, mas sem os clientes com ocultarRelatorio = true —
+	 * mesma base do peso coletado, usada só no R$/kg (senão o numerador tem
+	 * clientes que o denominador não tem).
+	 */
+	private Double faturamentoMesBasePeso = 0.;
+	private Double faturamentoMesAnoAnteriorBasePeso = 0.;
+	private Double faturamentoAnoBasePeso = 0.;
+	private Double faturamentoAnoAnteriorBasePeso = 0.;
+
 	private Double pesoColetadoMes = 0.;
 	private Double pesoColetadoMesAnoAnterior = 0.;
 	private Double pesoColetadoAno = 0.;
 	private Double pesoColetadoAnoAnterior = 0.;
+
+	/** (atual − anterior) ÷ anterior × 100. Null se não der pra comparar. */
+	private static Double variacao(Double atual, Double anterior) {
+		if (atual == null || anterior == null || anterior == 0) {
+			return null;
+		}
+		return ((atual - anterior) / anterior) * 100.;
+	}
+
+	private static Double divisao(Double valor, Double peso) {
+		if (valor == null || peso == null || peso == 0) {
+			return null;
+		}
+		return valor / peso;
+	}
+
+	/** Clientes novos menos clientes que saíram (pode ser negativo). */
+	public Long getSaldoClientes() {
+		return clientesNovos - clientesSaida;
+	}
+
+	public Double getVariacaoFaturamentoMesPercentual() {
+		return variacao(faturamentoMes, faturamentoMesAnoAnterior);
+	}
+
+	public Double getVariacaoFaturamentoAnoPercentual() {
+		return variacao(faturamentoAno, faturamentoAnoAnterior);
+	}
+
+	public Double getVariacaoPesoMesPercentual() {
+		return variacao(pesoColetadoMes, pesoColetadoMesAnoAnterior);
+	}
+
+	public Double getVariacaoPesoAnoPercentual() {
+		return variacao(pesoColetadoAno, pesoColetadoAnoAnterior);
+	}
+
+	public Double getFaturamentoPorQuiloMes() {
+		return divisao(faturamentoMesBasePeso, pesoColetadoMes);
+	}
+
+	public Double getFaturamentoPorQuiloMesAnoAnterior() {
+		return divisao(faturamentoMesAnoAnteriorBasePeso, pesoColetadoMesAnoAnterior);
+	}
+
+	public Double getVariacaoFaturamentoPorQuiloMesPercentual() {
+		return variacao(getFaturamentoPorQuiloMes(), getFaturamentoPorQuiloMesAnoAnterior());
+	}
+
+	public Double getFaturamentoPorQuiloAno() {
+		return divisao(faturamentoAnoBasePeso, pesoColetadoAno);
+	}
+
+	public Double getFaturamentoPorQuiloAnoAnterior() {
+		return divisao(faturamentoAnoAnteriorBasePeso, pesoColetadoAnoAnterior);
+	}
+
+	public Double getVariacaoFaturamentoPorQuiloPercentual() {
+		return variacao(getFaturamentoPorQuiloAno(), getFaturamentoPorQuiloAnoAnterior());
+	}
 
 	public Long getContratosAtivos() {
 		return contratosAtivos;
@@ -47,20 +124,20 @@ public class PainelExecutivoDTO implements Serializable {
 		this.pontosColetaAtivos = pontosColetaAtivos;
 	}
 
-	public Long getContratosNovosAno() {
-		return contratosNovosAno;
+	public Long getClientesNovos() {
+		return clientesNovos;
 	}
 
-	public void setContratosNovosAno(Long contratosNovosAno) {
-		this.contratosNovosAno = contratosNovosAno;
+	public void setClientesNovos(Long clientesNovos) {
+		this.clientesNovos = clientesNovos;
 	}
 
-	public Long getContratosEncerradosAno() {
-		return contratosEncerradosAno;
+	public Long getClientesSaida() {
+		return clientesSaida;
 	}
 
-	public void setContratosEncerradosAno(Long contratosEncerradosAno) {
-		this.contratosEncerradosAno = contratosEncerradosAno;
+	public void setClientesSaida(Long clientesSaida) {
+		this.clientesSaida = clientesSaida;
 	}
 
 	public Long getContratosSemFechamentoMes() {
@@ -111,6 +188,38 @@ public class PainelExecutivoDTO implements Serializable {
 		this.faturamentoAnoAnterior = faturamentoAnoAnterior;
 	}
 
+	public Double getFaturamentoMesBasePeso() {
+		return faturamentoMesBasePeso;
+	}
+
+	public void setFaturamentoMesBasePeso(Double faturamentoMesBasePeso) {
+		this.faturamentoMesBasePeso = faturamentoMesBasePeso;
+	}
+
+	public Double getFaturamentoMesAnoAnteriorBasePeso() {
+		return faturamentoMesAnoAnteriorBasePeso;
+	}
+
+	public void setFaturamentoMesAnoAnteriorBasePeso(Double faturamentoMesAnoAnteriorBasePeso) {
+		this.faturamentoMesAnoAnteriorBasePeso = faturamentoMesAnoAnteriorBasePeso;
+	}
+
+	public Double getFaturamentoAnoBasePeso() {
+		return faturamentoAnoBasePeso;
+	}
+
+	public void setFaturamentoAnoBasePeso(Double faturamentoAnoBasePeso) {
+		this.faturamentoAnoBasePeso = faturamentoAnoBasePeso;
+	}
+
+	public Double getFaturamentoAnoAnteriorBasePeso() {
+		return faturamentoAnoAnteriorBasePeso;
+	}
+
+	public void setFaturamentoAnoAnteriorBasePeso(Double faturamentoAnoAnteriorBasePeso) {
+		this.faturamentoAnoAnteriorBasePeso = faturamentoAnoAnteriorBasePeso;
+	}
+
 	public Double getPesoColetadoMes() {
 		return pesoColetadoMes;
 	}
@@ -141,95 +250,6 @@ public class PainelExecutivoDTO implements Serializable {
 
 	public void setPesoColetadoAnoAnterior(Double pesoColetadoAnoAnterior) {
 		this.pesoColetadoAnoAnterior = pesoColetadoAnoAnterior;
-	}
-
-	/** Novos contratos menos contratos encerrados no ano (pode ser negativo). */
-	public Long getVariacaoContratosAno() {
-		return contratosNovosAno - contratosEncerradosAno;
-	}
-
-	/** Faturamento do mês selecionado comparado ao mesmo mês do ano anterior. Null se não houve faturamento no ano anterior. */
-	public Double getVariacaoFaturamentoMesPercentual() {
-		if (faturamentoMesAnoAnterior == null || faturamentoMesAnoAnterior == 0) {
-			return null;
-		}
-		return ((faturamentoMes - faturamentoMesAnoAnterior) / faturamentoMesAnoAnterior) * 100.;
-	}
-
-	/** Faturamento do ano selecionado comparado ao ano anterior. Null se não houve faturamento no ano anterior. */
-	public Double getVariacaoFaturamentoAnoPercentual() {
-		if (faturamentoAnoAnterior == null || faturamentoAnoAnterior == 0) {
-			return null;
-		}
-		return ((faturamentoAno - faturamentoAnoAnterior) / faturamentoAnoAnterior) * 100.;
-	}
-
-	/** Peso coletado no mês selecionado comparado ao mesmo mês do ano anterior. Null se não houve coleta no ano anterior. */
-	public Double getVariacaoPesoMesPercentual() {
-		if (pesoColetadoMesAnoAnterior == null || pesoColetadoMesAnoAnterior == 0) {
-			return null;
-		}
-		return ((pesoColetadoMes - pesoColetadoMesAnoAnterior) / pesoColetadoMesAnoAnterior) * 100.;
-	}
-
-	/** Peso coletado no ano selecionado comparado ao ano anterior. Null se não houve coleta no ano anterior. */
-	public Double getVariacaoPesoAnoPercentual() {
-		if (pesoColetadoAnoAnterior == null || pesoColetadoAnoAnterior == 0) {
-			return null;
-		}
-		return ((pesoColetadoAno - pesoColetadoAnoAnterior) / pesoColetadoAnoAnterior) * 100.;
-	}
-
-	/** Faturamento do ano dividido pelo peso coletado no ano (R$/kg médio). Null se não houve coleta no ano. */
-	public Double getFaturamentoPorQuiloAno() {
-		if (pesoColetadoAno == null || pesoColetadoAno == 0) {
-			return null;
-		}
-		return faturamentoAno / pesoColetadoAno;
-	}
-
-	/** Faturamento do ano anterior dividido pelo peso coletado no ano anterior (R$/kg médio). Null se não houve coleta no ano anterior. */
-	public Double getFaturamentoPorQuiloAnoAnterior() {
-		if (pesoColetadoAnoAnterior == null || pesoColetadoAnoAnterior == 0) {
-			return null;
-		}
-		return faturamentoAnoAnterior / pesoColetadoAnoAnterior;
-	}
-
-	/** Variação do R$/kg médio do ano em relação ao ano anterior. Null se algum dos dois lados não puder ser calculado. */
-	public Double getVariacaoFaturamentoPorQuiloPercentual() {
-		Double atual = getFaturamentoPorQuiloAno();
-		Double anterior = getFaturamentoPorQuiloAnoAnterior();
-		if (atual == null || anterior == null || anterior == 0) {
-			return null;
-		}
-		return ((atual - anterior) / anterior) * 100.;
-	}
-
-	/** Faturamento do mês dividido pelo peso coletado no mês (R$/kg médio). Null se não houve coleta no mês. */
-	public Double getFaturamentoPorQuiloMes() {
-		if (pesoColetadoMes == null || pesoColetadoMes == 0) {
-			return null;
-		}
-		return faturamentoMes / pesoColetadoMes;
-	}
-
-	/** Faturamento do mesmo mês do ano anterior dividido pelo peso coletado nesse mês (R$/kg médio). Null se não houve coleta. */
-	public Double getFaturamentoPorQuiloMesAnoAnterior() {
-		if (pesoColetadoMesAnoAnterior == null || pesoColetadoMesAnoAnterior == 0) {
-			return null;
-		}
-		return faturamentoMesAnoAnterior / pesoColetadoMesAnoAnterior;
-	}
-
-	/** Variação do R$/kg médio do mês em relação ao mesmo mês do ano anterior. Null se algum dos dois lados não puder ser calculado. */
-	public Double getVariacaoFaturamentoPorQuiloMesPercentual() {
-		Double atual = getFaturamentoPorQuiloMes();
-		Double anterior = getFaturamentoPorQuiloMesAnoAnterior();
-		if (atual == null || anterior == null || anterior == 0) {
-			return null;
-		}
-		return ((atual - anterior) / anterior) * 100.;
 	}
 
 }
