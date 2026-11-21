@@ -101,7 +101,7 @@ public class NfseConfiguracaoMB implements Serializable {
 			return;
 		}
 		try {
-			infoCertificado = nfseEmissaoService.testarCertificado(configuracao);
+			infoCertificado = nfseEmissaoService.descreverCertificado(configuracao);
 		} catch (NfseException e) {
 			infoCertificado = "Certificado " + configuracao.getNomeArquivoCertificado() + ": " + e.getMessage();
 		}

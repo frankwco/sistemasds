@@ -90,6 +90,12 @@ public class NfseNacionalClient {
 	private final X509Certificate certificado;
 	private final SSLContext sslContext;
 	private final boolean assinaturaSha1;
+	private List<X509Certificate> cadeia = new ArrayList<>();
+	private boolean cadeiaCompletadaAutomaticamente;
+
+	/** ACs da ICP-Brasil (vigentes, fonte: ITI) usadas para completar a cadeia. */
+	private static final String RECURSO_ACS_ICP = "/nfse/icp-brasil-acs.pem";
+	private static volatile List<X509Certificate> acsIcpCache;
 
 	/**
 	 * @param certificadoPfx bytes do arquivo .pfx/.p12 (certificado A1)
@@ -122,6 +128,24 @@ public class NfseNacionalClient {
 			}
 			this.chavePrivada = (PrivateKey) ks.getKey(alias, senhaChars);
 			this.certificado = (X509Certificate) ks.getCertificate(alias);
+			if (certificado.getNotAfter().before(new Date())) {
+				throw new NfseException("O certificado digital venceu em "
+						+ new SimpleDateFormat("dd/MM/yyyy").format(certificado.getNotAfter())
+						+ ". Envie o certificado renovado na Configuração NFS-e.");
+			}
+
+			// Muitos .pfx vêm só com o certificado da empresa, sem as ACs
+			// intermediárias; o servidor da Sefin então não consegue montar a
+			// cadeia até a raiz ICP-Brasil e responde 403. Completa a cadeia com
+			// as ACs oficiais da ICP-Brasil que vão junto com o sistema.
+			java.security.cert.Certificate[] original = ks.getCertificateChain(alias);
+			List<X509Certificate> completa = completarCadeia(original);
+			cadeiaCompletadaAutomaticamente = completa.size() > (original == null ? 0 : original.length);
+			if (cadeiaCompletadaAutomaticamente) {
+				ks.setKeyEntry(alias, chavePrivada, senhaChars,
+						completa.toArray(new java.security.cert.Certificate[0]));
+			}
+			this.cadeia = completa;
 
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 			kmf.init(ks, senhaChars);
@@ -173,6 +197,121 @@ public class NfseNacionalClient {
 
 	public X509Certificate getCertificado() {
 		return certificado;
+	}
+
+	public List<X509Certificate> getCadeia() {
+		return cadeia;
+	}
+
+	public boolean isCadeiaCompletadaAutomaticamente() {
+		return cadeiaCompletadaAutomaticamente;
+	}
+
+	/** A cadeia termina numa raiz ICP-Brasil ("Autoridade Certificadora Raiz Brasileira")? */
+	public boolean isCadeiaIcpBrasil() {
+		if (cadeia.isEmpty()) {
+			return false;
+		}
+		X509Certificate ultimo = cadeia.get(cadeia.size() - 1);
+		return ultimo.getIssuerX500Principal().getName().contains("Raiz Brasileira");
+	}
+
+	/**
+	 * Acrescenta à cadeia do .pfx as ACs que faltam até a raiz, procurando cada
+	 * emissor na lista oficial da ICP-Brasil (conferindo a assinatura).
+	 */
+	static List<X509Certificate> completarCadeia(java.security.cert.Certificate[] original) {
+		List<X509Certificate> lista = new ArrayList<>();
+		if (original != null) {
+			for (java.security.cert.Certificate c : original) {
+				lista.add((X509Certificate) c);
+			}
+		}
+		if (lista.isEmpty()) {
+			return lista;
+		}
+		List<X509Certificate> acs = acsIcpBrasil();
+		for (int i = 0; i < 6; i++) {
+			X509Certificate ultimo = lista.get(lista.size() - 1);
+			if (ultimo.getSubjectX500Principal().equals(ultimo.getIssuerX500Principal())) {
+				break; // chegou na raiz
+			}
+			X509Certificate emissor = null;
+			for (X509Certificate ac : acs) {
+				if (ac.getSubjectX500Principal().equals(ultimo.getIssuerX500Principal())) {
+					try {
+						ultimo.verify(ac.getPublicKey());
+						emissor = ac;
+						break;
+					} catch (Exception e) {
+						// mesma AC com outra chave (versão antiga): tenta a próxima
+					}
+				}
+			}
+			if (emissor == null) {
+				break;
+			}
+			lista.add(emissor);
+		}
+		return lista;
+	}
+
+	private static List<X509Certificate> acsIcpBrasil() {
+		List<X509Certificate> acs = acsIcpCache;
+		if (acs != null) {
+			return acs;
+		}
+		acs = new ArrayList<>();
+		try (InputStream is = NfseNacionalClient.class.getResourceAsStream(RECURSO_ACS_ICP)) {
+			if (is != null) {
+				for (java.security.cert.Certificate c : java.security.cert.CertificateFactory.getInstance("X.509")
+						.generateCertificates(is)) {
+					acs.add((X509Certificate) c);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("[NFS-e] Não foi possível ler " + RECURSO_ACS_ICP + ": " + e.getMessage());
+		}
+		acsIcpCache = acs;
+		return acs;
+	}
+
+	/** Descrição da cadeia, do titular até a raiz, para a tela de diagnóstico. */
+	public String descreverCadeia() {
+		StringBuilder sb = new StringBuilder();
+		for (X509Certificate c : cadeia) {
+			if (sb.length() > 0) {
+				sb.append(" → ");
+			}
+			sb.append(nomeComum(c));
+		}
+		return sb.toString();
+	}
+
+	private static String nomeComum(X509Certificate c) {
+		Matcher m = Pattern.compile("CN=([^,]+)").matcher(c.getSubjectX500Principal().getName());
+		return m.find() ? m.group(1) : c.getSubjectX500Principal().getName();
+	}
+
+	/**
+	 * Faz uma consulta só de leitura (parâmetros do convênio do município) para
+	 * saber se a Sefin aceita o certificado. Devolve null se aceitou, ou a
+	 * mensagem de erro.
+	 */
+	public String testarAcesso(String codigoMunicipio) {
+		try {
+			RespostaHttp r = requisitar("GET", urlSefin() + "/parametros_municipais/" + codigoMunicipio + "/convenio",
+					null, "application/json");
+			if (r.status == 403) {
+				return "o servidor da Receita recusou o certificado (HTTP 403)";
+			}
+			if (r.status >= 500) {
+				return "o servidor da Receita está com problema agora (HTTP " + r.status + ")";
+			}
+			return null; // 200, 404 etc.: passou pela autenticação
+		} catch (NfseException e) {
+			return e.getMessage();
+		}
 	}
 
 	// =====================================================================

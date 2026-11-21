@@ -144,9 +144,52 @@ public class NfseEmissaoService implements Serializable {
 	/** Testa se o certificado abre com a senha informada; devolve o titular. */
 	public String testarCertificado(NfseConfiguracao cfg) throws NfseException {
 		NfseNacionalClient client = criarCliente(cfg);
+		StringBuilder sb = new StringBuilder(descrever(client, cfg));
+		String cMun = cfg.getCodigoMunicipioEmissor();
+		if (cMun == null || !cMun.matches("\\d{7}")) {
+			sb.append(" | Acesso à Receita não testado: preencha o código IBGE do município.");
+			return sb.toString();
+		}
+		String erro = client.testarAcesso(cMun);
+		if (erro != null) {
+			throw new NfseException(sb + " | FALHOU o acesso à Receita (" + (cfg.isProducao() ? "produção" : "testes")
+					+ "): " + erro + ".");
+		}
+		sb.append(" | Acesso à Receita (").append(cfg.isProducao() ? "produção" : "testes").append("): OK");
+		return sb.toString();
+	}
+
+	/** Dados do certificado sem acessar a internet (usado ao abrir a tela). */
+	public String descreverCertificado(NfseConfiguracao cfg) throws NfseException {
+		return descrever(criarCliente(cfg), cfg);
+	}
+
+	private String descrever(NfseNacionalClient client, NfseConfiguracao cfg) {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		return client.getCertificado().getSubjectX500Principal().getName() + " - válido até "
-				+ sdf.format(client.getCertificado().getNotAfter());
+		java.security.cert.X509Certificate c = client.getCertificado();
+		StringBuilder sb = new StringBuilder();
+		sb.append(nomeComum(c.getSubjectX500Principal().getName())).append(" - válido até ")
+				.append(sdf.format(c.getNotAfter()));
+		String cnpjCert = NfseNacionalClient.somenteDigitos(nomeComum(c.getSubjectX500Principal().getName()));
+		String cnpjCfg = NfseNacionalClient.somenteDigitos(cfg.getCnpjPrestador());
+		if (cnpjCert.length() >= 14 && !cnpjCfg.isEmpty()
+				&& !cnpjCert.substring(cnpjCert.length() - 14).equals(cnpjCfg)) {
+			sb.append(" | ATENÇÃO: o CNPJ do certificado (").append(cnpjCert.substring(cnpjCert.length() - 14))
+					.append(") é diferente do CNPJ da configuração (").append(cnpjCfg).append(")");
+		}
+		sb.append(" | Cadeia: ").append(client.descreverCadeia());
+		if (client.isCadeiaCompletadaAutomaticamente()) {
+			sb.append(" (ACs intermediárias completadas pelo sistema)");
+		}
+		if (!client.isCadeiaIcpBrasil()) {
+			sb.append(" | ATENÇÃO: não foi possível ligar o certificado à raiz ICP-Brasil");
+		}
+		return sb.toString();
+	}
+
+	private static String nomeComum(String dn) {
+		java.util.regex.Matcher m = java.util.regex.Pattern.compile("CN=([^,]+)").matcher(dn);
+		return m.find() ? m.group(1) : dn;
 	}
 
 	private void aplicarRetorno(NotaFiscalServico nota, RetornoNfse ret) {
