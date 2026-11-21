@@ -535,6 +535,11 @@
 .gf-form-item .ui-autocomplete {
 	width: 100% !important; border-radius: 8px !important;
 }
+/* selectOneMenu também ocupa a coluna toda (o PrimeFaces calcula uma largura
+   fixa pelo texto da opção; sem isto o select encolhe e deixa um vazio ao lado). */
+.gf-form-item .ui-selectonemenu {
+	width: 100% !important; min-width: 0 !important;
+}
 
 /* ══════════════════════════════════
    MODAL FOOTER
