@@ -59,6 +59,9 @@ public class NfseMB implements Serializable {
 	/** Id do fechamento vindo da tela de Fechamento do Mês (?fechamento=ID). */
 	private Long fechamentoId;
 	private boolean abrirDialogAoCarregar;
+	private NotaFiscalServico notaCancelar;
+	private Integer motivoCancelamento = 1;
+	private String justificativaCancelamento;
 
 	@PostConstruct
 	public void init() {
@@ -209,6 +212,69 @@ public class NfseMB implements Serializable {
 			ExibirMensagem.exibirMensagemErro("Erro inesperado ao emitir: " + e.getMessage());
 		}
 		buscar();
+	}
+
+	// ---------------- Cancelamento ----------------
+
+	public void prepararCancelamento(NotaFiscalServico n) {
+		notaCancelar = n;
+		motivoCancelamento = 1;
+		justificativaCancelamento = "";
+	}
+
+	public void cancelar() {
+		if (notaCancelar == null) {
+			return;
+		}
+		String just = justificativaCancelamento == null ? "" : justificativaCancelamento.trim();
+		if (just.length() < 15) {
+			ExibirMensagem.exibirMensagemErro("Escreva a justificativa com pelo menos 15 caracteres.");
+			return;
+		}
+		try {
+			NotaFiscalServico n = nfseEmissaoService.cancelar(notaCancelar, motivoCancelamento, just,
+					usuarioLogado());
+			ExibirMensagem.exibirMensagem("NFS-e " + (n.getNumeroNfse() == null ? "" : "nº " + n.getNumeroNfse() + " ")
+					+ "cancelada com sucesso.");
+			PrimeFaces.current().executeScript("PF('dlgCancelarNfse').hide();");
+			notaCancelar = null;
+		} catch (NfseException e) {
+			ExibirMensagem.exibirMensagemErro(e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			ExibirMensagem.exibirMensagemErro("Erro inesperado ao cancelar: " + e.getMessage());
+		}
+		buscar();
+	}
+
+	public StreamedContent baixarXmlCancelamento(NotaFiscalServico n) {
+		if (n.getXmlEventoCancelamento() == null) {
+			ExibirMensagem.exibirMensagemErro("Nota sem XML de cancelamento.");
+			return null;
+		}
+		return new DefaultStreamedContent(
+				new ByteArrayInputStream(n.getXmlEventoCancelamento().getBytes(StandardCharsets.UTF_8)),
+				"application/xml", "Cancelamento-NFSe-" + n.getChaveAcesso() + ".xml");
+	}
+
+	public NotaFiscalServico getNotaCancelar() {
+		return notaCancelar;
+	}
+
+	public Integer getMotivoCancelamento() {
+		return motivoCancelamento;
+	}
+
+	public void setMotivoCancelamento(Integer motivoCancelamento) {
+		this.motivoCancelamento = motivoCancelamento;
+	}
+
+	public String getJustificativaCancelamento() {
+		return justificativaCancelamento;
+	}
+
+	public void setJustificativaCancelamento(String justificativaCancelamento) {
+		this.justificativaCancelamento = justificativaCancelamento;
 	}
 
 	public void consultar(NotaFiscalServico n) {

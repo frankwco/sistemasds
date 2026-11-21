@@ -16,6 +16,7 @@ import util.nfse.NfseNacionalClient;
 import util.nfse.NfseNacionalClient.DadosDps;
 import util.nfse.NfseNacionalClient.NfseException;
 import util.nfse.NfseNacionalClient.NfseFalhaComunicacaoException;
+import util.nfse.NfseNacionalClient.RetornoEvento;
 import util.nfse.NfseNacionalClient.RetornoNfse;
 
 /**
@@ -85,6 +86,50 @@ public class NfseEmissaoService implements Serializable {
 		} else {
 			throw new NfseException("Consulta não concluída: " + ret.mensagensTexto());
 		}
+		return nfseService.salvarNota(nota);
+	}
+
+	/**
+	 * Cancela a NFS-e na Sefin Nacional (evento 101101). Se a Sefin recusar
+	 * (prazo do município vencido, nota já cancelada etc.), a nota continua
+	 * EMITIDA e a mensagem da Sefin é devolvida na exceção.
+	 */
+	public NotaFiscalServico cancelar(NotaFiscalServico nota, int motivo, String justificativa, String usuario)
+			throws NfseException {
+		if (!nota.isEmitida() || nota.getChaveAcesso() == null) {
+			throw new NfseException("Só é possível cancelar uma NFS-e emitida.");
+		}
+		NfseConfiguracao cfg = nfseService.carregarConfiguracao();
+		if (nota.getAmbiente() != null && !nota.getAmbiente().equals(cfg.getAmbiente())) {
+			throw new NfseException("Esta nota foi emitida em outro ambiente (" + (nota.getAmbiente() == 1 ? "produção"
+					: "testes") + "). Troque o ambiente na Configuração NFS-e para cancelá-la.");
+		}
+		NfseNacionalClient client = criarCliente(cfg);
+		String xml = client.assinar(NfseNacionalClient.montarPedidoCancelamento(cfg.getAmbiente(),
+				cfg.getCnpjPrestador(), nota.getChaveAcesso(), motivo, justificativa,
+				new Date(System.currentTimeMillis() - 60000)));
+
+		RetornoEvento ret = client.registrarEvento(nota.getChaveAcesso(), xml);
+		if (!ret.sucesso) {
+			// pode já ter sido cancelada antes (ex.: pelo portal ou numa tentativa com timeout)
+			RetornoEvento existente = client.consultarCancelamento(nota.getChaveAcesso());
+			if (!existente.sucesso) {
+				throw new NfseException("Cancelamento recusado pela Sefin Nacional: " + ret.mensagensTexto());
+			}
+			ret = existente;
+		}
+		nota.setSituacao(NotaFiscalServico.SITUACAO_CANCELADA);
+		nota.setDataCancelamento(new Date());
+		nota.setMotivoCancelamento(motivo);
+		nota.setJustificativaCancelamento(justificativa == null ? null : justificativa.trim());
+		nota.setUsuarioCancelamento(usuario);
+		nota.setXmlEventoCancelamento(ret.xmlEvento != null ? ret.xmlEvento : xml);
+		StringBuilder msg = new StringBuilder(nota.getMensagemRetorno() == null ? "" : nota.getMensagemRetorno());
+		msg.append("\nNFS-e cancelada (").append(nota.getMotivoCancelamentoDescricao()).append(").");
+		for (String alerta : ret.alertas) {
+			msg.append("\nAlerta: ").append(alerta);
+		}
+		nota.setMensagemRetorno(msg.toString().trim());
 		return nfseService.salvarNota(nota);
 	}
 

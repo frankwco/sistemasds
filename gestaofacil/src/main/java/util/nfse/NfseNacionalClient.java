@@ -321,10 +321,13 @@ public class NfseNacionalClient {
 	// Assinatura
 	// =====================================================================
 
-	/** Assina (XMLDSig enveloped) o elemento infDPS e devolve o XML em texto. */
+	/**
+	 * Assina (XMLDSig enveloped) o primeiro elemento filho da raiz (infDPS na
+	 * DPS, infPedReg no pedido de evento) e devolve o XML em texto.
+	 */
 	public String assinar(Document doc) throws NfseException {
 		try {
-			Element inf = (Element) doc.getElementsByTagNameNS(NAMESPACE, "infDPS").item(0);
+			Element inf = primeiroFilho(doc.getDocumentElement());
 			String id = inf.getAttribute("Id");
 			inf.setIdAttribute("Id", true);
 
@@ -367,6 +370,139 @@ public class NfseNacionalClient {
 	// =====================================================================
 	// Comunicação com a API
 	// =====================================================================
+
+	// =====================================================================
+	// Cancelamento (evento 101101)
+	// =====================================================================
+
+	public static final String EVENTO_CANCELAMENTO = "101101";
+
+	/** Identificador do pedido: "PRE" + chave de acesso (50) + tipo do evento (6). */
+	public static String gerarIdPedidoEvento(String chaveAcesso, String tipoEvento) {
+		return "PRE" + chaveAcesso + tipoEvento;
+	}
+
+	/**
+	 * Monta (sem assinatura) o Pedido de Registro de Evento de cancelamento.
+	 *
+	 * @param motivo 1 - Erro na emissão; 2 - Serviço não prestado; 9 - Outros
+	 * @param justificativa texto de 15 a 255 caracteres
+	 */
+	public static Document montarPedidoCancelamento(int ambiente, String cpfCnpjAutor, String chaveAcesso,
+			int motivo, String justificativa, Date dataHora) throws NfseException {
+		String chave = somenteDigitos(chaveAcesso);
+		String texto = limpar(justificativa).replace('\n', ' ');
+		List<String> erros = new ArrayList<>();
+		if (chave.length() != 50) {
+			erros.add("Chave de acesso da NFS-e inválida");
+		}
+		if (motivo != 1 && motivo != 2 && motivo != 9) {
+			erros.add("Motivo do cancelamento inválido");
+		}
+		if (texto.length() < 15 || texto.length() > 255) {
+			erros.add("A justificativa do cancelamento deve ter de 15 a 255 caracteres");
+		}
+		int doc = somenteDigitos(cpfCnpjAutor).length();
+		if (doc != 11 && doc != 14) {
+			erros.add("CNPJ do prestador inválido na configuração");
+		}
+		if (!erros.isEmpty()) {
+			throw new NfseException(String.join("; ", erros) + ".");
+		}
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(true);
+			Document d = dbf.newDocumentBuilder().newDocument();
+			Element ped = d.createElementNS(NAMESPACE, "pedRegEvento");
+			ped.setAttribute("versao", VERSAO_DPS);
+			d.appendChild(ped);
+			Element inf = el(d, ped, "infPedReg", null);
+			inf.setAttribute("Id", gerarIdPedidoEvento(chave, EVENTO_CANCELAMENTO));
+			inf.setIdAttribute("Id", true);
+			el(d, inf, "tpAmb", String.valueOf(ambiente));
+			el(d, inf, "verAplic", VERSAO_APLICATIVO);
+			el(d, inf, "dhEvento", formatarDataHora(dataHora));
+			el(d, inf, doc == 11 ? "CPFAutor" : "CNPJAutor", somenteDigitos(cpfCnpjAutor));
+			el(d, inf, "chNFSe", chave);
+			Element ev = el(d, inf, "e" + EVENTO_CANCELAMENTO, null);
+			el(d, ev, "xDesc", "Cancelamento de NFS-e");
+			el(d, ev, "cMotivo", String.valueOf(motivo));
+			el(d, ev, "xMotivo", texto);
+			return d;
+		} catch (Exception e) {
+			throw new NfseException("Erro ao montar o pedido de cancelamento: " + e.getMessage(), e);
+		}
+	}
+
+	/** Envia o pedido de evento assinado (POST /nfse/{chave}/eventos). */
+	public RetornoEvento registrarEvento(String chaveAcesso, String xmlPedidoAssinado) throws NfseException {
+		JsonObject corpo = new JsonObject();
+		corpo.addProperty("pedidoRegistroEventoXmlGZipB64", gzipBase64(xmlPedidoAssinado));
+		RespostaHttp r = requisitar("POST", urlSefin() + "/nfse/" + somenteDigitos(chaveAcesso) + "/eventos",
+				corpo.toString(), "application/json");
+		RetornoEvento ret = new RetornoEvento();
+		ret.httpStatus = r.status;
+		String texto = r.textoUtf8();
+		JsonObject json = json(texto);
+		if (json != null) {
+			// o nome do campo do XML do evento varia entre versões da API
+			for (Map.Entry<String, JsonElement> e : json.entrySet()) {
+				if (e.getKey().toLowerCase().contains("eventoxmlgzipb64") && e.getValue().isJsonPrimitive()) {
+					try {
+						ret.xmlEvento = gunzipBase64(e.getValue().getAsString());
+					} catch (IOException ex) {
+						ret.mensagens.add("Evento registrado, mas não foi possível ler o XML retornado.");
+					}
+				}
+			}
+			ret.alertas.addAll(extrairLista(json, "alertas"));
+		}
+		ret.sucesso = r.status >= 200 && r.status < 300 && (ret.xmlEvento != null || extrairMensagens(json, texto).isEmpty());
+		if (!ret.sucesso) {
+			ret.mensagens.addAll(extrairMensagens(json, texto));
+			if (ret.mensagens.isEmpty()) {
+				ret.mensagens.add("Retorno inesperado da Sefin Nacional (HTTP " + r.status + ").");
+			}
+		}
+		return ret;
+	}
+
+	/** Consulta se já existe evento de cancelamento registrado para a nota. */
+	public RetornoEvento consultarCancelamento(String chaveAcesso) throws NfseException {
+		RespostaHttp r = requisitar("GET", urlSefin() + "/nfse/" + somenteDigitos(chaveAcesso) + "/eventos/"
+				+ EVENTO_CANCELAMENTO + "/1", null, "application/json");
+		RetornoEvento ret = new RetornoEvento();
+		ret.httpStatus = r.status;
+		if (r.status == 404) {
+			return ret;
+		}
+		String texto = r.textoUtf8();
+		JsonObject json = json(texto);
+		if (r.status >= 200 && r.status < 300 && json != null) {
+			for (Map.Entry<String, JsonElement> e : json.entrySet()) {
+				if (e.getKey().toLowerCase().contains("xmlgzipb64") && e.getValue().isJsonPrimitive()) {
+					try {
+						ret.xmlEvento = gunzipBase64(e.getValue().getAsString());
+					} catch (IOException ex) {
+						// ignora
+					}
+				}
+			}
+			ret.sucesso = ret.xmlEvento != null || texto.contains(EVENTO_CANCELAMENTO);
+		} else {
+			ret.mensagens.addAll(extrairMensagens(json, texto));
+		}
+		return ret;
+	}
+
+	private static Element primeiroFilho(Element pai) {
+		for (org.w3c.dom.Node n = pai.getFirstChild(); n != null; n = n.getNextSibling()) {
+			if (n instanceof Element) {
+				return (Element) n;
+			}
+		}
+		throw new IllegalStateException("XML sem elemento a assinar");
+	}
 
 	/** Envia a DPS assinada e devolve o resultado (emitida ou rejeitada). */
 	public RetornoNfse emitir(String xmlDpsAssinado) throws NfseException {
@@ -748,6 +884,19 @@ public class NfseNacionalClient {
 		public boolean temEnderecoTomador() {
 			return ibge(tomadorCodigoMunicipio) && somenteDigitos(tomadorCep).length() == 8
 					&& temTexto(tomadorLogradouro) && temTexto(tomadorNumero) && temTexto(tomadorBairro);
+		}
+	}
+
+	/** Resultado do registro/consulta de um evento (ex.: cancelamento). */
+	public static class RetornoEvento {
+		public boolean sucesso;
+		public int httpStatus;
+		public String xmlEvento;
+		public List<String> mensagens = new ArrayList<>();
+		public List<String> alertas = new ArrayList<>();
+
+		public String mensagensTexto() {
+			return String.join("\n", mensagens);
 		}
 	}
 

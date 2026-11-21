@@ -160,7 +160,8 @@
 						</p:column>
 
 						<p:column headerText="Situação" width="110" sortBy="#{list.situacao}">
-							<span class="gf-status-badge #{list.situacao == 'EMITIDA' ? 'success' : (list.situacao == 'PENDENTE' ? 'warning' : 'danger')}">
+							<span class="gf-status-badge #{list.situacao == 'EMITIDA' ? 'success' : (list.situacao == 'PENDENTE' ? 'warning' : (list.situacao == 'CANCELADA' ? '' : 'danger'))}"
+								style="#{list.situacao == 'CANCELADA' ? 'background:#ECEFF1;color:#546E7A;' : ''}">
 								#{list.situacao}
 							</span>
 							<h:panelGroup rendered="#{list.ambiente == 2}">
@@ -193,6 +194,18 @@
 										rendered="#{list.situacao == 'REJEITADA'}"
 										actionListener="#{nfseMB.reemitir(list)}"
 										update=":frmEmitir" oncomplete="PF('dlgEmitirNfse').show();" />
+								</span>
+								<span class="btn-teal-modern">
+									<p:commandButton icon="fa fa-file-excel-o" title="Baixar XML do cancelamento"
+										rendered="#{list.cancelada and list.xmlEventoCancelamento != null}" ajax="false">
+										<p:fileDownload value="#{nfseMB.baixarXmlCancelamento(list)}" />
+									</p:commandButton>
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-ban" title="Cancelar NFS-e"
+										rendered="#{list.emitida}" process="@this"
+										actionListener="#{nfseMB.prepararCancelamento(list)}"
+										update=":frmCancelar" oncomplete="PF('dlgCancelarNfse').show();" />
 								</span>
 								<span class="btn-secondary-modern">
 									<p:commandButton icon="fa fa-info-circle" title="Detalhes / retorno da Sefin"
@@ -336,6 +349,15 @@
 						<p><strong>DPS:</strong> série #{nfseMB.notaSelecionada.serieDps}, nº #{nfseMB.notaSelecionada.numeroDps}</p>
 						<p><strong>Emitida por:</strong> #{nfseMB.notaSelecionada.usuarioEmissao}</p>
 						<p><strong>Descrição:</strong> #{nfseMB.notaSelecionada.descricaoServico}</p>
+						<h:panelGroup rendered="#{nfseMB.notaSelecionada.cancelada}">
+							<p><strong>Cancelada em:</strong>
+								<h:outputText value="#{nfseMB.notaSelecionada.dataCancelamento}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
+								</h:outputText>
+								por #{nfseMB.notaSelecionada.usuarioCancelamento}</p>
+							<p><strong>Motivo:</strong> #{nfseMB.notaSelecionada.motivoCancelamentoDescricao} -
+								#{nfseMB.notaSelecionada.justificativaCancelamento}</p>
+						</h:panelGroup>
 						<p><strong>Retorno da Sefin Nacional:</strong></p>
 						<pre style="white-space:pre-wrap;background:#f5f7fa;padding:10px;border-radius:8px;">#{nfseMB.notaSelecionada.mensagemRetorno}</pre>
 					</h:panelGroup>
@@ -343,6 +365,60 @@
 						<span class="btn-secondary-modern">
 							<p:commandButton value="  Fechar" icon="fa fa-times" type="button"
 								onclick="PF('dlgDetalhes').hide();" />
+						</span>
+					</div>
+				</h:form>
+			</p:dialog>
+
+			<!-- ═══ DIALOG: Cancelar ═══ -->
+			<p:dialog header="Cancelar NFS-e" widgetVar="dlgCancelarNfse" modal="true"
+				responsive="true" width="50%" id="dlgCancelarNfse" closable="true"
+				closeOnEscape="true" resizable="false" draggable="false">
+				<h:form id="frmCancelar">
+					<h:panelGroup layout="block" rendered="#{nfseMB.notaCancelar != null}">
+						<div class="gf-alert danger">
+							<i class="fa fa-exclamation-triangle"></i>
+							<span>Cancelar a NFS-e
+								<strong>#{nfseMB.notaCancelar.numeroNfse != null ? 'nº '.concat(nfseMB.notaCancelar.numeroNfse) : ''}</strong>
+								de <strong>#{nfseMB.notaCancelar.cliente.nomeRazaoSocial}</strong>
+								(R$ #{formatarMB.formatarNumeroDuasCasasDecimais(nfseMB.notaCancelar.valor)}).
+								O cancelamento é registrado na Receita e não pode ser desfeito.</span>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-list" style="margin-right:6px;color:#1565C0;"></i>Motivo *</label>
+								<p:selectOneMenu value="#{nfseMB.motivoCancelamento}">
+									<f:selectItem itemLabel="Erro na emissão" itemValue="1" />
+									<f:selectItem itemLabel="Serviço não prestado" itemValue="2" />
+									<f:selectItem itemLabel="Outros" itemValue="9" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-align-left" style="margin-right:6px;color:#1565C0;"></i>Justificativa * (de 15 a 255 caracteres)</label>
+								<p:inputTextarea value="#{nfseMB.justificativaCancelamento}" rows="3" maxlength="255"
+									autoResize="false" style="width:100%" counter="contadorJust"
+									counterTemplate="{0} caracteres restantes" required="true"
+									requiredMessage="Escreva a justificativa do cancelamento" />
+								<h:outputText id="contadorJust" style="font-size:12px;color:#78909c;" />
+							</div>
+						</div>
+					</h:panelGroup>
+
+					<div class="gf-modal-footer">
+						<span class="btn-secondary-modern">
+							<p:commandButton value="  Voltar" icon="fa fa-arrow-left" type="button"
+								onclick="PF('dlgCancelarNfse').hide();" />
+						</span>
+						<span class="btn-danger-modern">
+							<p:commandButton value="  Cancelar NFS-e" icon="fa fa-ban"
+								actionListener="#{nfseMB.cancelar()}"
+								update=":frmCancelar :frmTabela :dlgInformacao">
+								<p:confirm header="Confirmação"
+									message="Confirma o CANCELAMENTO desta NFS-e na Receita? Não é possível desfazer." />
+							</p:commandButton>
 						</span>
 					</div>
 				</h:form>

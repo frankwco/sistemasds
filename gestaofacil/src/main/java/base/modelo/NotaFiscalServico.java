@@ -27,6 +27,7 @@ public class NotaFiscalServico implements Serializable {
 	public static final String SITUACAO_REJEITADA = "REJEITADA";
 	/** Falha de comunicação: a nota pode ou não ter sido gerada - consultar. */
 	public static final String SITUACAO_PENDENTE = "PENDENTE";
+	public static final String SITUACAO_CANCELADA = "CANCELADA";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -84,6 +85,18 @@ public class NotaFiscalServico implements Serializable {
 
 	private String usuarioEmissao;
 
+	// ---------------- Cancelamento ----------------
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dataCancelamento;
+	/** 1 - Erro na emissão; 2 - Serviço não prestado; 9 - Outros. */
+	private Integer motivoCancelamento;
+	@Column(length = 255)
+	private String justificativaCancelamento;
+	private String usuarioCancelamento;
+	@Lob
+	@Column(columnDefinition = "LONGTEXT")
+	private String xmlEventoCancelamento;
+
 	private Boolean status = true;
 
 	public boolean isEmitida() {
@@ -92,6 +105,64 @@ public class NotaFiscalServico implements Serializable {
 
 	public boolean isPendente() {
 		return SITUACAO_PENDENTE.equals(situacao);
+	}
+
+	public boolean isCancelada() {
+		return SITUACAO_CANCELADA.equals(situacao);
+	}
+
+	public String getMotivoCancelamentoDescricao() {
+		if (motivoCancelamento == null) {
+			return null;
+		}
+		switch (motivoCancelamento) {
+		case 1:
+			return "Erro na emissão";
+		case 2:
+			return "Serviço não prestado";
+		default:
+			return "Outros";
+		}
+	}
+
+	public Date getDataCancelamento() {
+		return dataCancelamento;
+	}
+
+	public void setDataCancelamento(Date dataCancelamento) {
+		this.dataCancelamento = dataCancelamento;
+	}
+
+	public Integer getMotivoCancelamento() {
+		return motivoCancelamento;
+	}
+
+	public void setMotivoCancelamento(Integer motivoCancelamento) {
+		this.motivoCancelamento = motivoCancelamento;
+	}
+
+	public String getJustificativaCancelamento() {
+		return justificativaCancelamento;
+	}
+
+	public void setJustificativaCancelamento(String justificativaCancelamento) {
+		this.justificativaCancelamento = justificativaCancelamento;
+	}
+
+	public String getUsuarioCancelamento() {
+		return usuarioCancelamento;
+	}
+
+	public void setUsuarioCancelamento(String usuarioCancelamento) {
+		this.usuarioCancelamento = usuarioCancelamento;
+	}
+
+	public String getXmlEventoCancelamento() {
+		return xmlEventoCancelamento;
+	}
+
+	public void setXmlEventoCancelamento(String xmlEventoCancelamento) {
+		this.xmlEventoCancelamento = xmlEventoCancelamento;
 	}
 
 	public Long getId() {
