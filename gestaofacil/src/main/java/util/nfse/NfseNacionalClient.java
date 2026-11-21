@@ -299,8 +299,20 @@ public class NfseNacionalClient {
 	 * mensagem de erro.
 	 */
 	public String testarAcesso(String codigoMunicipio) {
+		return testarAcessoEm(urlSefin(), codigoMunicipio);
+	}
+
+	/** Endereços da Sefin testados no diagnóstico (rótulo, URL base). */
+	public static String[][] enderecosDiagnostico() {
+		return new String[][] { { "Testes /API/SefinNacional", URL_SEFIN_HOMOLOGACAO },
+				{ "Testes /SefinNacional", "https://sefin.producaorestrita.nfse.gov.br/SefinNacional" },
+				{ "Produção", URL_SEFIN_PRODUCAO } };
+	}
+
+	/** Igual a {@link #testarAcesso}, mas num endereço base informado. */
+	public String testarAcessoEm(String urlBase, String codigoMunicipio) {
 		try {
-			RespostaHttp r = requisitar("GET", urlSefin() + "/parametros_municipais/" + codigoMunicipio + "/convenio",
+			RespostaHttp r = requisitar("GET", urlBase + "/parametros_municipais/" + codigoMunicipio + "/convenio",
 					null, "application/json");
 			if (r.status == 403) {
 				return "o servidor da Receita recusou o certificado (HTTP 403)";

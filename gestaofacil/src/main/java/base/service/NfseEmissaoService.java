@@ -150,12 +150,25 @@ public class NfseEmissaoService implements Serializable {
 			sb.append(" | Acesso à Receita não testado: preencha o código IBGE do município.");
 			return sb.toString();
 		}
-		String erro = client.testarAcesso(cMun);
-		if (erro != null) {
-			throw new NfseException(sb + " | FALHOU o acesso à Receita (" + (cfg.isProducao() ? "produção" : "testes")
-					+ "): " + erro + ".");
+		// consulta somente leitura (parâmetros do município) em cada endereço:
+		// ajuda a separar "certificado recusado" de "empresa sem acesso ao
+		// ambiente de testes" ou "endereço da API diferente"
+		boolean algumOk = false;
+		boolean configuradoOk = false;
+		sb.append(" | Acesso à Receita (consulta, nada é emitido):");
+		for (String[] end : NfseNacionalClient.enderecosDiagnostico()) {
+			String erro = client.testarAcessoEm(end[1], cMun);
+			sb.append(" ").append(end[0]).append(" = ").append(erro == null ? "OK" : "recusado").append(";");
+			algumOk |= erro == null;
+			boolean ehProducao = end[0].startsWith("Produção");
+			if (erro == null && ehProducao == cfg.isProducao() && (ehProducao || end[0].contains("/API/"))) {
+				configuradoOk = true;
+			}
 		}
-		sb.append(" | Acesso à Receita (").append(cfg.isProducao() ? "produção" : "testes").append("): OK");
+		if (!configuradoOk) {
+			throw new NfseException(sb + (algumOk ? " O certificado foi aceito em outro endereço: me envie este texto."
+					: " Todos recusaram o certificado."));
+		}
 		return sb.toString();
 	}
 
