@@ -126,7 +126,7 @@ public class NfseNacionalClient {
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 			kmf.init(ks, senhaChars);
 			this.sslContext = SSLContext.getInstance("TLSv1.2");
-			this.sslContext.init(kmf.getKeyManagers(), null, null);
+			this.sslContext.init(kmf.getKeyManagers(), criarTrustManagers(), null);
 		} catch (NfseException e) {
 			throw e;
 		} catch (IOException e) {
@@ -134,6 +134,41 @@ public class NfseNacionalClient {
 		} catch (Exception e) {
 			throw new NfseException("Erro ao carregar o certificado digital: " + e.getMessage(), e);
 		}
+	}
+
+	/** Raízes extras que o Java 8 não traz (servidores da Sefin usam GlobalSign Root R46). */
+	private static final String[] RAIZES_EXTRAS = { "/nfse/globalsign-root-r46.pem" };
+
+	/**
+	 * Confia nas autoridades padrão do Java MAIS as raízes extras acima. A
+	 * verificação do certificado do servidor continua ativa normalmente.
+	 */
+	private static javax.net.ssl.TrustManager[] criarTrustManagers() throws Exception {
+		KeyStore confiaveis = KeyStore.getInstance(KeyStore.getDefaultType());
+		confiaveis.load(null, null);
+		javax.net.ssl.TrustManagerFactory padrao = javax.net.ssl.TrustManagerFactory
+				.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+		padrao.init((KeyStore) null);
+		int i = 0;
+		for (javax.net.ssl.TrustManager tm : padrao.getTrustManagers()) {
+			if (tm instanceof javax.net.ssl.X509TrustManager) {
+				for (X509Certificate c : ((javax.net.ssl.X509TrustManager) tm).getAcceptedIssuers()) {
+					confiaveis.setCertificateEntry("padrao-" + (i++), c);
+				}
+			}
+		}
+		java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+		for (String recurso : RAIZES_EXTRAS) {
+			try (InputStream is = NfseNacionalClient.class.getResourceAsStream(recurso)) {
+				if (is != null) {
+					confiaveis.setCertificateEntry("extra-" + (i++), cf.generateCertificate(is));
+				}
+			}
+		}
+		javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory
+				.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+		tmf.init(confiaveis);
+		return tmf.getTrustManagers();
 	}
 
 	public X509Certificate getCertificado() {
@@ -641,7 +676,19 @@ public class NfseNacionalClient {
 				}
 			}
 		} else if (textoBruto != null && !textoBruto.trim().isEmpty()) {
-			msgs.add(limitar(textoBruto.trim(), 500));
+			String t = textoBruto.trim();
+			if (t.startsWith("<")) {
+				// página de erro HTML (ex.: 403 do servidor): mostra só o título
+				Matcher m = Pattern.compile("(?is)<title>(.*?)</title>").matcher(t);
+				String titulo = m.find() ? m.group(1).trim() : "erro HTTP";
+				if (titulo.startsWith("403")) {
+					titulo += " - o servidor recusou o certificado digital (confira se é o e-CNPJ A1 do"
+							+ " prestador, dentro da validade, e se o CNPJ da configuração é o do certificado)";
+				}
+				msgs.add(titulo);
+			} else {
+				msgs.add(limitar(t, 500));
+			}
 		}
 		return msgs;
 	}
