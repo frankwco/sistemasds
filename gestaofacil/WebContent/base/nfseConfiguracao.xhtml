@@ -244,14 +244,13 @@
 								<f:selectItem itemLabel="RSA-SHA1" itemValue="SHA1" />
 							</p:selectOneMenu>
 						</div>
-					</div>
-
-					<div class="gf-form-group">
-						<span class="btn-purple-modern">
-							<p:commandButton value="  Testar certificado" icon="fa fa-check"
-								actionListener="#{nfseConfiguracaoMB.testarCertificado()}"
-								process="@this senhaCert algAssinatura" update="infoCert :dlgInformacao" />
-						</span>
+						<div class="gf-form-item" style="flex:0 0 auto; min-width:0; align-self:flex-end;">
+							<span class="btn-purple-modern">
+								<p:commandButton value="  Testar certificado" icon="fa fa-check"
+									actionListener="#{nfseConfiguracaoMB.testarCertificado()}"
+									process="@this senhaCert algAssinatura" update="infoCert :dlgInformacao" />
+							</span>
+						</div>
 					</div>
 				</div>
 
