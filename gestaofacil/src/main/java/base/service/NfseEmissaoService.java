@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import base.modelo.Cliente;
 import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
+import util.nfse.CriptografiaSenhaCertificado;
 import util.nfse.NfseNacionalClient;
 import util.nfse.NfseNacionalClient.DadosDps;
 import util.nfse.NfseNacionalClient.NfseException;
@@ -125,7 +126,8 @@ public class NfseEmissaoService implements Serializable {
 	}
 
 	private NfseNacionalClient criarCliente(NfseConfiguracao cfg) throws NfseException {
-		return new NfseNacionalClient(cfg.getCertificado(), cfg.getSenhaCertificado(), cfg.isProducao(),
+		String senha = CriptografiaSenhaCertificado.descriptografar(cfg.getSenhaCertificado());
+		return new NfseNacionalClient(cfg.getCertificado(), senha, cfg.isProducao(),
 				cfg.getAlgoritmoAssinatura());
 	}
 

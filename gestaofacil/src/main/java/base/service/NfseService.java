@@ -9,6 +9,8 @@ import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
 import dao.GenericDAO;
 import util.Transacional;
+import util.nfse.CriptografiaSenhaCertificado;
+import util.nfse.NfseNacionalClient.NfseException;
 
 /**
  * Persistência da configuração e das notas de NFS-e. Cada método é uma
@@ -30,15 +32,34 @@ public class NfseService implements Serializable {
 	public NfseConfiguracao carregarConfiguracao() {
 		List<NfseConfiguracao> lista = daoConfiguracao.listaComStatus(NfseConfiguracao.class);
 		if (!lista.isEmpty()) {
-			return lista.get(0);
+			NfseConfiguracao cfg = lista.get(0);
+			migrarSenhaTextoPuro(cfg);
+			return cfg;
 		}
 		NfseConfiguracao cfg = new NfseConfiguracao();
 		daoConfiguracao.inserir(cfg);
 		return cfg;
 	}
 
+	/** Senha gravada antes da criptografia: criptografa e grava de novo. */
+	private void migrarSenhaTextoPuro(NfseConfiguracao cfg) {
+		String senha = cfg.getSenhaCertificado();
+		if (senha == null || senha.isEmpty() || CriptografiaSenhaCertificado.estaCriptografada(senha)) {
+			return;
+		}
+		try {
+			cfg.setSenhaCertificado(CriptografiaSenhaCertificado.criptografar(senha));
+			daoConfiguracao.alterar(cfg);
+		} catch (NfseException e) {
+			// mantém como está; a emissão continua funcionando com a senha antiga
+			System.err.println("[NFS-e] Senha do certificado não foi criptografada: " + e.getMessage());
+		}
+	}
+
+	/** Grava a configuração; a senha do certificado vai criptografada (AES). */
 	@Transacional
-	public void salvarConfiguracao(NfseConfiguracao cfg) {
+	public void salvarConfiguracao(NfseConfiguracao cfg) throws NfseException {
+		cfg.setSenhaCertificado(CriptografiaSenhaCertificado.criptografar(cfg.getSenhaCertificado()));
 		if (cfg.getId() == null) {
 			daoConfiguracao.inserir(cfg);
 		} else {
