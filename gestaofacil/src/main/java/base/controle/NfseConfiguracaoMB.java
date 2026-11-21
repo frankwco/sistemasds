@@ -33,10 +33,13 @@ public class NfseConfiguracaoMB implements Serializable {
 	/** Senha digitada na tela; vazia = mantém a senha já gravada. */
 	private String novaSenha;
 	private String infoCertificado;
+	/** Há senha gravada no banco (não conta a digitada e ainda não salva). */
+	private boolean senhaSalva;
 
 	@PostConstruct
 	public void init() {
 		configuracao = nfseService.carregarConfiguracao();
+		senhaSalva = temTexto(configuracao.getSenhaCertificado());
 		atualizarInfoCertificado();
 	}
 
@@ -46,6 +49,8 @@ public class NfseConfiguracaoMB implements Serializable {
 			normalizar();
 			nfseService.salvarConfiguracao(configuracao);
 			configuracao = nfseService.carregarConfiguracao();
+			senhaSalva = temTexto(configuracao.getSenhaCertificado());
+			novaSenha = null;
 			atualizarInfoCertificado();
 			ExibirMensagem.exibirMensagem("Configuração da NFS-e salva.");
 		} catch (Exception e) {
@@ -69,6 +74,12 @@ public class NfseConfiguracaoMB implements Serializable {
 
 	public void testarCertificado() {
 		try {
+			if (!configuracao.isCertificadoCarregado()) {
+				throw new NfseException("Envie primeiro o arquivo do certificado (.pfx ou .p12).");
+			}
+			if (!temTexto(novaSenha) && !temTexto(configuracao.getSenhaCertificado())) {
+				throw new NfseException("Digite a senha do certificado para testar (ainda não há senha salva).");
+			}
 			aplicarSenhaDigitada();
 			infoCertificado = nfseEmissaoService.testarCertificado(configuracao);
 			ExibirMensagem.exibirMensagem("Certificado OK: " + infoCertificado);
@@ -126,6 +137,14 @@ public class NfseConfiguracaoMB implements Serializable {
 
 	public void setNovaSenha(String novaSenha) {
 		this.novaSenha = novaSenha;
+	}
+
+	public boolean isSenhaSalva() {
+		return senhaSalva;
+	}
+
+	private static boolean temTexto(String s) {
+		return s != null && !s.isEmpty();
 	}
 
 	public String getInfoCertificado() {

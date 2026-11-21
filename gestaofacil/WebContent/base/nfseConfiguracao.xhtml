@@ -232,9 +232,14 @@
 								invalidSizeMessage="Arquivo muito grande" />
 						</div>
 						<div class="gf-form-item">
-							<label>Senha do certificado (em branco = manter a atual)</label>
+							<h:panelGroup id="lblSenha">
+								<label>#{nfseConfiguracaoMB.senhaSalva
+									? 'Senha do certificado (já salva - preencha só para trocar)'
+									: 'Senha do certificado *'}</label>
+							</h:panelGroup>
 							<p:password id="senhaCert" value="#{nfseConfiguracaoMB.novaSenha}" redisplay="false"
-								feedback="false" pt:autocomplete="new-password" />
+								feedback="false" pt:autocomplete="new-password"
+								placeholder="#{nfseConfiguracaoMB.senhaSalva ? '••••••  (senha salva)' : 'Digite a senha do certificado'}" />
 						</div>
 						<div class="gf-form-item">
 							<label>Algoritmo da assinatura</label>
@@ -252,7 +257,7 @@
 								<p:commandButton value="  Testar certificado" icon="fa fa-check"
 									style="height:38px !important; padding:0 20px !important;"
 									actionListener="#{nfseConfiguracaoMB.testarCertificado()}"
-									process="@this senhaCert algAssinatura" update="infoCert :dlgInformacao" />
+									process="@this senhaCert algAssinatura" update="infoCert lblSenha senhaCert :dlgInformacao" />
 							</span>
 						</div>
 					</div>
