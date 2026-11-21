@@ -83,7 +83,7 @@
 					<div class="gf-form-group">
 						<div class="gf-filter-item">
 							<label>Mês</label>
-							<p:selectOneMenu value="#{nfseMB.mesFiltro}">
+							<p:selectOneMenu style="width:100%" value="#{nfseMB.mesFiltro}">
 								<f:selectItem itemLabel="Todos" itemValue="0" />
 								<f:selectItem itemLabel="Janeiro" itemValue="1" />
 								<f:selectItem itemLabel="Fevereiro" itemValue="2" />
@@ -101,7 +101,7 @@
 						</div>
 						<div class="gf-filter-item">
 							<label>Ano</label>
-							<p:inputNumber value="#{nfseMB.anoFiltro}" decimalPlaces="0" thousandSeparator="" />
+							<p:inputNumber value="#{nfseMB.anoFiltro}" decimalPlaces="0" thousandSeparator="" style="display:block;width:100%" inputStyle="width:100%" />
 						</div>
 						<div class="gf-filter-item" style="flex:0 0 auto; align-self:flex-end;">
 							<span class="btn-primary-modern">
@@ -254,7 +254,8 @@
 								<label><i class="fa fa-usd" style="margin-right:6px;color:#1565C0;"></i>Valor do serviço (R$) *</label>
 								<p:inputNumber value="#{nfseMB.nota.valor}" decimalPlaces="2"
 									decimalSeparator="," thousandSeparator="." required="true"
-									requiredMessage="Informe o valor" />
+									requiredMessage="Informe o valor"
+									style="display:block;width:100%" inputStyle="width:100%" />
 							</div>
 						</div>
 
@@ -262,7 +263,7 @@
 							<div class="gf-form-item">
 								<label><i class="fa fa-align-left" style="margin-right:6px;color:#1565C0;"></i>Descrição do serviço *</label>
 								<p:inputTextarea id="descricao" value="#{nfseMB.nota.descricaoServico}" rows="4"
-									maxlength="2000" autoResize="false" required="true"
+									maxlength="2000" autoResize="false" required="true" style="width:100%"
 									requiredMessage="Informe a descrição do serviço" />
 							</div>
 						</div>
@@ -288,7 +289,7 @@
 							<div class="gf-form-group">
 								<div class="gf-form-item">
 									<label>ISS retido?</label>
-									<p:selectOneMenu value="#{nfseMB.nota.retencaoIssqn}">
+									<p:selectOneMenu style="width:100%" value="#{nfseMB.nota.retencaoIssqn}">
 										<f:selectItem itemLabel="Não retido" itemValue="1" />
 										<f:selectItem itemLabel="Retido pelo tomador" itemValue="2" />
 									</p:selectOneMenu>
@@ -296,8 +297,10 @@
 								<div class="gf-form-item">
 									<label>Alíquota ISS (%) - 0 = não informar</label>
 									<p:inputNumber value="#{nfseMB.nota.aliquotaIss}" decimalPlaces="2"
-										decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99" />
+										decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
+										style="display:block;width:100%" inputStyle="width:100%" />
 								</div>
+								<div class="gf-form-item"></div>
 							</div>
 						</p:fieldset>
 
