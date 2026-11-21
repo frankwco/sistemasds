@@ -244,9 +244,13 @@
 								<f:selectItem itemLabel="RSA-SHA1" itemValue="SHA1" />
 							</p:selectOneMenu>
 						</div>
-						<div class="gf-form-item" style="flex:0 0 auto; min-width:0; align-self:flex-end;">
+						<!-- label vazio + 38px de altura: alinha o botão com os inputs da linha
+						     (o upload é mais alto, então alinhar pela base não serve) -->
+						<div class="gf-form-item" style="flex:0 0 auto; min-width:0;">
+							<label>&#160;</label>
 							<span class="btn-purple-modern">
 								<p:commandButton value="  Testar certificado" icon="fa fa-check"
+									style="height:38px !important; padding:0 20px !important;"
 									actionListener="#{nfseConfiguracaoMB.testarCertificado()}"
 									process="@this senhaCert algAssinatura" update="infoCert :dlgInformacao" />
 							</span>
