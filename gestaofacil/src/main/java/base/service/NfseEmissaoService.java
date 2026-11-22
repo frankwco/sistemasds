@@ -155,19 +155,38 @@ public class NfseEmissaoService implements Serializable {
 		// ambiente de testes" ou "endereço da API diferente"
 		boolean algumOk = false;
 		boolean configuradoOk = false;
+		boolean producaoOk = false;
+		boolean testesOk = false;
 		sb.append(" | Acesso à Receita (consulta, nada é emitido):");
 		for (String[] end : NfseNacionalClient.enderecosDiagnostico()) {
 			String erro = client.testarAcessoEm(end[1], cMun);
 			sb.append(" ").append(end[0]).append(" = ").append(erro == null ? "OK" : "recusado").append(";");
 			algumOk |= erro == null;
 			boolean ehProducao = end[0].startsWith("Produção");
+			if (erro == null) {
+				if (ehProducao) {
+					producaoOk = true;
+				} else {
+					testesOk = true;
+				}
+			}
 			if (erro == null && ehProducao == cfg.isProducao() && (ehProducao || end[0].contains("/API/"))) {
 				configuradoOk = true;
 			}
 		}
 		if (!configuradoOk) {
-			throw new NfseException(sb + (algumOk ? " O certificado foi aceito em outro endereço: me envie este texto."
-					: " Todos recusaram o certificado."));
+			String conclusao;
+			if (producaoOk && !testesOk) {
+				conclusao = " O certificado está correto (a Produção aceitou), mas a empresa não tem acesso ao"
+						+ " ambiente de TESTES da Receita. Faça o primeiro acesso no Emissor Nacional de testes"
+						+ " (www.producaorestrita.nfse.gov.br/EmissorNacional) com este certificado, ou use o"
+						+ " ambiente de Produção.";
+			} else if (algumOk) {
+				conclusao = " O certificado foi aceito em outro endereço: me envie este texto.";
+			} else {
+				conclusao = " Todos recusaram o certificado.";
+			}
+			throw new NfseException(sb + conclusao);
 		}
 		return sb.toString();
 	}
