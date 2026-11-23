@@ -915,6 +915,45 @@ void main() {
       expect(await visiveis(), [1]);
     });
 
+    test('endpoint de ativos com erro 500: remove os inativos pela carga completa e a rodada continua', () async {
+      await a.carregarPontos([pontoJson(1), pontoJson(2)]);
+      a.servidor = (r) async {
+        final path = r.url.path;
+        if (path.endsWith('idsPontosColetaAtivos')) return http.Response('erro', 500);
+        if (path.endsWith('todosPontosColetaReduzidos') && r.url.queryParameters['dataUltimaAtualizacao'] == 'nao') {
+          return http.Response(jsonEncode([pontoJson(1)]), 200);
+        }
+        if (path.endsWith('cidades')) return http.Response(jsonEncode([{'id': 1, 'nome': 'Sarandi'}]), 200);
+        return http.Response('[]', 200);
+      };
+
+      await a.sync.sincronizar(catalogos: true);
+
+      expect(await visiveis(), [1]);
+      expect(await a.catalogo.listarCidades(), hasLength(1), reason: 'os catálogos vêm depois e não podem ser perdidos');
+      expect(a.sync.estado.value.erro, isNull);
+    });
+
+    test('ponto ativo que a carga completa não traz não força carga completa a cada rodada', () async {
+      await a.carregarPontos([pontoJson(1)]);
+      a.servidor = (r) async {
+        final path = r.url.path;
+        if (path.endsWith('idsPontosColetaAtivos')) return http.Response('[1, 77]', 200); // formato do backend
+        if (path.endsWith('todosPontosColetaReduzidos') && r.url.queryParameters['dataUltimaAtualizacao'] == 'nao') {
+          return http.Response(jsonEncode([pontoJson(1)]), 200);
+        }
+        return http.Response('[]', 200);
+      };
+
+      await a.sync.sincronizar();
+      await a.sync.sincronizar();
+      await a.sync.sincronizar();
+
+      final completas = a.requisicoes.where((r) => r.url.queryParameters['dataUltimaAtualizacao'] == 'nao');
+      expect(completas, hasLength(1));
+      expect(await visiveis(), [1]);
+    });
+
     test('servidor fora do ar: a rodada termina com erro visível e nada é perdido', () async {
       await a.carregarPontos([pontoJson(1)]);
       final id = await a.registrar(1);

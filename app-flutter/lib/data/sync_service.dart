@@ -295,26 +295,34 @@ class SyncService {
     try {
       ativos = await _api.idsPontosAtivos();
     } on ApiException catch (e) {
-      if (e.status != 404) rethrow;
-      // Servidor ainda sem o endpoint: a carga completa também remove os inativos.
+      if (e.semConexao) rethrow;
+      // Endpoint ausente (404) ou com defeito (500...): a carga completa também remove os
+      // inativos. A falha não interrompe a rodada (os catálogos vêm depois).
+      debugPrint('[Sync] lista de pontos ativos indisponível: ${e.descricao}');
       final agora = DateTime.now();
       final ultima = _ultimaCargaCompletaSemEndpoint;
       if (!jaBaixouCompleto && (ultima == null || agora.difference(ultima) > const Duration(minutes: 30))) {
-        _ultimaCargaCompletaSemEndpoint = agora;
         await _baixarPontos(completo: true);
+        _ultimaCargaCompletaSemEndpoint = agora;
       }
       return;
     }
     // Lista vazia é quase certamente falha do servidor: não esconde tudo por causa disso.
     if (ativos.isEmpty && await _pontos.total() > 0) return;
-    if (!jaBaixouCompleto && ativos.difference(await _pontos.idsAtivos()).isNotEmpty) {
-      await _baixarPontos(completo: true);
+    if (!jaBaixouCompleto) {
+      final faltando = ativos.difference(await _pontos.idsAtivos());
+      // Se a carga completa já não resolveu esses mesmos pontos, não repete a cada rodada.
+      if (faltando.difference(_faltandoAposCarga).isNotEmpty) {
+        await _baixarPontos(completo: true);
+        _faltandoAposCarga = ativos.difference(await _pontos.idsAtivos());
+      }
     }
     final escondidos = await _pontos.desativarForaDe(ativos);
     if (escondidos > 0) debugPrint('[Sync] $escondidos ponto(s) de contrato inativo escondido(s)');
   }
 
   DateTime? _ultimaCargaCompletaSemEndpoint;
+  Set<int> _faltandoAposCarga = {};
 
   Future<void> _baixarCatalogos() async {
     // Cada lista é independente: uma falha não impede as outras (e só a primeira é relatada).

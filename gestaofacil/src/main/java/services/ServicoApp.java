@@ -307,10 +307,10 @@ public class ServicoApp {
 	@Consumes("application/json;charset=UTF-8")
 	@Path("/idsPontosColetaAtivos")
 	public Response buscarIdsPontosColetaAtivos() {
+		// JSON montado como texto ("[12, 15, 98]"): o MOXy não serializa coleção de tipo
+		// simples (List<Long>) e responderia 500 "MessageBodyWriter not found".
 		List<Long> ids = daoPontoColeta.idsPontosColetaAtivos();
-		GenericEntity<List<Long>> lista = new GenericEntity<List<Long>>(ids) {
-		};
-		return Response.status(200).entity(lista).build();
+		return Response.status(200).entity(ids.toString()).build();
 	}
 
 	@GET
