@@ -155,7 +155,9 @@ public class InformacoesFinanceirasPaginaInicioMB implements Serializable {
 		dadosCarregados = true;
 		preencherMensagemSite();
 		buscarContratosVencidos();
-		resumoEmAberto = fechamentoMesService.buscarResumoEmAbertoPorSituacao().get("Total");
+		// Card "Em aberto (a faturar)" da tela inicial está comentado em inicio.xhtml;
+		// sem ele, não precisa calcular. Ao voltar o card, descomentar esta linha.
+		// resumoEmAberto = fechamentoMesService.buscarResumoEmAbertoPorSituacao().get("Total");
 	}
 	 public void incrementar() {
 		 //System.out.println("AAAA");

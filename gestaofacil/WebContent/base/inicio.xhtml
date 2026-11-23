@@ -109,6 +109,11 @@
 						</div>
 					</div>
 				</div>
+				<!-- Card "Em aberto (a faturar)" comentado por enquanto (pedido do Frank em
+				     22/11/2026). ui:remove tira o bloco da página sem avaliar as expressões.
+				     Para voltar: remover o ui:remove e descomentar a linha resumoEmAberto em
+				     InformacoesFinanceirasPaginaInicioMB.garantirCarregado(). -->
+				<ui:remove>
 				<div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom:16px;">
 					<a href="fechamentoMes.jsf" class="stat-card sc-purple"
 						title="Valores já gerados e ainda não faturados, de todos os contratos. Faturas mensais = contratos não anuais, a fatura inteira ainda precisa ser feita; Excedentes de anuais = o fixo dos anuais já vai por boleto, só o excedente fica em aberto. 'Desde' = mês mais antigo não faturado. Em faturamento = do último mês fechado em diante (ciclo normal); Atrasado = meses anteriores ainda não faturados. Clique para ver por situação do contrato.">
@@ -126,6 +131,7 @@
 						</div>
 					</a>
 				</div>
+				</ui:remove>
 			</div>
 
 			<!-- ══════════════════════════════════
