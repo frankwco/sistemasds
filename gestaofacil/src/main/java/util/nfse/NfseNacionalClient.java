@@ -498,6 +498,16 @@ public class NfseNacionalClient {
 		if (d.competencia == null) {
 			erros.add("Competência não informada");
 		}
+		// Anexo I: ME/EPP nunca pode informar indTotTrib; Não Optante não pode
+		// informar indTotTrib nem pTotTribSN. Só o MEI pode usar indTotTrib.
+		if (d.opcaoSimplesNacional == 3
+				&& (d.percentualTributosSimples == null || d.percentualTributosSimples <= 0)) {
+			erros.add("Preencha o % aproximado de tributos do Simples na Configuração NFS-e (obrigatório para ME/EPP)");
+		}
+		if (d.opcaoSimplesNacional == 1) {
+			erros.add("Emissão para empresa não optante do Simples ainda não é suportada"
+					+ " (falta informar os tributos federais, estaduais e municipais)");
+		}
 		if (!erros.isEmpty()) {
 			throw new NfseException(String.join("; ", erros) + ".");
 		}

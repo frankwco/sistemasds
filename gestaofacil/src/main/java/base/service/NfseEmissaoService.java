@@ -177,10 +177,9 @@ public class NfseEmissaoService implements Serializable {
 		if (!configuradoOk) {
 			String conclusao;
 			if (producaoOk && !testesOk) {
-				conclusao = " O certificado está correto (a Produção aceitou), mas a empresa não tem acesso ao"
-						+ " ambiente de TESTES da Receita. Faça o primeiro acesso no Emissor Nacional de testes"
-						+ " (www.producaorestrita.nfse.gov.br/EmissorNacional) com este certificado, ou use o"
-						+ " ambiente de Produção.";
+				conclusao = " A Produção aceita este certificado, mas o servidor de TESTES da Receita o recusa já na"
+						+ " conexão, antes de consultar o cadastro da empresa. A causa está no lado da Receita e não"
+						+ " foi identificada; informe este texto ao suporte da NFS-e Nacional.";
 			} else if (algumOk) {
 				conclusao = " O certificado foi aceito em outro endereço: me envie este texto.";
 			} else {
