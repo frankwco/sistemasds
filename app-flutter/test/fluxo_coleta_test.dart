@@ -639,6 +639,25 @@ void main() {
       );
     });
 
+    test('coleta excluída no servidor (dia/mês/ano zerados, data preenchida) não vira 1ª coleta', () async {
+      await a.carregarPontos([
+        pontoJson(1, extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(2, extra: {'dataUltimaColeta': '2026-10-14T14:21:16-03:00'}), // o ponto 2136 era assim
+        pontoJson(3), // 1ª coleta de verdade
+        pontoJson(4, periodicidade: 'Coleta Única'),
+      ]);
+      Future<List<Ponto>> lista() => a.pontos.pagina(cidadeId: 1, hoje: DateTime.now(), coletados: false, limite: 10, offset: 0);
+      expect((await lista()).map((p) => p.id), [4, 3, 2, 1]);
+      expect({for (final p in await lista()) p.id: p.primeiraColeta}, {4: false, 3: true, 2: false, 1: false});
+
+      // Coletou o ponto de 1ª coleta e excluiu: continua sendo 1ª coleta.
+      final id = await a.registrar(3);
+      expect((await lista()).map((p) => p.id), isNot(contains(3)));
+      await a.coletas.excluir(id);
+      expect((await lista()).map((p) => p.id), [4, 3, 2, 1]);
+      expect((await lista())[1].primeiraColeta, isTrue);
+    });
+
     test('Coleta Única: depois de coletar não aparece nem em "coletados", nem no dia seguinte', () async {
       await a.carregarPontos([pontoJson(1, periodicidade: 'Coleta Única'), pontoJson(2)]);
       await a.registrar(1);
@@ -807,6 +826,20 @@ void main() {
     final linha = (await db.query('coletas')).single;
     expect(linha['id'], 'velha');
     expect([linha['tentativas'], linha['fb']], [0, 0]);
+    await db.close();
+  });
+
+  test('migração v5 -> v6: calcula a 1ª coleta dos pontos já gravados', () async {
+    final db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath, options: OpenDatabaseOptions(singleInstance: false));
+    await db.execute('CREATE TABLE pontos (id INTEGER PRIMARY KEY, coleta_unica INTEGER NOT NULL, json TEXT NOT NULL)');
+    Future<void> gravar(Map<String, dynamic> j) => db.insert('pontos', {'id': j['id'], 'coleta_unica': 0, 'json': jsonEncode(j)});
+    await gravar(pontoJson(1));
+    await gravar(pontoJson(2, extra: {'dataUltimaColeta': '2026-10-14T14:21:16-03:00'}));
+    await gravar(pontoJson(3, extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}));
+
+    await AppDatabase.atualizarEsquema(db, 5, AppDatabase.versaoEsquema);
+
+    expect((await db.query('pontos', where: 'primeira = 1')).map((l) => l['id']), [1]);
     await db.close();
   });
 

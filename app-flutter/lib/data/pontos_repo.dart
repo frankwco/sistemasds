@@ -90,14 +90,14 @@ class PontosRepo {
     final f = _filtro(
         cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco,
         incluirUnicasColetadas: incluirUnicasColetadas);
-    // Listas do motorista: primeiro as Coletas Únicas, depois os pontos de 1ª coleta (sem
-    // data de última coleta), e o resto da última coleta mais antiga para a mais recente.
+    // Listas do motorista: primeiro as Coletas Únicas, depois os pontos de 1ª coleta
+    // (Ponto.primeiraColeta), e o resto da última coleta mais antiga para a mais recente.
     // O desempate pela ordem do servidor (seq) mantém a hora da coleta dentro do mesmo dia.
     // A tela de consulta continua na ordem do servidor.
     final ordem = coletados == null
         ? 'seq'
         : 'CASE WHEN coleta_unica = 1 THEN 0 '
-            'WHEN dia = 0 AND mes = 0 AND ano = 0 THEN 1 ELSE 2 END, '
+            'WHEN primeira = 1 THEN 1 ELSE 2 END, '
             'ano, mes, dia, seq';
     final r = await _d.rawQuery(
       'SELECT json FROM pontos WHERE ${f.where} ORDER BY $ordem LIMIT ? OFFSET ?',
@@ -156,6 +156,7 @@ class PontosRepo {
       'id_cidade': idCidade == null ? null : inteiro(idCidade),
       'ativo': inativo ? 0 : 1,
       'coleta_unica': ehColetaUnica(p['periodicidadeColeta']) ? 1 : 0,
+      'primeira': Ponto(p).primeiraColeta ? 1 : 0,
       'aviso': verdadeiro(p['situacaoAviso']) ? 1 : 0,
       'dia': inteiro(p['diaUltimaColeta']),
       'mes': inteiro(p['mesUltimaColeta']),
@@ -261,6 +262,7 @@ class PontosRepo {
     await txn.update(
       'pontos',
       {
+        'primeira': novo.primeiraColeta ? 1 : 0,
         'dia': inteiro(novo.raw['diaUltimaColeta']),
         'mes': inteiro(novo.raw['mesUltimaColeta']),
         'ano': inteiro(novo.raw['anoUltimaColeta']),

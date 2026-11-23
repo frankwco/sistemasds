@@ -114,10 +114,12 @@ class Ponto {
   bool get situacaoAviso => verdadeiro(raw['situacaoAviso']);
   bool get coletaUnica => ehColetaUnica(periodicidadeColeta);
 
-  /// Ponto que ainda não teve nenhuma coleta (sem data da última coleta). Mesmo critério
-  /// da ordenação da lista do motorista; Coleta Única tem destaque próprio.
+  /// Ponto que ainda não teve nenhuma coleta. Dia/mês/ano zerados não bastam: o servidor os
+  /// zerava ao excluir uma coleta, mesmo em ponto antigo; nesse caso a data completa continua
+  /// preenchida. Mesmo critério da ordenação da lista; Coleta Única tem destaque próprio.
   bool get primeiraColeta =>
       !coletaUnica &&
+      dataUltimaColeta == null &&
       inteiro(raw['diaUltimaColeta']) == 0 &&
       inteiro(raw['mesUltimaColeta']) == 0 &&
       inteiro(raw['anoUltimaColeta']) == 0;

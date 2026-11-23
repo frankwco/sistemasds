@@ -28,6 +28,26 @@ public class ColetaAppDAO implements Serializable {
 	@Inject
 	private EntityManager manager;
 	
+	/**
+	 * Data da última coleta válida do ponto, sem contar a ColetaApp informada (a que
+	 * está sendo excluída). Se o ponto não tem outra coleta do app, usa a última Coleta
+	 * lançada no sistema. Null = o ponto nunca teve outra coleta.
+	 */
+	public Date dataUltimaColetaValida(Long idPonto, Long idColetaAppExcluida) {
+		Date data = manager
+				.createQuery("select max(c.dataUltimaColeta) from ColetaApp c where c.status = true "
+						+ "and c.pontoColetaSelecionado.id = :ponto and c.id <> :excluida", Date.class)
+				.setParameter("ponto", idPonto).setParameter("excluida", idColetaAppExcluida).getSingleResult();
+		if (data != null) {
+			return data;
+		}
+		return manager
+				.createQuery("select max(c.dataColeta) from Coleta c where c.status = true "
+						+ "and c.pontoColeta.id = :ponto "
+						+ "and (c.coletaAppId is null or c.coletaAppId <> :excluida)", Date.class)
+				.setParameter("ponto", idPonto).setParameter("excluida", idColetaAppExcluida).getSingleResult();
+	}
+
 	//TEM QUE PEGAR A VIGENCIA DO CONTRATO, SÓ TRAZER DOS CONTRATOS VIGENTES....
 	public List<ColetaAppPontosSemColeta> diasSemColetaPonto() {
 		String dataFormatada = Formatacoes.formatarInvertido(new Date());

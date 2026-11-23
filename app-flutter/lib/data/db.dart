@@ -26,7 +26,7 @@ class AppDatabase {
   /// do aparelho assim que a coleta é confirmada pelo servidor.
   final Directory pastaAssinaturas;
 
-  static const versaoEsquema = 5;
+  static const versaoEsquema = 6;
   static const _versao = versaoEsquema;
 
   static Future<AppDatabase> abrir() async {
@@ -69,6 +69,7 @@ class AppDatabase {
         id_cidade INTEGER,
         ativo INTEGER NOT NULL,
         coleta_unica INTEGER NOT NULL,
+        primeira INTEGER NOT NULL DEFAULT 0,
         aviso INTEGER NOT NULL DEFAULT 0,
         dia INTEGER NOT NULL DEFAULT 0,
         mes INTEGER NOT NULL DEFAULT 0,
@@ -127,6 +128,19 @@ class AppDatabase {
         final json = jsonDecode(l['json'] as String);
         final unica = json is Map && ehColetaUnica(json['periodicidadeColeta']);
         b.update('pontos', {'coleta_unica': unica ? 1 : 0}, where: 'id = ?', whereArgs: [l['id']]);
+      }
+      await b.commit(noResult: true);
+    }
+    if (de < 6 && temPontos) {
+      // 1ª coleta vira coluna (a ordenação não pode olhar só dia/mês/ano zerados): calcula
+      // para os pontos já gravados.
+      await db.execute('ALTER TABLE pontos ADD COLUMN primeira INTEGER NOT NULL DEFAULT 0');
+      final linhas = await db.query('pontos', columns: ['id', 'json']);
+      final b = db.batch();
+      for (final l in linhas) {
+        if (Ponto.deJson(l['json'] as String).primeiraColeta) {
+          b.update('pontos', {'primeira': 1}, where: 'id = ?', whereArgs: [l['id']]);
+        }
       }
       await b.commit(noResult: true);
     }

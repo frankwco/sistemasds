@@ -308,13 +308,26 @@ public class ServicoHello {
 							co.setPontoColetaSelecionado(p);
 							if (p != null) {
 
-								p.setMesUltimaColeta(0);
-								p.setAnoUltimaColeta(0);
-								p.setDiaUltimaColeta(0);
-								if (p.getDataPenultimaColeta() != null) {
-									p.setDataUltimaColeta(p.getDataUltimaColeta());
-
+								// A última coleta volta a ser a anterior válida. Antes só dia/mês/ano
+								// eram zerados e a data da coleta excluída ficava, o que fazia o ponto
+								// parecer "1ª coleta" no app.
+								// Coleta Única: a coleta anterior é de outro pedido (contrato já
+								// renovado); zera tudo para o ponto voltar a aparecer como pendente.
+								Date ultimaValida = "Coleta Única".equals(p.getPeriodicidadeColeta()) ? null
+										: coletaAppDAO.dataUltimaColetaValida(p.getId(), cbanco.getId());
+								if (ultimaValida != null) {
+									Calendar calUltima = Calendar.getInstance();
+									calUltima.setTime(ultimaValida);
+									p.setDiaUltimaColeta(calUltima.get(Calendar.DAY_OF_MONTH));
+									p.setMesUltimaColeta(calUltima.get(Calendar.MONTH) + 1);
+									p.setAnoUltimaColeta(calUltima.get(Calendar.YEAR));
+								} else {
+									p.setDiaUltimaColeta(0);
+									p.setMesUltimaColeta(0);
+									p.setAnoUltimaColeta(0);
+									p.setPrimeiraColeta(true);
 								}
+								p.setDataUltimaColeta(ultimaValida);
 
 								p.setQuantidadeColetadaMes(p.getQuantidadeColetadaMes() - 1);
 
