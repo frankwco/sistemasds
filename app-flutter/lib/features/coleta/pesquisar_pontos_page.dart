@@ -19,8 +19,9 @@ class PesquisarPontosPage extends ConsumerStatefulWidget {
 
   final Cidade cidade;
 
-  /// Modo consulta (tela "Dados de pontos"): lista todos os pontos da cidade juntos, sem separar
-  /// coletados e sem os atalhos de coletas/telefones.
+  /// Modo consulta (tela "Dados de pontos"): mesma lista e mesmo visual da coleta, mas tocar
+  /// em qualquer ponto (inclusive coletado) devolve o ponto, sem a confirmação de aviso, e a
+  /// Coleta Única já coletada continua aparecendo (na seção de coletados).
   final bool consulta;
 
   @override
@@ -72,12 +73,14 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
     final repo = ref.read(pontosRepoProvider);
     setState(() => _carregando = true);
     final cid = widget.cidade.id;
-    final totalColetar = await repo.contar(cidadeId: cid, hoje: _hoje, coletados: widget.consulta ? null : false, nome: _nome, endereco: _endereco);
-    final totalColetados = widget.consulta
-        ? 0
-        : await repo.contar(cidadeId: cid, hoje: _hoje, coletados: true, nome: _nome, endereco: _endereco);
+    final unicas = widget.consulta;
+    final totalColetar = await repo.contar(
+        cidadeId: cid, hoje: _hoje, coletados: false, nome: _nome, endereco: _endereco, incluirUnicasColetadas: unicas);
+    final totalColetados = await repo.contar(
+        cidadeId: cid, hoje: _hoje, coletados: true, nome: _nome, endereco: _endereco, incluirUnicasColetadas: unicas);
     final primeiros = await repo.pagina(
-        cidadeId: cid, hoje: _hoje, coletados: widget.consulta ? null : false, nome: _nome, endereco: _endereco, limite: _tamanhoPagina, offset: 0);
+        cidadeId: cid, hoje: _hoje, coletados: false, nome: _nome, endereco: _endereco,
+        limite: _tamanhoPagina, offset: 0, incluirUnicasColetadas: unicas);
     if (!mounted || minha != _geracao) return;
     setState(() {
       _totalColetar = totalColetar;
@@ -103,11 +106,12 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
       final lote = await repo.pagina(
         cidadeId: cid,
         hoje: _hoje,
-        coletados: widget.consulta ? null : !aColetar,
+        coletados: !aColetar,
         nome: _nome,
         endereco: _endereco,
         limite: _tamanhoPagina,
         offset: aColetar ? _coletar.length : _coletados.length,
+        incluirUnicasColetadas: widget.consulta,
       );
       if (!mounted || minha != _geracao) return;
       setState(() => (aColetar ? _coletar : _coletados).addAll(lote));
@@ -206,9 +210,8 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
       );
 
   Widget _cartaoPonto(Ponto p, {required bool coletado}) {
-    final destaque = !widget.consulta && !coletado;
-    final unica = destaque && p.coletaUnica;
-    final primeira = destaque && p.primeiraColeta;
+    final unica = !coletado && p.coletaUnica;
+    final primeira = !coletado && p.primeiraColeta;
     return Cartao(
       cor: coletado
           ? const Color(0xFFEAF8F0)
@@ -218,7 +221,7 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
                   ? _fundoPrimeira
                   : null,
       borda: unica ? _corUnica : (primeira ? _corPrimeira : null),
-      onTap: () => coletado ? Navigator.pop(context) : _selecionar(p),
+      onTap: () => coletado && !widget.consulta ? Navigator.pop(context) : _selecionar(p),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (unica) _faixaDestaque(Icons.star, 'COLETA ÚNICA', _corUnica),
         if (primeira) _faixaDestaque(Icons.fiber_new, '1ª COLETA - ${p.periodicidadeColeta}', _corPrimeira),
@@ -233,8 +236,8 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
             ]),
           ),
         ]),
-        if (!widget.consulta) const SizedBox(height: 8),
-        if (!widget.consulta) Wrap(spacing: 6, runSpacing: 4, children: [
+        const SizedBox(height: 8),
+        Wrap(spacing: 6, runSpacing: 4, children: [
           // Nos coletados a faixa não aparece: mantém a etiqueta discreta.
           if (p.coletaUnica && !unica)
             const Chip(label: Text('COLETA ÚNICA'), visualDensity: VisualDensity.compact),
@@ -298,7 +301,7 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
                     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: const EdgeInsets.only(bottom: 24),
                     children: [
-                      _cabecalho(Icons.location_on_outlined, corPrimaria, widget.consulta ? 'Pontos de coleta' : 'Pontos para coletar', _totalColetar),
+                      _cabecalho(Icons.location_on_outlined, corPrimaria, 'Pontos para coletar', _totalColetar),
                       if (_totalColetar == 0)
                         const Padding(padding: EdgeInsets.all(16), child: Text('Nenhum ponto a coletar.')),
                       for (final p in _coletar) _cartaoPonto(p, coletado: false),

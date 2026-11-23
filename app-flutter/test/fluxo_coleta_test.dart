@@ -597,6 +597,25 @@ void main() {
       expect(await ids(false), [1, 4, 2]);
     });
 
+    test('tela de consulta: mesmas seções da coleta, mas Coleta Única já coletada aparece nos coletados', () async {
+      final hoje = DateTime.now();
+      await a.carregarPontos([
+        pontoJson(1, periodicidade: 'Coleta Única', extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(2, extra: {'diaUltimaColeta': 3, 'mesUltimaColeta': 2, 'anoUltimaColeta': 2020}),
+        pontoJson(3, extra: {'diaUltimaColeta': hoje.day, 'mesUltimaColeta': hoje.month, 'anoUltimaColeta': hoje.year}),
+        pontoJson(4, periodicidade: 'Coleta Única'),
+        pontoJson(5),
+      ]);
+      Future<List<int>> ids(bool coletados) async => (await a.pontos.pagina(
+              cidadeId: 1, hoje: hoje, coletados: coletados, limite: 10, offset: 0, incluirUnicasColetadas: true))
+          .map((p) => p.id)
+          .toList();
+      expect(await ids(false), [4, 5, 2], reason: 'mesma ordem da coleta: Coleta Única, 1ª coleta, mais antiga');
+      expect(await ids(true), unorderedEquals([1, 3]));
+      expect(await a.pontos.contar(cidadeId: 1, hoje: hoje, coletados: true, incluirUnicasColetadas: true), 2);
+      expect(await a.pontos.contar(cidadeId: 1, hoje: hoje, coletados: true), 1, reason: 'motorista continua sem ver a Única coletada');
+    });
+
     test('a coletar: Coleta Única, depois 1ª coleta, depois última coleta mais antiga primeiro', () async {
       await a.carregarPontos([
         pontoJson(1, extra: {'diaUltimaColeta': 10, 'mesUltimaColeta': 5, 'anoUltimaColeta': 2020}),

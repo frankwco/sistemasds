@@ -24,21 +24,30 @@ class PontosRepo {
   ///
   /// "Coleta Única" já coletada (qualquer data) não aparece para o motorista em nenhuma
   /// das duas listas, nem nos dias seguintes: só volta quando o contrato é renovado e o
-  /// backend zera a data da última coleta.
+  /// backend zera a data da última coleta. Na tela de consulta ([incluirUnicasColetadas])
+  /// ela continua visível, na lista de coletados.
   ({String where, List<Object?> args}) _filtro({
     required int cidadeId,
     required DateTime hoje,
     bool? coletados,
     String nome = '',
     String endereco = '',
+    bool incluirUnicasColetadas = false,
   }) {
     final where = StringBuffer('id_cidade = ? AND ativo = 1');
     final args = <Object?>[cidadeId];
 
     if (coletados != null) {
-      where.write(' AND NOT (coleta_unica = 1 AND (dia > 0 OR mes > 0 OR ano > 0))');
+      const unicaColetada = '(coleta_unica = 1 AND (dia > 0 OR mes > 0 OR ano > 0))';
       const coletadoHoje = '(dia = ? AND mes = ? AND ano = ?)';
-      where.write(coletados ? ' AND $coletadoHoje' : ' AND NOT $coletadoHoje');
+      if (!incluirUnicasColetadas) {
+        where.write(' AND NOT $unicaColetada');
+        where.write(coletados ? ' AND $coletadoHoje' : ' AND NOT $coletadoHoje');
+      } else {
+        where.write(coletados
+            ? ' AND ($coletadoHoje OR $unicaColetada)'
+            : ' AND NOT $coletadoHoje AND NOT $unicaColetada');
+      }
       args.addAll([hoje.day, hoje.month, hoje.year]);
     }
     final n = normalizar(nome).trim();
@@ -60,8 +69,11 @@ class PontosRepo {
     bool? coletados,
     String nome = '',
     String endereco = '',
+    bool incluirUnicasColetadas = false,
   }) async {
-    final f = _filtro(cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco);
+    final f = _filtro(
+        cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco,
+        incluirUnicasColetadas: incluirUnicasColetadas);
     return Sqflite.firstIntValue(await _d.rawQuery('SELECT COUNT(*) FROM pontos WHERE ${f.where}', f.args)) ?? 0;
   }
 
@@ -73,8 +85,11 @@ class PontosRepo {
     String endereco = '',
     required int limite,
     required int offset,
+    bool incluirUnicasColetadas = false,
   }) async {
-    final f = _filtro(cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco);
+    final f = _filtro(
+        cidadeId: cidadeId, hoje: hoje, coletados: coletados, nome: nome, endereco: endereco,
+        incluirUnicasColetadas: incluirUnicasColetadas);
     // Listas do motorista: primeiro as Coletas Únicas, depois os pontos de 1ª coleta (sem
     // data de última coleta), e o resto da última coleta mais antiga para a mais recente.
     // O desempate pela ordem do servidor (seq) mantém a hora da coleta dentro do mesmo dia.
