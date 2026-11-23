@@ -118,6 +118,21 @@ public class NfseMB implements Serializable {
 		nota = nfseEmissaoService.novaNota(null, null, null);
 	}
 
+	/** A competência define as alíquotas do mês, além da descrição. */
+	public void aoMudarCompetencia() {
+		nfseEmissaoService.atualizarPadroesCliente(nota);
+		nfseEmissaoService.aplicarAliquotasDoMes(nota);
+	}
+
+	public String getAvisoAliquota() {
+		if (nota == null || nota.getCompetencia() == null || nota.getPercentualTributosSimples() != null
+				|| configuracao.getOpcaoSimplesNacional() == null || configuracao.getOpcaoSimplesNacional() != 3) {
+			return null;
+		}
+		return "Não há alíquotas cadastradas para " + new java.text.SimpleDateFormat("MM/yyyy").format(nota.getCompetencia())
+				+ ". Cadastre em Configuração NFS-e > Alíquotas do mês, ou digite os valores abaixo.";
+	}
+
 	public void aoMudarClienteOuCompetencia() {
 		nfseEmissaoService.atualizarPadroesCliente(nota);
 	}
@@ -356,6 +371,7 @@ public class NfseMB implements Serializable {
 		n.setCodigoMunicipioPrestacao(origem.getCodigoMunicipioPrestacao());
 		n.setRetencaoIssqn(origem.getRetencaoIssqn());
 		n.setAliquotaIss(origem.getAliquotaIss());
+		n.setPercentualTributosSimples(origem.getPercentualTributosSimples());
 		return n;
 	}
 

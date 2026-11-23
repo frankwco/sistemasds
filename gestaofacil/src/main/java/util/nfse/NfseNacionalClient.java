@@ -502,7 +502,7 @@ public class NfseNacionalClient {
 		// informar indTotTrib nem pTotTribSN. Só o MEI pode usar indTotTrib.
 		if (d.opcaoSimplesNacional == 3
 				&& (d.percentualTributosSimples == null || d.percentualTributosSimples <= 0)) {
-			erros.add("Preencha o % aproximado de tributos do Simples na Configuração NFS-e (obrigatório para ME/EPP)");
+			erros.add("Informe o % de tributos do Simples do mês da competência (cadastre em Configuração NFS-e > Alíquotas do mês)");
 		}
 		if (d.opcaoSimplesNacional == 3 && d.regimeApuracaoSimplesNacional == null) {
 			erros.add("Selecione o regime de apuração do Simples na Configuração NFS-e");

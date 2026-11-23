@@ -246,6 +246,11 @@
 								<i class="fa fa-exclamation-triangle"></i>
 								<span>#{nfseMB.avisoCliente}</span>
 							</h:panelGroup>
+							<h:panelGroup layout="block" styleClass="gf-alert warning" style="margin-top:12px;"
+								rendered="#{nfseMB.avisoAliquota != null}">
+								<i class="fa fa-percent"></i>
+								<span>#{nfseMB.avisoAliquota}</span>
+							</h:panelGroup>
 							<h:panelGroup layout="block" styleClass="gf-alert danger" style="margin-top:12px;"
 								rendered="#{nfseMB.avisoDuplicidade != null}">
 								<i class="fa fa-clone"></i>
@@ -259,8 +264,8 @@
 								<p:calendar value="#{nfseMB.nota.competencia}" pattern="dd/MM/yyyy"
 									locale="pt" navigator="true" required="true"
 									requiredMessage="Informe a competência" maxdate="#{nfseMB.hoje}">
-									<p:ajax event="dateSelect" listener="#{nfseMB.aoMudarClienteOuCompetencia()}"
-										update="avisos descricao" process="@this" />
+									<p:ajax event="dateSelect" listener="#{nfseMB.aoMudarCompetencia()}"
+										update="avisos descricao percSimples aliqIss" process="@this" />
 								</p:calendar>
 							</div>
 							<div class="gf-form-item">
@@ -281,6 +286,28 @@
 							</div>
 						</div>
 
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-percent" style="margin-right:6px;color:#1565C0;"></i>% Simples do mês *</label>
+								<p:inputNumber id="percSimples" value="#{nfseMB.nota.percentualTributosSimples}" decimalPlaces="2"
+									decimalSeparator="," thousandSeparator="" minValue="0" maxValue="99.99"
+									style="display:block;width:100%" inputStyle="width:100%" />
+							</div>
+							<div class="gf-form-item">
+								<label>ISS retido?</label>
+								<p:selectOneMenu style="width:100%" value="#{nfseMB.nota.retencaoIssqn}">
+									<f:selectItem itemLabel="Não retido" itemValue="1" />
+									<f:selectItem itemLabel="Retido pelo tomador" itemValue="2" />
+								</p:selectOneMenu>
+							</div>
+							<div class="gf-form-item">
+								<label>Alíquota ISS (%) - só com ISS retido</label>
+								<p:inputNumber id="aliqIss" value="#{nfseMB.nota.aliquotaIss}" decimalPlaces="2"
+									decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
+									style="display:block;width:100%" inputStyle="width:100%" />
+							</div>
+						</div>
+
 						<p:fieldset legend="Tributação (já preenchida pela configuração)" toggleable="true"
 							collapsed="true" style="margin-top:16px;">
 							<div class="gf-form-group">
@@ -298,22 +325,6 @@
 									<p:inputText id="localPrestacao" value="#{nfseMB.nota.codigoMunicipioPrestacao}"
 										maxlength="7" required="true" requiredMessage="Informe o município de prestação" />
 								</div>
-							</div>
-							<div class="gf-form-group">
-								<div class="gf-form-item">
-									<label>ISS retido?</label>
-									<p:selectOneMenu style="width:100%" value="#{nfseMB.nota.retencaoIssqn}">
-										<f:selectItem itemLabel="Não retido" itemValue="1" />
-										<f:selectItem itemLabel="Retido pelo tomador" itemValue="2" />
-									</p:selectOneMenu>
-								</div>
-								<div class="gf-form-item">
-									<label>Alíquota ISS (%) - só com ISS retido</label>
-									<p:inputNumber value="#{nfseMB.nota.aliquotaIss}" decimalPlaces="2"
-										decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
-										style="display:block;width:100%" inputStyle="width:100%" />
-								</div>
-								<div class="gf-form-item"></div>
 							</div>
 						</p:fieldset>
 

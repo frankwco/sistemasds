@@ -9,6 +9,7 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import base.modelo.Cliente;
+import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
 import util.nfse.CriptografiaSenhaCertificado;
@@ -294,7 +295,7 @@ public class NfseEmissaoService implements Serializable {
 		d.tributacaoIssqn = valor(cfg.getTributacaoIssqn(), 1);
 		d.retencaoIssqn = valor(nota.getRetencaoIssqn(), 1);
 		d.aliquotaIss = nota.getAliquotaIss();
-		d.percentualTributosSimples = cfg.getPercentualTributosSimples();
+		d.percentualTributosSimples = nota.getPercentualTributosSimples();
 		return d;
 	}
 
@@ -308,9 +309,24 @@ public class NfseEmissaoService implements Serializable {
 		n.setCodigoTributacaoNacional(cfg.getCodigoTributacaoNacional());
 		n.setCodigoTributacaoMunicipal(cfg.getCodigoTributacaoMunicipal());
 		n.setRetencaoIssqn(cfg.getRetencaoIssqnPadrao());
-		n.setAliquotaIss(cfg.getAliquotaIss());
+		aplicarAliquotasDoMes(n);
 		atualizarPadroesCliente(n);
 		return n;
+	}
+
+	/**
+	 * Preenche as alíquotas do mês da competência. Sem cadastro para o mês, deixa
+	 * em branco (nunca reaproveita outro mês).
+	 */
+	public void aplicarAliquotasDoMes(NotaFiscalServico n) {
+		NfseAliquotaMensal a = null;
+		if (n.getCompetencia() != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(n.getCompetencia());
+			a = nfseService.buscarAliquota(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR));
+		}
+		n.setPercentualTributosSimples(a == null ? null : a.getPercentualSimples());
+		n.setAliquotaIss(a == null ? null : a.getAliquotaIssRetido());
 	}
 
 	/** Recalcula descrição e local de prestação quando cliente/competência mudam. */

@@ -58,6 +58,7 @@ public class NotaFiscalServico implements Serializable {
 	private String codigoMunicipioPrestacao;
 	private Integer retencaoIssqn = 1;
 	private Double aliquotaIss = 0.;
+	private Double percentualTributosSimples;
 
 	private Integer ambiente;
 	@Column(length = 5)
@@ -259,6 +260,14 @@ public class NotaFiscalServico implements Serializable {
 
 	public void setAliquotaIss(Double aliquotaIss) {
 		this.aliquotaIss = aliquotaIss;
+	}
+
+	public Double getPercentualTributosSimples() {
+		return percentualTributosSimples;
+	}
+
+	public void setPercentualTributosSimples(Double percentualTributosSimples) {
+		this.percentualTributosSimples = percentualTributosSimples;
 	}
 
 	public Integer getAmbiente() {

@@ -10,6 +10,7 @@ import javax.inject.Named;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
+import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
 import base.service.NfseEmissaoService;
 import base.service.NfseService;
@@ -33,6 +34,13 @@ public class NfseConfiguracaoMB implements Serializable {
 	/** Senha digitada na tela; vazia = mantém a senha já gravada. */
 	private String novaSenha;
 	private String infoCertificado;
+
+	// Alíquotas do mês
+	private Integer aliqMes;
+	private Integer aliqAno;
+	private Double aliqSimples;
+	private Double aliqIss;
+	private java.util.List<NfseAliquotaMensal> listaAliquotas;
 	/** Há senha gravada no banco (não conta a digitada e ainda não salva). */
 	private boolean senhaSalva;
 
@@ -41,6 +49,82 @@ public class NfseConfiguracaoMB implements Serializable {
 		configuracao = nfseService.carregarConfiguracao();
 		senhaSalva = temTexto(configuracao.getSenhaCertificado());
 		atualizarInfoCertificado();
+		limparAliquota();
+	}
+
+	private void limparAliquota() {
+		java.util.Calendar cal = java.util.Calendar.getInstance();
+		aliqMes = cal.get(java.util.Calendar.MONTH) + 1;
+		aliqAno = cal.get(java.util.Calendar.YEAR);
+		aliqSimples = null;
+		aliqIss = null;
+		listaAliquotas = nfseService.listarAliquotas();
+	}
+
+	public void salvarAliquota() {
+		if (aliqMes == null || aliqAno == null || aliqAno < 2020 || aliqAno > 2100) {
+			ExibirMensagem.exibirMensagemErro("Informe o mês e o ano.");
+			return;
+		}
+		if (aliqSimples == null || aliqSimples <= 0 || aliqSimples >= 100) {
+			ExibirMensagem.exibirMensagemErro("Informe o % de tributos do Simples do mês.");
+			return;
+		}
+		if (aliqIss != null && aliqIss > 0 && (aliqIss < 1.8 || aliqIss >= 10)) {
+			ExibirMensagem.exibirMensagemErro("A alíquota do ISS retido deve ser de no mínimo 1,80%.");
+			return;
+		}
+		try {
+			nfseService.salvarAliquota(aliqMes, aliqAno, aliqSimples, aliqIss);
+			ExibirMensagem.exibirMensagem("Alíquotas de " + String.format("%02d/%d", aliqMes, aliqAno) + " salvas.");
+			limparAliquota();
+		} catch (Exception e) {
+			e.printStackTrace();
+			ExibirMensagem.exibirMensagemErro("Erro ao salvar as alíquotas: " + e.getMessage());
+		}
+	}
+
+	public void editarAliquota(NfseAliquotaMensal a) {
+		aliqMes = a.getMes();
+		aliqAno = a.getAno();
+		aliqSimples = a.getPercentualSimples();
+		aliqIss = a.getAliquotaIssRetido();
+	}
+
+	public Integer getAliqMes() {
+		return aliqMes;
+	}
+
+	public void setAliqMes(Integer aliqMes) {
+		this.aliqMes = aliqMes;
+	}
+
+	public Integer getAliqAno() {
+		return aliqAno;
+	}
+
+	public void setAliqAno(Integer aliqAno) {
+		this.aliqAno = aliqAno;
+	}
+
+	public Double getAliqSimples() {
+		return aliqSimples;
+	}
+
+	public void setAliqSimples(Double aliqSimples) {
+		this.aliqSimples = aliqSimples;
+	}
+
+	public Double getAliqIss() {
+		return aliqIss;
+	}
+
+	public void setAliqIss(Double aliqIss) {
+		this.aliqIss = aliqIss;
+	}
+
+	public java.util.List<NfseAliquotaMensal> getListaAliquotas() {
+		return listaAliquotas;
 	}
 
 	public void salvar() {

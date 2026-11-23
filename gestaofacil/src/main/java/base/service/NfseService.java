@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
 import dao.GenericDAO;
@@ -26,6 +27,38 @@ public class NfseService implements Serializable {
 
 	@Inject
 	private GenericDAO<NotaFiscalServico> daoNota;
+
+	@Inject
+	private GenericDAO<NfseAliquotaMensal> daoAliquota;
+
+	/** Alíquotas do mês de competência, ou null se ainda não foram cadastradas. */
+	public NfseAliquotaMensal buscarAliquota(int mes, int ano) {
+		List<NfseAliquotaMensal> l = daoAliquota.listar(NfseAliquotaMensal.class, "mes = " + mes + " and ano = " + ano);
+		return l.isEmpty() ? null : l.get(0);
+	}
+
+	public List<NfseAliquotaMensal> listarAliquotas() {
+		return daoAliquota.listaComStatus(NfseAliquotaMensal.class, "ano desc, mes desc");
+	}
+
+	/** Grava as alíquotas do mês (altera se o mês já existir). */
+	@Transacional
+	public void salvarAliquota(int mes, int ano, Double percentualSimples, Double aliquotaIssRetido) {
+		NfseAliquotaMensal a = buscarAliquota(mes, ano);
+		boolean nova = a == null;
+		if (nova) {
+			a = new NfseAliquotaMensal();
+			a.setMes(mes);
+			a.setAno(ano);
+		}
+		a.setPercentualSimples(percentualSimples);
+		a.setAliquotaIssRetido(aliquotaIssRetido);
+		if (nova) {
+			daoAliquota.inserir(a);
+		} else {
+			daoAliquota.alterar(a);
+		}
+	}
 
 	/** Devolve a configuração (registro único), criando uma vazia se não existir. */
 	@Transacional

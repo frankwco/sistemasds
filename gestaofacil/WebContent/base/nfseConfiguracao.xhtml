@@ -176,22 +176,6 @@
 
 					<div class="gf-form-group">
 						<div class="gf-form-item">
-							<label>Alíquota ISS (%) - só com ISS retido</label>
-							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.aliquotaIss}" decimalPlaces="2"
-								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
-								style="display:block;width:100%" inputStyle="width:100%" />
-						</div>
-						<div class="gf-form-item">
-							<label>% aprox. de tributos do Simples (obrigatório para ME/EPP)</label>
-							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.percentualTributosSimples}" decimalPlaces="2"
-								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="99.99"
-								style="display:block;width:100%" inputStyle="width:100%" />
-						</div>
-						<div class="gf-form-item"></div>
-					</div>
-
-					<div class="gf-form-group">
-						<div class="gf-form-item">
 							<label>Descrição padrão do serviço - pode usar {MES_NOME}, {MES}, {ANO} e {CLIENTE}</label>
 							<p:inputTextarea value="#{nfseConfiguracaoMB.configuracao.descricaoServicoPadrao}" rows="3"
 								maxlength="2000" autoResize="false" style="width:100%" />
@@ -305,6 +289,90 @@
 					</div>
 				</div>
 			</h:form>
+
+			<!-- ═══ CARD: Alíquotas do mês ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-percent icon-green"></i>
+					<div>
+						<h4>Alíquotas do mês</h4>
+						<small>Mudam todo mês. Cada nota usa as alíquotas do mês da sua competência</small>
+					</div>
+				</div>
+				<h:form id="frmAliquotas">
+					<h:panelGroup id="painelAliquota" layout="block" styleClass="gf-form-group">
+						<div class="gf-form-item">
+							<label>Mês *</label>
+							<p:selectOneMenu value="#{nfseConfiguracaoMB.aliqMes}">
+								<f:selectItem itemLabel="Janeiro" itemValue="1" />
+								<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+								<f:selectItem itemLabel="Março" itemValue="3" />
+								<f:selectItem itemLabel="Abril" itemValue="4" />
+								<f:selectItem itemLabel="Maio" itemValue="5" />
+								<f:selectItem itemLabel="Junho" itemValue="6" />
+								<f:selectItem itemLabel="Julho" itemValue="7" />
+								<f:selectItem itemLabel="Agosto" itemValue="8" />
+								<f:selectItem itemLabel="Setembro" itemValue="9" />
+								<f:selectItem itemLabel="Outubro" itemValue="10" />
+								<f:selectItem itemLabel="Novembro" itemValue="11" />
+								<f:selectItem itemLabel="Dezembro" itemValue="12" />
+							</p:selectOneMenu>
+						</div>
+						<div class="gf-form-item">
+							<label>Ano *</label>
+							<p:inputText value="#{nfseConfiguracaoMB.aliqAno}" maxlength="4"
+								converterMessage="Ano inválido" />
+						</div>
+						<div class="gf-form-item">
+							<label>% de tributos do Simples *</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.aliqSimples}" decimalPlaces="2"
+								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="99.99"
+								style="display:block;width:100%" inputStyle="width:100%" />
+						</div>
+						<div class="gf-form-item">
+							<label>Alíquota do ISS quando retido (%)</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.aliqIss}" decimalPlaces="2"
+								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
+								style="display:block;width:100%" inputStyle="width:100%" />
+						</div>
+						<div class="gf-form-item" style="flex:0 0 auto; min-width:0;">
+							<label>&#160;</label>
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Salvar mês" icon="fa fa-save"
+									style="height:38px !important; padding:0 20px !important;"
+									actionListener="#{nfseConfiguracaoMB.salvarAliquota()}"
+									update="@form :dlgInformacao" />
+							</span>
+						</div>
+					</h:panelGroup>
+
+					<p:dataTable value="#{nfseConfiguracaoMB.listaAliquotas}" var="a" rows="12"
+						paginator="true" paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						style="margin-top:16px;" emptyMessage="Nenhum mês cadastrado">
+						<p:column headerText="Mês">
+							<h:outputText value="#{a.mesAno}" />
+						</p:column>
+						<p:column headerText="% Simples">
+							<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(a.percentualSimples)}%" />
+						</p:column>
+						<p:column headerText="ISS retido">
+							<h:outputText rendered="#{a.aliquotaIssRetido != null and a.aliquotaIssRetido gt 0}"
+								value="#{formatarMB.formatarNumeroDuasCasasDecimais(a.aliquotaIssRetido)}%" />
+						</p:column>
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil" title="Alterar" process="@this"
+										actionListener="#{nfseConfiguracaoMB.editarAliquota(a)}"
+										update=":frmAliquotas:painelAliquota">
+										<p:resetInput target=":frmAliquotas:painelAliquota" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</div>
 
 		</div><!-- /.gf-page -->
 
