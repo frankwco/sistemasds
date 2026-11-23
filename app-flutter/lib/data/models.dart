@@ -113,6 +113,14 @@ class Ponto {
   String get aviso => texto(raw['aviso']);
   bool get situacaoAviso => verdadeiro(raw['situacaoAviso']);
   bool get coletaUnica => ehColetaUnica(periodicidadeColeta);
+
+  /// Ponto que ainda não teve nenhuma coleta (sem data da última coleta). Mesmo critério
+  /// da ordenação da lista do motorista; Coleta Única tem destaque próprio.
+  bool get primeiraColeta =>
+      !coletaUnica &&
+      inteiro(raw['diaUltimaColeta']) == 0 &&
+      inteiro(raw['mesUltimaColeta']) == 0 &&
+      inteiro(raw['anoUltimaColeta']) == 0;
   int get quantidadeColetadaMes => inteiro(raw['quantidadeColetadaMes']);
   int get quantidadeColetaMes => inteiro(raw['quantidadeColetaMes']);
   String get email => texto(raw['email']);

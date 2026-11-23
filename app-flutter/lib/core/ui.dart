@@ -106,20 +106,26 @@ class IconeSelo extends StatelessWidget {
 
 /// Cartão padrão das telas (cantos arredondados, margem lateral de 12).
 class Cartao extends StatelessWidget {
-  const Cartao({super.key, required this.child, this.onTap, this.cor, this.padding = const EdgeInsets.all(14)});
+  const Cartao({super.key, required this.child, this.onTap, this.cor, this.borda, this.padding = const EdgeInsets.all(14)});
 
   final Widget child;
   final VoidCallback? onTap;
   final Color? cor;
+
+  /// Contorno colorido para destacar o cartão (ex.: Coleta Única na lista do motorista).
+  final Color? borda;
   final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: cor ?? Colors.white,
-      elevation: 1,
+      elevation: borda == null ? 1 : 3,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: borda == null ? BorderSide.none : BorderSide(color: borda!, width: 2.5),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
     );

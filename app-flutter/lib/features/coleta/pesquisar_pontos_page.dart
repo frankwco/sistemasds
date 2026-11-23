@@ -184,11 +184,44 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
         ]),
       );
 
+  // Destaque na lista do motorista: Coleta Única (laranja) e 1ª coleta (roxo).
+  static const _corUnica = Color(0xFFE65100);
+  static const _fundoUnica = Color(0xFFFFF3E0);
+  static const _corPrimeira = Color(0xFF6A1B9A);
+  static const _fundoPrimeira = Color(0xFFF3E5F5);
+
+  Widget _faixaDestaque(IconData icone, String texto, Color cor) => Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(8)),
+        child: Row(children: [
+          Icon(icone, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(texto,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5)),
+          ),
+        ]),
+      );
+
   Widget _cartaoPonto(Ponto p, {required bool coletado}) {
+    final destaque = !widget.consulta && !coletado;
+    final unica = destaque && p.coletaUnica;
+    final primeira = destaque && p.primeiraColeta;
     return Cartao(
-      cor: coletado ? const Color(0xFFEAF8F0) : null,
+      cor: coletado
+          ? const Color(0xFFEAF8F0)
+          : unica
+              ? _fundoUnica
+              : primeira
+                  ? _fundoPrimeira
+                  : null,
+      borda: unica ? _corUnica : (primeira ? _corPrimeira : null),
       onTap: () => coletado ? Navigator.pop(context) : _selecionar(p),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (unica) _faixaDestaque(Icons.star, 'COLETA ÚNICA', _corUnica),
+        if (primeira) _faixaDestaque(Icons.fiber_new, '1ª COLETA - ${p.periodicidadeColeta}', _corPrimeira),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           IconeSelo(coletado ? Icons.check : Icons.business_outlined, cor: coletado ? corSucesso : corPrimaria),
           const SizedBox(width: 12),
@@ -202,10 +235,9 @@ class _PesquisarPontosPageState extends ConsumerState<PesquisarPontosPage> {
         ]),
         if (!widget.consulta) const SizedBox(height: 8),
         if (!widget.consulta) Wrap(spacing: 6, runSpacing: 4, children: [
-          if (p.coletaUnica)
-            const Chip(label: Text('COLETA ÚNICA'), visualDensity: VisualDensity.compact)
-          else if (p.dataUltimaColeta == null)
-            Chip(label: Text('1ª coleta - ${p.periodicidadeColeta}'), visualDensity: VisualDensity.compact),
+          // Nos coletados a faixa não aparece: mantém a etiqueta discreta.
+          if (p.coletaUnica && !unica)
+            const Chip(label: Text('COLETA ÚNICA'), visualDensity: VisualDensity.compact),
           if (p.dataUltimaColeta != null)
             Chip(label: Text('Última: ${formatarData(p.dataUltimaColeta!)}'), visualDensity: VisualDensity.compact),
           ActionChip(
