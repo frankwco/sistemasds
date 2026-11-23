@@ -437,7 +437,7 @@ public class NfseNacionalClient {
 			Element tribMun = el(doc, trib, "tribMun", null);
 			el(doc, tribMun, "tribISSQN", String.valueOf(d.tributacaoIssqn));
 			el(doc, tribMun, "tpRetISSQN", String.valueOf(d.retencaoIssqn));
-			if (d.aliquotaIss != null && d.aliquotaIss > 0) {
+			if (d.aliquotaIss != null && d.aliquotaIss > 0 && !d.aliquotaProibida()) {
 				el(doc, tribMun, "pAliq", decimal(d.aliquotaIss));
 			}
 			Element totTrib = el(doc, trib, "totTrib", null);
@@ -503,6 +503,13 @@ public class NfseNacionalClient {
 		if (d.opcaoSimplesNacional == 3
 				&& (d.percentualTributosSimples == null || d.percentualTributosSimples <= 0)) {
 			erros.add("Preencha o % aproximado de tributos do Simples na Configuração NFS-e (obrigatório para ME/EPP)");
+		}
+		if (d.opcaoSimplesNacional == 3 && d.regimeApuracaoSimplesNacional == null) {
+			erros.add("Selecione o regime de apuração do Simples na Configuração NFS-e");
+		}
+		// E0621/E0628: ISSQN pelo Simples e retido exige alíquota de no mínimo 1,8%
+		if (d.issPeloSimples() && d.retencaoIssqn != 1 && (d.aliquotaIss == null || d.aliquotaIss < 1.8)) {
+			erros.add("Com ISS retido é obrigatório informar a alíquota do ISS (mínimo 1,80%)");
 		}
 		if (d.opcaoSimplesNacional == 1) {
 			erros.add("Emissão para empresa não optante do Simples ainda não é suportada"
@@ -1087,6 +1094,17 @@ public class NfseNacionalClient {
 		public int retencaoIssqn = 1;
 		public Double aliquotaIss;
 		public Double percentualTributosSimples;
+
+		/** ME/EPP com tributos federais e municipal apurados pelo Simples. */
+		boolean issPeloSimples() {
+			return opcaoSimplesNacional == 3 && regimeApuracaoSimplesNacional != null
+					&& regimeApuracaoSimplesNacional == 1;
+		}
+
+		/** E0625/E0631: ISSQN pelo Simples e sem retenção não pode levar alíquota. */
+		boolean aliquotaProibida() {
+			return issPeloSimples() && retencaoIssqn == 1;
+		}
 
 		/** Só envia endereço quando estiver completo (todos os campos obrigatórios). */
 		public boolean temEnderecoTomador() {
