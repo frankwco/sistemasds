@@ -169,7 +169,7 @@ public class NfseMB implements Serializable {
 			avisoLocal = "Cliente sem ponto de coleta com cidade. Escolha o município da prestação.";
 		} else if (nomes.size() > 1) {
 			avisoLocal = "Coletas em mais de uma cidade (" + String.join(", ", nomes) + "). Escolha o município da prestação"
-					+ " e confira se o valor desta nota é só dessa cidade.";
+					+ " desta nota.";
 		}
 	}
 
