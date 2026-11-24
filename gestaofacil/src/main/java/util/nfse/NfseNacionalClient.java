@@ -440,6 +440,12 @@ public class NfseNacionalClient {
 			if (d.aliquotaIss != null && d.aliquotaIss > 0 && !d.aliquotaProibida()) {
 				el(doc, tribMun, "pAliq", decimal(d.aliquotaIss));
 			}
+			if (d.opcaoSimplesNacional == 3) {
+				// igual ao Emissor Nacional para ME/EPP: PIS/COFINS sem destaque nem retenção
+				Element piscofins = el(doc, el(doc, trib, "tribFed", null), "piscofins", null);
+				el(doc, piscofins, "CST", "00");
+				el(doc, piscofins, "tpRetPisCofins", "0");
+			}
 			Element totTrib = el(doc, trib, "totTrib", null);
 			if (d.opcaoSimplesNacional == 3 && d.percentualTributosSimples != null
 					&& d.percentualTributosSimples > 0) {
@@ -488,6 +494,9 @@ public class NfseNacionalClient {
 		}
 		if (!temTexto(d.descricaoServico)) {
 			erros.add("Descrição do serviço não informada");
+		} else if (Pattern.compile("\\{[A-Z_]+\\}").matcher(d.descricaoServico).find()) {
+			erros.add("A descrição ainda tem campo a preencher (ex.: {BOLETO}). Informe o vencimento do boleto e o mês de"
+					+ " referência, ou corrija o texto");
 		}
 		if (d.valorServico == null || d.valorServico <= 0) {
 			erros.add("Valor do serviço deve ser maior que zero");

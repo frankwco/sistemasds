@@ -260,12 +260,12 @@
 
 						<div class="gf-form-group">
 							<div class="gf-form-item">
-								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Competência *</label>
+								<label><i class="fa fa-calendar" style="margin-right:6px;color:#1565C0;"></i>Data da nota (competência) *</label>
 								<p:calendar value="#{nfseMB.nota.competencia}" pattern="dd/MM/yyyy"
 									locale="pt" navigator="true" required="true"
-									requiredMessage="Informe a competência" maxdate="#{nfseMB.hoje}">
+									requiredMessage="Informe a competência" maxdate="#{nfseMB.hoje}" readonlyInput="true">
 									<p:ajax event="dateSelect" listener="#{nfseMB.aoMudarCompetencia()}"
-										update="avisos descricao percSimples aliqIss" process="@this" />
+										update="avisos percSimples aliqIss" process="@this" />
 								</p:calendar>
 							</div>
 							<div class="gf-form-item">
@@ -274,6 +274,41 @@
 									decimalSeparator="," thousandSeparator="." required="true"
 									requiredMessage="Informe o valor"
 									style="display:block;width:100%" inputStyle="width:100%" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label>Mês do serviço *</label>
+								<p:selectOneMenu value="#{nfseMB.nota.mesReferencia}">
+									<f:selectItem itemLabel="Janeiro" itemValue="1" />
+									<f:selectItem itemLabel="Fevereiro" itemValue="2" />
+									<f:selectItem itemLabel="Março" itemValue="3" />
+									<f:selectItem itemLabel="Abril" itemValue="4" />
+									<f:selectItem itemLabel="Maio" itemValue="5" />
+									<f:selectItem itemLabel="Junho" itemValue="6" />
+									<f:selectItem itemLabel="Julho" itemValue="7" />
+									<f:selectItem itemLabel="Agosto" itemValue="8" />
+									<f:selectItem itemLabel="Setembro" itemValue="9" />
+									<f:selectItem itemLabel="Outubro" itemValue="10" />
+									<f:selectItem itemLabel="Novembro" itemValue="11" />
+									<f:selectItem itemLabel="Dezembro" itemValue="12" />
+									<p:ajax listener="#{nfseMB.aoMudarReferencia()}" update="avisos descricao" process="@this" />
+								</p:selectOneMenu>
+							</div>
+							<div class="gf-form-item">
+								<label>Ano do serviço *</label>
+								<p:inputText value="#{nfseMB.nota.anoReferencia}" maxlength="4" required="true"
+									requiredMessage="Informe o ano do serviço" converterMessage="Ano inválido">
+									<p:ajax event="change" listener="#{nfseMB.aoMudarReferencia()}" update="avisos descricao" process="@this" />
+								</p:inputText>
+							</div>
+							<div class="gf-form-item">
+								<label><i class="fa fa-barcode" style="margin-right:6px;color:#1565C0;"></i>Vencimento do boleto</label>
+								<p:calendar value="#{nfseMB.nota.dataBoleto}" pattern="dd/MM/yyyy" locale="pt"
+									navigator="true" readonlyInput="true">
+									<p:ajax event="dateSelect" listener="#{nfseMB.aoMudarReferencia()}" update="descricao" process="@this" />
+								</p:calendar>
 							</div>
 						</div>
 

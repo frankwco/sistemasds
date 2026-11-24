@@ -176,7 +176,7 @@
 
 					<div class="gf-form-group">
 						<div class="gf-form-item">
-							<label>Descrição padrão do serviço - pode usar {MES_NOME}, {MES}, {ANO} e {CLIENTE}</label>
+							<label>Descrição padrão do serviço - pode usar {MES_NOME}, {MES}, {ANO}, {BOLETO} e {CLIENTE}</label>
 							<p:inputTextarea value="#{nfseConfiguracaoMB.configuracao.descricaoServicoPadrao}" rows="3"
 								maxlength="2000" autoResize="false" style="width:100%" />
 						</div>
@@ -296,7 +296,7 @@
 					<i class="fa fa-percent icon-green"></i>
 					<div>
 						<h4>Alíquotas do mês</h4>
-						<small>Mudam todo mês. Cada nota usa as alíquotas do mês da sua competência</small>
+						<small>Mudam todo mês. Cada nota usa as do mês da data da nota (competência), não do mês do serviço</small>
 					</div>
 				</div>
 				<h:form id="frmAliquotas">

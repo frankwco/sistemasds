@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import base.modelo.ContasReceberParcelas;
 import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
@@ -30,6 +31,29 @@ public class NfseService implements Serializable {
 
 	@Inject
 	private GenericDAO<NfseAliquotaMensal> daoAliquota;
+
+	@Inject
+	private GenericDAO<ContasReceberParcelas> daoParcela;
+
+	/**
+	 * Vencimento da parcela do fechamento. Só devolve quando há uma única data;
+	 * com nenhuma ou várias, o usuário informa.
+	 */
+	public java.util.Date buscarVencimento(Long fechamentoId) {
+		List<ContasReceberParcelas> parcelas = daoParcela.listar(ContasReceberParcelas.class,
+				"fechamentoMes.id = " + fechamentoId);
+		if (parcelas.isEmpty()) {
+			parcelas = daoParcela.listar(ContasReceberParcelas.class, "contasReceber.fechamentoMes.id = " + fechamentoId);
+		}
+		java.util.Date unica = null;
+		for (ContasReceberParcelas p : parcelas) {
+			if (p.getDataVencimento() == null || (unica != null && unica.getTime() != p.getDataVencimento().getTime())) {
+				return null;
+			}
+			unica = p.getDataVencimento();
+		}
+		return unica;
+	}
 
 	/** Alíquotas do mês de competência, ou null se ainda não foram cadastradas. */
 	public NfseAliquotaMensal buscarAliquota(int mes, int ano) {

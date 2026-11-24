@@ -87,11 +87,8 @@ public class NfseMB implements Serializable {
 			if (f == null || f.getInformacaoFinanceira() == null || f.getMes() == null || f.getAno() == null) {
 				return;
 			}
-			Calendar cal = Calendar.getInstance();
-			cal.clear();
-			cal.set(f.getAno(), f.getMes() - 1, 1);
-			nota = nfseEmissaoService.novaNota(f.getInformacaoFinanceira().getCliente(), cal.getTime(),
-					f.getValorFinal());
+			nota = nfseEmissaoService.novaNota(f.getInformacaoFinanceira().getCliente(), f.getValorFinal(), f.getMes(),
+					f.getAno(), nfseService.buscarVencimento(f.getId()));
 			nota.setFechamentoMes(f);
 			abrirDialogAoCarregar = true;
 		} catch (Exception e) {
@@ -115,12 +112,15 @@ public class NfseMB implements Serializable {
 	}
 
 	public void novaNota() {
-		nota = nfseEmissaoService.novaNota(null, null, null);
+		nota = nfseEmissaoService.novaNota(null, null);
 	}
 
-	/** A competência define as alíquotas do mês, além da descrição. */
+	public void aoMudarReferencia() {
+		nfseEmissaoService.atualizarDescricao(nota);
+	}
+
+	/** A competência (data da nota) define as alíquotas do mês. */
 	public void aoMudarCompetencia() {
-		nfseEmissaoService.atualizarPadroesCliente(nota);
 		nfseEmissaoService.aplicarAliquotasDoMes(nota);
 	}
 
@@ -179,21 +179,19 @@ public class NfseMB implements Serializable {
 	/** Avisa se já existe nota emitida/pendente para o mesmo cliente e competência. */
 	public String getAvisoDuplicidade() {
 		if (nota == null || nota.getCliente() == null || nota.getCliente().getId() == null
-				|| nota.getCompetencia() == null) {
+				|| nota.getMesReferencia() == null || nota.getAnoReferencia() == null) {
 			return null;
 		}
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(nota.getCompetencia());
 		List<NotaFiscalServico> existentes = nfseService.listarNotas("cliente.id = " + nota.getCliente().getId()
 				+ " and situacao in ('" + NotaFiscalServico.SITUACAO_EMITIDA + "','"
-				+ NotaFiscalServico.SITUACAO_PENDENTE + "') and month(competencia) = " + (cal.get(Calendar.MONTH) + 1)
-				+ " and year(competencia) = " + cal.get(Calendar.YEAR));
+				+ NotaFiscalServico.SITUACAO_PENDENTE + "') and mesReferencia = " + nota.getMesReferencia() + " and anoReferencia = "
+				+ nota.getAnoReferencia());
 		if (existentes.isEmpty()) {
 			return null;
 		}
 		NotaFiscalServico n = existentes.get(0);
 		return "Atenção: já existe NFS-e " + n.getSituacao().toLowerCase()
-				+ (n.getNumeroNfse() != null ? " nº " + n.getNumeroNfse() : "") + " para este cliente nesta competência"
+				+ (n.getNumeroNfse() != null ? " nº " + n.getNumeroNfse() : "") + " para este cliente neste mês de referência"
 				+ " (R$ " + String.format("%.2f", n.getValor()) + ").";
 	}
 
@@ -364,6 +362,9 @@ public class NfseMB implements Serializable {
 		n.setCliente(origem.getCliente());
 		n.setFechamentoMes(origem.getFechamentoMes());
 		n.setCompetencia(origem.getCompetencia());
+		n.setMesReferencia(origem.getMesReferencia());
+		n.setAnoReferencia(origem.getAnoReferencia());
+		n.setDataBoleto(origem.getDataBoleto());
 		n.setValor(origem.getValor());
 		n.setDescricaoServico(origem.getDescricaoServico());
 		n.setCodigoTributacaoNacional(origem.getCodigoTributacaoNacional());

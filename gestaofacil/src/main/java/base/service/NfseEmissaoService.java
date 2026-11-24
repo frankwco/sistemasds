@@ -300,11 +300,26 @@ public class NfseEmissaoService implements Serializable {
 	}
 
 	/** Preenche uma nota nova com os padrões da configuração. */
-	public NotaFiscalServico novaNota(Cliente cliente, Date competencia, Double valor) {
+	public NotaFiscalServico novaNota(Cliente cliente, Double valor) {
+		Calendar anterior = Calendar.getInstance();
+		anterior.set(Calendar.DAY_OF_MONTH, 1);
+		anterior.add(Calendar.MONTH, -1);
+		return novaNota(cliente, valor, anterior.get(Calendar.MONTH) + 1, anterior.get(Calendar.YEAR), null);
+	}
+
+	/**
+	 * A competência é o dia da emissão (como no Emissor Nacional); o mês do
+	 * serviço prestado aparece só na descrição.
+	 */
+	public NotaFiscalServico novaNota(Cliente cliente, Double valor, Integer mesReferencia, Integer anoReferencia,
+			Date dataBoleto) {
 		NfseConfiguracao cfg = nfseService.carregarConfiguracao();
 		NotaFiscalServico n = new NotaFiscalServico();
 		n.setCliente(cliente);
-		n.setCompetencia(competencia == null ? primeiroDiaMesAnterior() : competencia);
+		n.setCompetencia(new Date());
+		n.setMesReferencia(mesReferencia);
+		n.setAnoReferencia(anoReferencia);
+		n.setDataBoleto(dataBoleto);
 		n.setValor(valor == null ? 0. : valor);
 		n.setCodigoTributacaoNacional(cfg.getCodigoTributacaoNacional());
 		n.setCodigoTributacaoMunicipal(cfg.getCodigoTributacaoMunicipal());
@@ -343,26 +358,30 @@ public class NfseEmissaoService implements Serializable {
 		n.setDescricaoServico(aplicarModelo(cfg.getDescricaoServicoPadrao(), n));
 	}
 
+	/** Refaz só a descrição (mês de referência ou boleto mudou). */
+	public void atualizarDescricao(NotaFiscalServico n) {
+		n.setDescricaoServico(aplicarModelo(nfseService.carregarConfiguracao().getDescricaoServicoPadrao(), n));
+	}
+
 	private String aplicarModelo(String modelo, NotaFiscalServico n) {
 		if (modelo == null) {
 			return "";
 		}
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(n.getCompetencia() == null ? new Date() : n.getCompetencia());
-		String mesNome = new SimpleDateFormat("MMMM", new Locale("pt", "BR")).format(cal.getTime());
-		mesNome = mesNome.substring(0, 1).toUpperCase() + mesNome.substring(1);
+		Integer mes = n.getMesReferencia();
+		if (mes != null && mes >= 1 && mes <= 12 && n.getAnoReferencia() != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.clear();
+			cal.set(n.getAnoReferencia(), mes - 1, 1);
+			Locale ptBr = new Locale("pt", "BR");
+			modelo = modelo.replace("{MES_NOME}", new SimpleDateFormat("MMMM", ptBr).format(cal.getTime()).toUpperCase(ptBr))
+					.replace("{MES}", String.format("%02d", mes)).replace("{ANO}", String.valueOf(n.getAnoReferencia()));
+		}
+		if (n.getDataBoleto() != null) {
+			modelo = modelo.replace("{BOLETO}", new SimpleDateFormat("dd/MM/yyyy").format(n.getDataBoleto()));
+		}
 		String cliente = n.getCliente() == null || n.getCliente().getNomeRazaoSocial() == null ? ""
 				: n.getCliente().getNomeRazaoSocial();
-		return modelo.replace("{MES_NOME}", mesNome)
-				.replace("{MES}", String.format("%02d", cal.get(Calendar.MONTH) + 1))
-				.replace("{ANO}", String.valueOf(cal.get(Calendar.YEAR))).replace("{CLIENTE}", cliente);
-	}
-
-	private static Date primeiroDiaMesAnterior() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MONTH, -1);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		return cal.getTime();
+		return modelo.replace("{CLIENTE}", cliente);
 	}
 
 	private static int valor(Integer v, int padrao) {

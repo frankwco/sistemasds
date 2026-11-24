@@ -81,9 +81,9 @@ public class NfseConfiguracao implements Serializable {
 	/** Código NBS (9 dígitos), opcional. */
 	@Column(length = 9)
 	private String codigoNbs;
-	/** Texto padrão da descrição. Aceita {MES}, {ANO}, {MES_NOME} e {CLIENTE}. */
+	/** Descrição padrão. Aceita {MES}, {ANO}, {MES_NOME}, {CLIENTE} e {BOLETO}. */
 	@Column(length = 2000)
-	private String descricaoServicoPadrao = "Prestação de serviços de coleta de resíduos referente a {MES_NOME}/{ANO}.";
+	private String descricaoServicoPadrao = "COLETA, TRANSPORTE, TRATAMENTO e DESTIN. FINAL DE RESIDUOS DA SAUDE Mês {MES_NOME}/{ANO} Conforme contrato e demonstrativo anexo. BOLETO: {BOLETO}";
 	/** "EMITENTE" ou "TOMADOR": de onde vem o município de prestação padrão. */
 	@Column(length = 10)
 	private String localPrestacaoPadrao = "TOMADOR";

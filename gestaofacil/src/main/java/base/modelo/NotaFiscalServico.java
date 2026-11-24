@@ -45,6 +45,12 @@ public class NotaFiscalServico implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date competencia;
 
+	/** Mês em que o serviço foi prestado (vai na descrição; a competência é a data da nota). */
+	private Integer mesReferencia;
+	private Integer anoReferencia;
+	@Temporal(TemporalType.DATE)
+	private Date dataBoleto;
+
 	private Double valor = 0.;
 
 	@Column(length = 2000)
@@ -268,6 +274,30 @@ public class NotaFiscalServico implements Serializable {
 
 	public void setPercentualTributosSimples(Double percentualTributosSimples) {
 		this.percentualTributosSimples = percentualTributosSimples;
+	}
+
+	public Integer getMesReferencia() {
+		return mesReferencia;
+	}
+
+	public void setMesReferencia(Integer mesReferencia) {
+		this.mesReferencia = mesReferencia;
+	}
+
+	public Integer getAnoReferencia() {
+		return anoReferencia;
+	}
+
+	public void setAnoReferencia(Integer anoReferencia) {
+		this.anoReferencia = anoReferencia;
+	}
+
+	public Date getDataBoleto() {
+		return dataBoleto;
+	}
+
+	public void setDataBoleto(Date dataBoleto) {
+		this.dataBoleto = dataBoleto;
 	}
 
 	public Integer getAmbiente() {
