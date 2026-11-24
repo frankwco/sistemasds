@@ -39,7 +39,6 @@ public class NfseConfiguracaoMB implements Serializable {
 	private Integer aliqMes;
 	private Integer aliqAno;
 	private Double aliqSimples;
-	private Double aliqIss;
 	private java.util.List<NfseAliquotaMensal> listaAliquotas;
 	/** Há senha gravada no banco (não conta a digitada e ainda não salva). */
 	private boolean senhaSalva;
@@ -57,7 +56,6 @@ public class NfseConfiguracaoMB implements Serializable {
 		aliqMes = cal.get(java.util.Calendar.MONTH) + 1;
 		aliqAno = cal.get(java.util.Calendar.YEAR);
 		aliqSimples = null;
-		aliqIss = null;
 		listaAliquotas = nfseService.listarAliquotas();
 	}
 
@@ -70,12 +68,8 @@ public class NfseConfiguracaoMB implements Serializable {
 			ExibirMensagem.exibirMensagemErro("Informe o % de tributos do Simples do mês.");
 			return;
 		}
-		if (aliqIss != null && aliqIss > 0 && (aliqIss < 1.8 || aliqIss >= 10)) {
-			ExibirMensagem.exibirMensagemErro("A alíquota do ISS retido deve ser de no mínimo 1,80%.");
-			return;
-		}
 		try {
-			nfseService.salvarAliquota(aliqMes, aliqAno, aliqSimples, aliqIss);
+			nfseService.salvarAliquota(aliqMes, aliqAno, aliqSimples);
 			ExibirMensagem.exibirMensagem("Alíquotas de " + String.format("%02d/%d", aliqMes, aliqAno) + " salvas.");
 			limparAliquota();
 		} catch (Exception e) {
@@ -88,7 +82,6 @@ public class NfseConfiguracaoMB implements Serializable {
 		aliqMes = a.getMes();
 		aliqAno = a.getAno();
 		aliqSimples = a.getPercentualSimples();
-		aliqIss = a.getAliquotaIssRetido();
 	}
 
 	public Integer getAliqMes() {
@@ -113,14 +106,6 @@ public class NfseConfiguracaoMB implements Serializable {
 
 	public void setAliqSimples(Double aliqSimples) {
 		this.aliqSimples = aliqSimples;
-	}
-
-	public Double getAliqIss() {
-		return aliqIss;
-	}
-
-	public void setAliqIss(Double aliqIss) {
-		this.aliqIss = aliqIss;
 	}
 
 	public java.util.List<NfseAliquotaMensal> getListaAliquotas() {

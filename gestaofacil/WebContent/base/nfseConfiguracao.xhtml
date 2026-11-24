@@ -150,11 +150,10 @@
 
 					<div class="gf-form-group">
 						<div class="gf-form-item">
-							<label>Município de prestação padrão</label>
-							<p:selectOneMenu style="width:100%" value="#{nfseConfiguracaoMB.configuracao.localPrestacaoPadrao}">
-								<f:selectItem itemLabel="Município do prestador" itemValue="EMITENTE" />
-								<f:selectItem itemLabel="Município do cliente (tomador)" itemValue="TOMADOR" />
-							</p:selectOneMenu>
+							<label>Alíquota do ISS quando retido (%)</label>
+							<p:inputNumber value="#{nfseConfiguracaoMB.configuracao.aliquotaIss}" decimalPlaces="2"
+								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
+								style="display:block;width:100%" inputStyle="width:100%" />
 						</div>
 						<div class="gf-form-item">
 							<label>Tributação do ISSQN</label>
@@ -295,8 +294,8 @@
 				<div class="gf-card-header">
 					<i class="fa fa-percent icon-green"></i>
 					<div>
-						<h4>Alíquotas do mês</h4>
-						<small>Mudam todo mês. Cada nota usa as do mês da data da nota (competência), não do mês do serviço</small>
+						<h4>% do Simples por mês</h4>
+						<small>Muda todo mês. Cada nota usa o do mês da data da nota (competência), não do mês do serviço</small>
 					</div>
 				</div>
 				<h:form id="frmAliquotas">
@@ -329,12 +328,6 @@
 								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="99.99"
 								style="display:block;width:100%" inputStyle="width:100%" />
 						</div>
-						<div class="gf-form-item">
-							<label>Alíquota do ISS quando retido (%)</label>
-							<p:inputNumber value="#{nfseConfiguracaoMB.aliqIss}" decimalPlaces="2"
-								decimalSeparator="," thousandSeparator="" minValue="0" maxValue="9.99"
-								style="display:block;width:100%" inputStyle="width:100%" />
-						</div>
 						<div class="gf-form-item" style="flex:0 0 auto; min-width:0;">
 							<label>&#160;</label>
 							<span class="btn-primary-modern">
@@ -354,10 +347,6 @@
 						</p:column>
 						<p:column headerText="% Simples">
 							<h:outputText value="#{formatarMB.formatarNumeroDuasCasasDecimais(a.percentualSimples)}%" />
-						</p:column>
-						<p:column headerText="ISS retido">
-							<h:outputText rendered="#{a.aliquotaIssRetido != null and a.aliquotaIssRetido gt 0}"
-								value="#{formatarMB.formatarNumeroDuasCasasDecimais(a.aliquotaIssRetido)}%" />
 						</p:column>
 						<p:column headerText="Ações" width="90">
 							<div class="action-btn-icons">

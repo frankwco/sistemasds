@@ -27,8 +27,6 @@ public class NfseAliquotaMensal implements Serializable {
 	private Integer ano;
 	/** % aproximado dos tributos do Simples (pTotTribSN). */
 	private Double percentualSimples;
-	/** Alíquota do ISS usada só quando o ISS é retido (pAliq). */
-	private Double aliquotaIssRetido;
 	private Boolean status = true;
 
 	public Long getId() {
@@ -61,14 +59,6 @@ public class NfseAliquotaMensal implements Serializable {
 
 	public void setPercentualSimples(Double percentualSimples) {
 		this.percentualSimples = percentualSimples;
-	}
-
-	public Double getAliquotaIssRetido() {
-		return aliquotaIssRetido;
-	}
-
-	public void setAliquotaIssRetido(Double aliquotaIssRetido) {
-		this.aliquotaIssRetido = aliquotaIssRetido;
 	}
 
 	public Boolean getStatus() {

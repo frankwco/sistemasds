@@ -468,7 +468,7 @@ public class NfseNacionalClient {
 			erros.add("Código IBGE do município emissor inválido na configuração (7 dígitos)");
 		}
 		if (!ibge(d.codigoMunicipioPrestacao)) {
-			erros.add("Código IBGE do município de prestação inválido (7 dígitos)");
+			erros.add("Selecione o município da prestação (cidade do ponto de coleta, com código IBGE cadastrado)");
 		}
 		if (!somenteDigitos(d.serie).matches("\\d{1,5}")) {
 			erros.add("Série da DPS inválida (até 5 dígitos)");
@@ -511,7 +511,7 @@ public class NfseNacionalClient {
 		// informar indTotTrib nem pTotTribSN. Só o MEI pode usar indTotTrib.
 		if (d.opcaoSimplesNacional == 3
 				&& (d.percentualTributosSimples == null || d.percentualTributosSimples <= 0)) {
-			erros.add("Informe o % de tributos do Simples do mês da competência (cadastre em Configuração NFS-e > Alíquotas do mês)");
+			erros.add("Informe o % de tributos do Simples do mês da competência (cadastre em Configuração NFS-e > % do Simples por mês)");
 		}
 		if (d.opcaoSimplesNacional == 3 && d.regimeApuracaoSimplesNacional == null) {
 			erros.add("Selecione o regime de apuração do Simples na Configuração NFS-e");

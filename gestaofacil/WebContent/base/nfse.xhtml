@@ -247,6 +247,11 @@
 								<span>#{nfseMB.avisoCliente}</span>
 							</h:panelGroup>
 							<h:panelGroup layout="block" styleClass="gf-alert warning" style="margin-top:12px;"
+								rendered="#{nfseMB.avisoLocal != null}">
+								<i class="fa fa-map-marker"></i>
+								<span>#{nfseMB.avisoLocal}</span>
+							</h:panelGroup>
+							<h:panelGroup layout="block" styleClass="gf-alert warning" style="margin-top:12px;"
 								rendered="#{nfseMB.avisoAliquota != null}">
 								<i class="fa fa-percent"></i>
 								<span>#{nfseMB.avisoAliquota}</span>
@@ -265,7 +270,7 @@
 									locale="pt" navigator="true" required="true"
 									requiredMessage="Informe a competência" maxdate="#{nfseMB.hoje}" readonlyInput="true">
 									<p:ajax event="dateSelect" listener="#{nfseMB.aoMudarCompetencia()}"
-										update="avisos percSimples aliqIss" process="@this" />
+										update="avisos percSimples" process="@this" />
 								</p:calendar>
 							</div>
 							<div class="gf-form-item">
@@ -274,6 +279,17 @@
 									decimalSeparator="," thousandSeparator="." required="true"
 									requiredMessage="Informe o valor"
 									style="display:block;width:100%" inputStyle="width:100%" />
+							</div>
+						</div>
+
+						<div class="gf-form-group">
+							<div class="gf-form-item">
+								<label><i class="fa fa-map-marker" style="margin-right:6px;color:#1565C0;"></i>Município da prestação (ponto de coleta) *</label>
+								<p:selectOneMenu id="localPrestacao" value="#{nfseMB.nota.codigoMunicipioPrestacao}"
+									required="true" requiredMessage="Selecione o município da prestação">
+									<f:selectItem itemLabel="Selecione..." itemValue="" noSelectionOption="true" />
+									<f:selectItems value="#{nfseMB.locais}" />
+								</p:selectOneMenu>
 							</div>
 						</div>
 
@@ -355,11 +371,7 @@
 									<label>Cód. tributação municipal</label>
 									<p:inputText value="#{nfseMB.nota.codigoTributacaoMunicipal}" maxlength="3" />
 								</div>
-								<div class="gf-form-item">
-									<label>Município da prestação (IBGE) *</label>
-									<p:inputText id="localPrestacao" value="#{nfseMB.nota.codigoMunicipioPrestacao}"
-										maxlength="7" required="true" requiredMessage="Informe o município de prestação" />
-								</div>
+								<div class="gf-form-item"></div>
 							</div>
 						</p:fieldset>
 

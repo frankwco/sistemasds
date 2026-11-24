@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,6 +21,7 @@ import org.primefaces.model.StreamedContent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import base.modelo.Cidade;
 import base.modelo.Cliente;
 import base.modelo.FechamentoMes;
 import base.modelo.NfseConfiguracao;
@@ -59,6 +61,8 @@ public class NfseMB implements Serializable {
 	/** Id do fechamento vindo da tela de Fechamento do Mês (?fechamento=ID). */
 	private Long fechamentoId;
 	private boolean abrirDialogAoCarregar;
+	private List<SelectItem> locais = new ArrayList<>();
+	private String avisoLocal;
 	private NotaFiscalServico notaCancelar;
 	private Integer motivoCancelamento = 1;
 	private String justificativaCancelamento;
@@ -90,6 +94,8 @@ public class NfseMB implements Serializable {
 			nota = nfseEmissaoService.novaNota(f.getInformacaoFinanceira().getCliente(), f.getValorFinal(), f.getMes(),
 					f.getAno(), nfseService.buscarVencimento(f.getId()));
 			nota.setFechamentoMes(f);
+			nfseEmissaoService.definirLocalPrestacao(nota);
+			carregarLocais();
 			abrirDialogAoCarregar = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -113,6 +119,7 @@ public class NfseMB implements Serializable {
 
 	public void novaNota() {
 		nota = nfseEmissaoService.novaNota(null, null);
+		carregarLocais();
 	}
 
 	public void aoMudarReferencia() {
@@ -124,17 +131,74 @@ public class NfseMB implements Serializable {
 		nfseEmissaoService.aplicarAliquotasDoMes(nota);
 	}
 
+	/** Opções de município da prestação: cidades dos pontos de coleta. */
+	private void carregarLocais() {
+		locais = new ArrayList<>();
+		avisoLocal = null;
+		if (nota == null || nota.getCliente() == null) {
+			return;
+		}
+		List<String> nomes = new ArrayList<>();
+		List<String> semIbge = new ArrayList<>();
+		java.util.Map<String, String> opcoes = new java.util.LinkedHashMap<>();
+		for (Cidade c : nfseEmissaoService.cidadesPrestacao(nota)) {
+			String nome = c.getNome() + (c.getEstado() == null ? "" : "-" + c.getEstado().getSigla());
+			if (c.getCodigoIbge() == null || c.getCodigoIbge().trim().isEmpty()) {
+				semIbge.add(nome);
+				nomes.add(nome);
+			} else if (opcoes.put(c.getCodigoIbge().trim(), nome) == null) {
+				nomes.add(nome);
+			}
+		}
+		Cidade doCliente = nota.getCliente().getCidade();
+		if (doCliente != null && doCliente.getCodigoIbge() != null && !doCliente.getCodigoIbge().trim().isEmpty()
+				&& !opcoes.containsKey(doCliente.getCodigoIbge().trim())) {
+			opcoes.put(doCliente.getCodigoIbge().trim(), doCliente.getNome() + " (cidade do cliente, sem ponto de coleta)");
+		}
+		String atual = nota.getCodigoMunicipioPrestacao();
+		if (atual != null && !atual.isEmpty() && !opcoes.containsKey(atual)) {
+			opcoes.put(atual, "IBGE " + atual);
+		}
+		for (java.util.Map.Entry<String, String> e : opcoes.entrySet()) {
+			locais.add(new SelectItem(e.getKey(), e.getValue()));
+		}
+		if (!semIbge.isEmpty()) {
+			avisoLocal = "Cidade de ponto de coleta sem código IBGE: " + String.join(", ", semIbge)
+					+ ". Preencha em Cadastros > Cidades.";
+		} else if (nomes.isEmpty()) {
+			avisoLocal = "Cliente sem ponto de coleta com cidade. Escolha o município da prestação.";
+		} else if (nomes.size() > 1) {
+			avisoLocal = "Coletas em mais de uma cidade (" + String.join(", ", nomes) + "). Escolha o município da prestação"
+					+ " e confira se o valor desta nota é só dessa cidade.";
+		}
+	}
+
+	public List<SelectItem> getLocais() {
+		return locais;
+	}
+
+	public String getAvisoLocal() {
+		return avisoLocal;
+	}
+
 	public String getAvisoAliquota() {
 		if (nota == null || nota.getCompetencia() == null || nota.getPercentualTributosSimples() != null
 				|| configuracao.getOpcaoSimplesNacional() == null || configuracao.getOpcaoSimplesNacional() != 3) {
 			return null;
 		}
-		return "Não há alíquotas cadastradas para " + new java.text.SimpleDateFormat("MM/yyyy").format(nota.getCompetencia())
-				+ ". Cadastre em Configuração NFS-e > Alíquotas do mês, ou digite os valores abaixo.";
+		return "Não há % do Simples cadastrado para " + new java.text.SimpleDateFormat("MM/yyyy").format(nota.getCompetencia())
+				+ ". Cadastre em Configuração NFS-e > % do Simples por mês, ou digite o valor abaixo.";
 	}
 
 	public void aoMudarClienteOuCompetencia() {
+		// trocou o cliente: o fechamento de origem não vale mais
+		if (nota.getFechamentoMes() != null && nota.getFechamentoMes().getInformacaoFinanceira() != null
+				&& nota.getCliente() != null && !nota.getCliente().getId()
+						.equals(nota.getFechamentoMes().getInformacaoFinanceira().getCliente().getId())) {
+			nota.setFechamentoMes(null);
+		}
 		nfseEmissaoService.atualizarPadroesCliente(nota);
+		carregarLocais();
 	}
 
 	public List<Cliente> completarCliente(String str) {
@@ -212,6 +276,7 @@ public class NfseMB implements Serializable {
 				ExibirMensagem.exibirMensagemErro("Nota rejeitada pela Sefin Nacional: " + nota.getMensagemRetorno());
 				// número da DPS já foi consumido: prepara nova tentativa com os mesmos dados
 				nota = copiarParaNovaTentativa(nota);
+				carregarLocais();
 			}
 		} catch (NfseFalhaComunicacaoException e) {
 			ExibirMensagem.exibirMensagemErro(e.getMessage()
@@ -306,6 +371,7 @@ public class NfseMB implements Serializable {
 	/** Reaproveita os dados de uma nota rejeitada para corrigir e reenviar. */
 	public void reemitir(NotaFiscalServico n) {
 		nota = copiarParaNovaTentativa(n);
+		carregarLocais();
 	}
 
 	public StreamedContent baixarXml(NotaFiscalServico n) {

@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import base.modelo.Cidade;
 import base.modelo.Cliente;
 import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
@@ -324,6 +325,7 @@ public class NfseEmissaoService implements Serializable {
 		n.setCodigoTributacaoNacional(cfg.getCodigoTributacaoNacional());
 		n.setCodigoTributacaoMunicipal(cfg.getCodigoTributacaoMunicipal());
 		n.setRetencaoIssqn(cfg.getRetencaoIssqnPadrao());
+		n.setAliquotaIss(cfg.getAliquotaIss());
 		aplicarAliquotasDoMes(n);
 		atualizarPadroesCliente(n);
 		return n;
@@ -341,21 +343,36 @@ public class NfseEmissaoService implements Serializable {
 			a = nfseService.buscarAliquota(cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR));
 		}
 		n.setPercentualTributosSimples(a == null ? null : a.getPercentualSimples());
-		n.setAliquotaIss(a == null ? null : a.getAliquotaIssRetido());
 	}
 
 	/** Recalcula descrição e local de prestação quando cliente/competência mudam. */
 	public void atualizarPadroesCliente(NotaFiscalServico n) {
 		NfseConfiguracao cfg = nfseService.carregarConfiguracao();
-		String local = cfg.getCodigoMunicipioEmissor();
-		Cliente c = n.getCliente();
-		if ("TOMADOR".equals(cfg.getLocalPrestacaoPadrao())) {
-			// sem código IBGE fica em branco e a emissão é bloqueada: usar a cidade
-			// da empresa mandaria o ISS para o município errado sem ninguém notar
-			local = c == null || c.getCidade() == null ? null : c.getCidade().getCodigoIbge();
-		}
-		n.setCodigoMunicipioPrestacao(local);
+		definirLocalPrestacao(n);
 		n.setDescricaoServico(aplicarModelo(cfg.getDescricaoServicoPadrao(), n));
+	}
+
+	/** Cidades dos pontos de coleta que entram na nota. */
+	public java.util.List<Cidade> cidadesPrestacao(NotaFiscalServico n) {
+		if (n.getCliente() == null) {
+			return new java.util.ArrayList<>();
+		}
+		return nfseService.listarCidadesPontos(n.getCliente().getId(),
+				n.getFechamentoMes() == null ? null : n.getFechamentoMes().getId());
+	}
+
+	/**
+	 * No 07.09.01 o ISS é do município da prestação, que é o do ponto de coleta
+	 * (não o do cliente nem o da empresa). Só preenche quando há uma única cidade
+	 * com código IBGE; nos outros casos fica em branco para o usuário escolher.
+	 */
+	public void definirLocalPrestacao(NotaFiscalServico n) {
+		java.util.Set<String> codigos = new java.util.HashSet<>();
+		for (Cidade c : cidadesPrestacao(n)) {
+			codigos.add(c.getCodigoIbge() == null ? "" : c.getCodigoIbge().trim());
+		}
+		String unico = codigos.size() == 1 ? codigos.iterator().next() : "";
+		n.setCodigoMunicipioPrestacao(unico.isEmpty() ? null : unico);
 	}
 
 	/** Refaz só a descrição (mês de referência ou boleto mudou). */

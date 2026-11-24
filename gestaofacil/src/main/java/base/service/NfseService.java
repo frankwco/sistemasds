@@ -5,10 +5,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import base.modelo.Cidade;
 import base.modelo.ContasReceberParcelas;
+import base.modelo.FechamentoMesItensPontoColeta;
 import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
 import base.modelo.NotaFiscalServico;
+import base.modelo.PontoColeta;
 import dao.GenericDAO;
 import util.Transacional;
 import util.nfse.CriptografiaSenhaCertificado;
@@ -31,6 +34,40 @@ public class NfseService implements Serializable {
 
 	@Inject
 	private GenericDAO<NfseAliquotaMensal> daoAliquota;
+
+	@Inject
+	private GenericDAO<FechamentoMesItensPontoColeta> daoItensFechamento;
+
+	@Inject
+	private GenericDAO<PontoColeta> daoPonto;
+
+	/**
+	 * Cidades dos pontos de coleta: os do fechamento, quando informado; senão,
+	 * todos os pontos ativos do cliente.
+	 */
+	public List<Cidade> listarCidadesPontos(Long clienteId, Long fechamentoId) {
+		java.util.Map<Long, Cidade> cidades = new java.util.LinkedHashMap<>();
+		if (fechamentoId != null) {
+			for (FechamentoMesItensPontoColeta i : daoItensFechamento.listar(FechamentoMesItensPontoColeta.class,
+					"fechamentoMes.id = " + fechamentoId)) {
+				if (i.getItensPontoColeta() != null) {
+					incluirCidade(cidades, i.getItensPontoColeta().getPontoColeta());
+				}
+			}
+		}
+		if (cidades.isEmpty() && clienteId != null) {
+			for (PontoColeta p : daoPonto.listar(PontoColeta.class, "cliente.id = " + clienteId)) {
+				incluirCidade(cidades, p);
+			}
+		}
+		return new java.util.ArrayList<>(cidades.values());
+	}
+
+	private static void incluirCidade(java.util.Map<Long, Cidade> cidades, PontoColeta p) {
+		if (p != null && p.getCidade() != null) {
+			cidades.put(p.getCidade().getId(), p.getCidade());
+		}
+	}
 
 	@Inject
 	private GenericDAO<ContasReceberParcelas> daoParcela;
@@ -67,7 +104,7 @@ public class NfseService implements Serializable {
 
 	/** Grava as alíquotas do mês (altera se o mês já existir). */
 	@Transacional
-	public void salvarAliquota(int mes, int ano, Double percentualSimples, Double aliquotaIssRetido) {
+	public void salvarAliquota(int mes, int ano, Double percentualSimples) {
 		NfseAliquotaMensal a = buscarAliquota(mes, ano);
 		boolean nova = a == null;
 		if (nova) {
@@ -76,7 +113,6 @@ public class NfseService implements Serializable {
 			a.setAno(ano);
 		}
 		a.setPercentualSimples(percentualSimples);
-		a.setAliquotaIssRetido(aliquotaIssRetido);
 		if (nova) {
 			daoAliquota.inserir(a);
 		} else {
