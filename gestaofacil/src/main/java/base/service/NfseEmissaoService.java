@@ -334,9 +334,10 @@ public class NfseEmissaoService implements Serializable {
 		NfseConfiguracao cfg = nfseService.carregarConfiguracao();
 		String local = cfg.getCodigoMunicipioEmissor();
 		Cliente c = n.getCliente();
-		if ("TOMADOR".equals(cfg.getLocalPrestacaoPadrao()) && c != null && c.getCidade() != null
-				&& c.getCidade().getCodigoIbge() != null && !c.getCidade().getCodigoIbge().isEmpty()) {
-			local = c.getCidade().getCodigoIbge();
+		if ("TOMADOR".equals(cfg.getLocalPrestacaoPadrao())) {
+			// sem código IBGE fica em branco e a emissão é bloqueada: usar a cidade
+			// da empresa mandaria o ISS para o município errado sem ninguém notar
+			local = c == null || c.getCidade() == null ? null : c.getCidade().getCodigoIbge();
 		}
 		n.setCodigoMunicipioPrestacao(local);
 		n.setDescricaoServico(aplicarModelo(cfg.getDescricaoServicoPadrao(), n));

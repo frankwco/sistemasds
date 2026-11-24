@@ -86,7 +86,7 @@ public class NfseConfiguracao implements Serializable {
 	private String descricaoServicoPadrao = "Prestação de serviços de coleta de resíduos referente a {MES_NOME}/{ANO}.";
 	/** "EMITENTE" ou "TOMADOR": de onde vem o município de prestação padrão. */
 	@Column(length = 10)
-	private String localPrestacaoPadrao = "EMITENTE";
+	private String localPrestacaoPadrao = "TOMADOR";
 	/** 1 - Operação tributável; 2 - Imunidade; 3 - Exportação; 4 - Não incidência. */
 	private Integer tributacaoIssqn = 1;
 	/** 1 - Não retido; 2 - Retido pelo tomador; 3 - Retido pelo intermediário. */
