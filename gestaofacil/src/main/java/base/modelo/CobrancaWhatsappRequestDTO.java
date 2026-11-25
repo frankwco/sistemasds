@@ -14,6 +14,8 @@ public class CobrancaWhatsappRequestDTO implements Serializable {
 	private Long clienteId;
 	// 1 ou 2, indicando telefone1 ou telefone2 do cliente
 	private Integer numeroTelefone;
+	// só no desmarcar: tira a confirmação do número sem apagar o último envio do histórico
+	private Boolean manterHistorico;
 
 	public Long getUsuarioId() {
 		return usuarioId;
@@ -29,6 +31,14 @@ public class CobrancaWhatsappRequestDTO implements Serializable {
 
 	public void setClienteId(Long clienteId) {
 		this.clienteId = clienteId;
+	}
+
+	public Boolean getManterHistorico() {
+		return manterHistorico;
+	}
+
+	public void setManterHistorico(Boolean manterHistorico) {
+		this.manterHistorico = manterHistorico;
 	}
 
 	public Integer getNumeroTelefone() {

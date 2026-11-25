@@ -1,7 +1,7 @@
 name: gestaofacil
 description: Gestão Fácil (DS Resíduos) - fluxo de coleta em Flutter.
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
   sdk: '>=3.3.0 <4.0.0'

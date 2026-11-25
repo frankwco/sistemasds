@@ -838,7 +838,9 @@ public class ServicoApp {
 		} else {
 			cliente.setTelefone2Whatsapp(false);
 		}
-		cliente.removerUltimoRegistroCobranca();
+		if (!Boolean.TRUE.equals(requisicao.getManterHistorico())) {
+			cliente.removerUltimoRegistroCobranca();
+		}
 		clienteService.inserirAlterar(cliente);
 
 		return Response.status(200).entity(paraCobrancaDTODoCliente(cliente.getId())).build();

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/api_client.dart';
 import 'data/catalogo_repo.dart';
+import 'data/cobranca_repo.dart';
 import 'data/coleta_service.dart';
 import 'data/coletas_repo.dart';
 import 'data/db.dart';
@@ -29,6 +30,7 @@ final apiProvider = Provider<ApiClient>((ref) {
 
 final sessaoRepoProvider = Provider((ref) => SessaoRepo(ref.watch(bancoProvider)));
 final catalogoRepoProvider = Provider((ref) => CatalogoRepo(ref.watch(bancoProvider)));
+final cobrancaRepoProvider = Provider((ref) => CobrancaRepo(ref.watch(bancoProvider)));
 final pontosRepoProvider = Provider((ref) => PontosRepo(ref.watch(bancoProvider)));
 final coletasRepoProvider = Provider((ref) => ColetasRepo(ref.watch(bancoProvider), ref.watch(pontosRepoProvider)));
 final espelhoProvider =

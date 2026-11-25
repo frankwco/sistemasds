@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'formato.dart';
@@ -50,12 +51,21 @@ Future<void> informar(BuildContext context, {required String titulo, required Wi
   );
 }
 
+const _canalExterno = MethodChannel('gestaofacil/externo');
+
 /// Abre o WhatsApp no número (com DDI 55 se faltar) e já com a mensagem.
-Future<bool> abrirWhatsapp(String telefone, String mensagem) {
+Future<bool> abrirWhatsapp(String telefone, String mensagem) async {
   var numero = apenasDigitos(telefone);
   if (numero.length <= 11) numero = '55$numero';
   final uri = Uri.parse('https://wa.me/$numero?text=${Uri.encodeComponent(mensagem)}');
-  return launchUrl(uri, mode: LaunchMode.externalApplication);
+  try {
+    // Nativo (MainActivity): abre em tarefa própria, para o voltar cair na mesma tela do app.
+    return await _canalExterno.invokeMethod<bool>('abrir', {'url': uri.toString()}) ?? false;
+  } on MissingPluginException {
+    return launchUrl(uri, mode: LaunchMode.externalApplication);
+  } on PlatformException {
+    return launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 }
 
 Future<bool> ligarPara(String telefone) => launchUrl(Uri(scheme: 'tel', path: apenasDigitos(telefone)));

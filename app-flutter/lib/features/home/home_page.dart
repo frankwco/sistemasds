@@ -40,7 +40,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       final sync = ref.read(syncProvider);
       unawaited(sync.sincronizar(catalogos: true).catchError((_) {}));
       unawaited(ref.read(coletasRepoProvider).limparAssinaturasOrfas().catchError((_) {}));
+      unawaited(_retomarCobranca());
     });
+  }
+
+  /// O Android encerrou o app enquanto o WhatsApp da cobrança estava na frente: volta para a Cobrança.
+  Future<void> _retomarCobranca() async {
+    if (!(ref.read(sessaoProvider).usuario?.acessoSistema ?? false)) return;
+    final reabrir = await ref.read(cobrancaRepoProvider).deveReabrir().catchError((_) => false);
+    // Se o operador já foi para outra tela, não atropela.
+    if (reabrir && mounted && (ModalRoute.of(context)?.isCurrent ?? false)) _abrir(const CobrancaPage());
   }
 
   Future<void> _escolherVeiculo() async {

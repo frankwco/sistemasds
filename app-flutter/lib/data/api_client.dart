@@ -215,9 +215,16 @@ class ApiClient {
   }
 
   /// acao: 'confirmar' | 'desmarcar' | 'registrarEnvio'. Devolve a cobrança do cliente já atualizada.
-  Future<Map<String, dynamic>?> acaoWhatsapp(String acao, int usuarioId, int clienteId, int numeroTelefone) async {
+  /// [manterHistorico]: no 'desmarcar', tira só a confirmação do número, sem apagar o último envio.
+  Future<Map<String, dynamic>?> acaoWhatsapp(String acao, int usuarioId, int clienteId, int numeroTelefone,
+      {bool manterHistorico = false}) async {
     final r = await _post('cobrancas/whatsapp/$acao',
-        {'usuarioId': usuarioId, 'clienteId': clienteId, 'numeroTelefone': numeroTelefone});
+        {
+          'usuarioId': usuarioId,
+          'clienteId': clienteId,
+          'numeroTelefone': numeroTelefone,
+          if (manterHistorico) 'manterHistorico': true,
+        });
     return r is Map ? Map<String, dynamic>.from(r) : null;
   }
 

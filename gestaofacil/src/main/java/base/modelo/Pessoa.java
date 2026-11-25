@@ -130,13 +130,18 @@ public class Pessoa implements Serializable {
 	/**
 	 * Remove a última linha do histórico de cobrança — usado quando o usuário desfaz uma
 	 * confirmação de WhatsApp feita por engano, pra tirar do histórico o registro que a
-	 * confirmação tinha acabado de criar.
+	 * confirmação tinha acabado de criar. Só mexe em linha de WhatsApp: se a última for um e-mail
+	 * ou o marcador de novo lote, não há registro da confirmação nesta rodada para tirar (apagar o
+	 * marcador faria os envios da rodada anterior voltarem a contar como da atual).
 	 */
 	public void removerUltimoRegistroCobranca() {
 		if (getHistoricoCobranca().isEmpty()) {
 			return;
 		}
 		int ultimaQuebra = historicoCobranca.lastIndexOf('\n');
+		if (!historicoCobranca.startsWith("WHATSAPP - ", ultimaQuebra + 1)) {
+			return;
+		}
 		historicoCobranca = ultimaQuebra == -1 ? "" : historicoCobranca.substring(0, ultimaQuebra);
 	}
 
