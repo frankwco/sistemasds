@@ -194,7 +194,7 @@
 				<textElement verticalAlignment="Middle" markup="html">
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>DESTINAÇÃO FINAL:</b><br/><b>A1, A4 e E</b> - Autoclavados e Aterro Sanitário (CTR ITAMBÉ - Itambé/PR)<br/><b>B</b> - Aterro Sanitário (CTR ITAMBÉ - Itambé/PR)<br/><b>A2 e A3</b> - Incineração (SERVIOESTE - Chapecó/SC)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>DESTINAÇÃO FINAL:</b><br/><b>A1, A4 e E</b> - Autoclavados e Aterro Sanitário (CTR ITAMBÉ - CNPJ 10.139.979/0001-37 - Itambé/PR)<br/><b>B</b> - Aterro Sanitário (CTR ITAMBÉ - CNPJ 10.139.979/0001-37 - Itambé/PR)<br/><b>A2 e A3</b> - Incineração (SERVIOESTE - CNPJ 03.392.348/0001-60 - Chapecó/SC)"]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnFooter>
