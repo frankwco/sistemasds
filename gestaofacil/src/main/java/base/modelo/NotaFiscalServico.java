@@ -12,6 +12,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 import javax.persistence.TemporalType;
 
 /**
@@ -52,6 +53,10 @@ public class NotaFiscalServico implements Serializable {
 	private Date dataBoleto;
 
 	private Double valor = 0.;
+
+	/** Último texto gerado pelo modelo; se o usuário editou, não é sobrescrito. */
+	@Transient
+	private String descricaoGerada;
 
 	@Column(length = 2000)
 	private String descricaoServico;
@@ -274,6 +279,14 @@ public class NotaFiscalServico implements Serializable {
 
 	public void setPercentualTributosSimples(Double percentualTributosSimples) {
 		this.percentualTributosSimples = percentualTributosSimples;
+	}
+
+	public String getDescricaoGerada() {
+		return descricaoGerada;
+	}
+
+	public void setDescricaoGerada(String descricaoGerada) {
+		this.descricaoGerada = descricaoGerada;
 	}
 
 	public Integer getMesReferencia() {

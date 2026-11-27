@@ -281,8 +281,7 @@ public class NfseEmissaoService implements Serializable {
 			d.tomadorNumero = c.getNumero();
 			d.tomadorComplemento = c.getComplemento();
 			d.tomadorBairro = c.getBairro();
-			d.tomadorTelefone = c.getTelefone1();
-			d.tomadorEmail = c.getEmail();
+			// telefone e e-mail do tomador não vão, igual às notas do Emissor Nacional
 		}
 
 		d.codigoMunicipioPrestacao = nota.getCodigoMunicipioPrestacao();
@@ -349,7 +348,7 @@ public class NfseEmissaoService implements Serializable {
 	public void atualizarPadroesCliente(NotaFiscalServico n) {
 		NfseConfiguracao cfg = nfseService.carregarConfiguracao();
 		definirLocalPrestacao(n);
-		n.setDescricaoServico(aplicarModelo(cfg.getDescricaoServicoPadrao(), n));
+		regerarDescricao(n, cfg.getDescricaoServicoPadrao());
 	}
 
 	/** Cidades dos pontos de coleta que entram na nota. */
@@ -377,7 +376,22 @@ public class NfseEmissaoService implements Serializable {
 
 	/** Refaz só a descrição (mês de referência ou boleto mudou). */
 	public void atualizarDescricao(NotaFiscalServico n) {
-		n.setDescricaoServico(aplicarModelo(nfseService.carregarConfiguracao().getDescricaoServicoPadrao(), n));
+		regerarDescricao(n, nfseService.carregarConfiguracao().getDescricaoServicoPadrao());
+	}
+
+	/**
+	 * Aplica o modelo só se o usuário não reescreveu a descrição (cada nota pode
+	 * ter um texto próprio: contrato, kg x preço, dados bancários...).
+	 */
+	private void regerarDescricao(NotaFiscalServico n, String modelo) {
+		String atual = n.getDescricaoServico();
+		boolean editada = atual != null && !atual.trim().isEmpty() && !atual.equals(n.getDescricaoGerada());
+		if (editada) {
+			return;
+		}
+		String nova = aplicarModelo(modelo, n);
+		n.setDescricaoServico(nova);
+		n.setDescricaoGerada(nova);
 	}
 
 	private String aplicarModelo(String modelo, NotaFiscalServico n) {
