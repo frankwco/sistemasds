@@ -671,6 +671,10 @@ public class NfseNacionalClient {
 		RetornoEvento ret = new RetornoEvento();
 		ret.httpStatus = r.status;
 		String texto = r.textoUtf8();
+		if (r.status >= 300) {
+			System.err.println("[NFS-e] Evento recusado HTTP " + r.status + " - resposta: " + texto + " - pedido: "
+					+ xmlPedidoAssinado);
+		}
 		JsonObject json = json(texto);
 		if (json != null) {
 			// o nome do campo do XML do evento varia entre versões da API
@@ -689,7 +693,7 @@ public class NfseNacionalClient {
 		if (!ret.sucesso) {
 			ret.mensagens.addAll(extrairMensagens(json, texto));
 			if (ret.mensagens.isEmpty()) {
-				ret.mensagens.add("Retorno inesperado da Sefin Nacional (HTTP " + r.status + ").");
+				ret.mensagens.add("Retorno inesperado da Sefin Nacional (HTTP " + r.status + ")" + resumo(texto, r));
 			}
 		}
 		return ret;
@@ -807,7 +811,7 @@ public class NfseNacionalClient {
 		if (!ret.sucesso) {
 			ret.mensagens.addAll(extrairMensagens(json, texto));
 			if (ret.mensagens.isEmpty()) {
-				ret.mensagens.add("Retorno inesperado da Sefin Nacional (HTTP " + r.status + ").");
+				ret.mensagens.add("Retorno inesperado da Sefin Nacional (HTTP " + r.status + ")" + resumo(texto, r));
 			}
 		}
 		return ret;
@@ -857,6 +861,15 @@ public class NfseNacionalClient {
 	// =====================================================================
 	// Utilitários
 	// =====================================================================
+
+	/** Trecho da resposta para a mensagem de erro (vazia, cabeçalhos úteis, ou o texto). */
+	private static String resumo(String texto, RespostaHttp r) {
+		String t = texto == null ? "" : texto.replaceAll("\\s+", " ").trim();
+		if (t.isEmpty()) {
+			return ": resposta vazia.";
+		}
+		return ": " + limitar(t, 400);
+	}
 
 	private static List<String> extrairMensagens(JsonObject json, String textoBruto) {
 		List<String> msgs = new ArrayList<>();
