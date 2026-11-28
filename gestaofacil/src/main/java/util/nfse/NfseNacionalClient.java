@@ -495,7 +495,7 @@ public class NfseNacionalClient {
 		if (!temTexto(d.descricaoServico)) {
 			erros.add("Descrição do serviço não informada");
 		} else if (Pattern.compile("\\{[A-Z_]+\\}").matcher(d.descricaoServico).find()) {
-			erros.add("A descrição ainda tem campo a preencher (ex.: {BOLETO}). Informe o vencimento do boleto e o mês de"
+			erros.add("A descrição ainda tem campo a preencher ({PREENCHER}, {BOLETO}...). Troque pelo texto certo ou informe o vencimento do boleto e o mês de"
 					+ " referência, ou corrija o texto");
 		}
 		if (d.valorServico == null || d.valorServico <= 0) {

@@ -25,6 +25,7 @@ import base.modelo.Cidade;
 import base.modelo.Cliente;
 import base.modelo.FechamentoMes;
 import base.modelo.NfseConfiguracao;
+import base.modelo.NfseModeloDescricao;
 import base.modelo.NotaFiscalServico;
 import base.service.NfseEmissaoService;
 import base.service.NfseService;
@@ -63,6 +64,7 @@ public class NfseMB implements Serializable {
 	private boolean abrirDialogAoCarregar;
 	private List<SelectItem> locais = new ArrayList<>();
 	private String avisoLocal;
+	private List<NfseModeloDescricao> modelosDescricao = new ArrayList<>();
 	private NotaFiscalServico notaCancelar;
 	private Integer motivoCancelamento = 1;
 	private String justificativaCancelamento;
@@ -70,6 +72,7 @@ public class NfseMB implements Serializable {
 	@PostConstruct
 	public void init() {
 		configuracao = nfseService.carregarConfiguracao();
+		modelosDescricao = nfseService.listarModelosDescricao();
 		Calendar cal = Calendar.getInstance();
 		mesFiltro = cal.get(Calendar.MONTH) + 1;
 		anoFiltro = cal.get(Calendar.YEAR);
@@ -120,6 +123,14 @@ public class NfseMB implements Serializable {
 	public void novaNota() {
 		nota = nfseEmissaoService.novaNota(null, null);
 		carregarLocais();
+	}
+
+	public void aplicarModeloDescricao(NfseModeloDescricao m) {
+		nfseEmissaoService.aplicarModeloDescricao(nota, m.getTexto());
+	}
+
+	public List<NfseModeloDescricao> getModelosDescricao() {
+		return modelosDescricao;
 	}
 
 	public void aoMudarReferencia() {

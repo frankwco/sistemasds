@@ -98,6 +98,9 @@ public class NfseConfiguracao implements Serializable {
 	@Column(length = 2000)
 	private String informacoesComplementares;
 
+	/** Os modelos de descrição iniciais já foram criados (não recria se apagados). */
+	private Boolean modelosDescricaoCriados = false;
+
 	private Boolean status = true;
 
 	public boolean isProducao() {
@@ -322,6 +325,14 @@ public class NfseConfiguracao implements Serializable {
 
 	public void setInformacoesComplementares(String informacoesComplementares) {
 		this.informacoesComplementares = informacoesComplementares;
+	}
+
+	public Boolean getModelosDescricaoCriados() {
+		return modelosDescricaoCriados;
+	}
+
+	public void setModelosDescricaoCriados(Boolean modelosDescricaoCriados) {
+		this.modelosDescricaoCriados = modelosDescricaoCriados;
 	}
 
 	public Boolean getStatus() {

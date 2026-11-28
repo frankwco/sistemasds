@@ -57,6 +57,9 @@ public class NotaFiscalServico implements Serializable {
 	/** Último texto gerado pelo modelo; se o usuário editou, não é sobrescrito. */
 	@Transient
 	private String descricaoGerada;
+	/** Modelo escolhido no botão (para refazer o texto se mudar mês/boleto). */
+	@Transient
+	private String modeloDescricao;
 
 	@Column(length = 2000)
 	private String descricaoServico;
@@ -279,6 +282,14 @@ public class NotaFiscalServico implements Serializable {
 
 	public void setPercentualTributosSimples(Double percentualTributosSimples) {
 		this.percentualTributosSimples = percentualTributosSimples;
+	}
+
+	public String getModeloDescricao() {
+		return modeloDescricao;
+	}
+
+	public void setModeloDescricao(String modeloDescricao) {
+		this.modeloDescricao = modeloDescricao;
 	}
 
 	public String getDescricaoGerada() {

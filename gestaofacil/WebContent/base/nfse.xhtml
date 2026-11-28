@@ -331,6 +331,16 @@
 						<div class="gf-form-group" style="flex-direction:column;">
 							<div class="gf-form-item">
 								<label><i class="fa fa-align-left" style="margin-right:6px;color:#1565C0;"></i>Descrição do serviço *</label>
+								<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;">
+									<small style="color:#78909c;">Preencher com:</small>
+									<ui:repeat value="#{nfseMB.modelosDescricao}" var="m">
+										<span class="btn-secondary-modern">
+											<p:commandButton value=" #{m.nome}" icon="fa fa-file-text-o" process="@this"
+												style="padding:4px 12px !important;" title="#{m.texto}"
+												actionListener="#{nfseMB.aplicarModeloDescricao(m)}" update="descricao" />
+										</span>
+									</ui:repeat>
+								</div>
 								<p:inputTextarea id="descricao" value="#{nfseMB.nota.descricaoServico}" rows="4"
 									maxlength="2000" autoResize="false" required="true" style="width:100%"
 									requiredMessage="Informe a descrição do serviço" />

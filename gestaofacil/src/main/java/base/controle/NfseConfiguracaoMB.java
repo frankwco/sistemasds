@@ -12,6 +12,7 @@ import org.primefaces.model.UploadedFile;
 
 import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
+import base.modelo.NfseModeloDescricao;
 import base.service.NfseEmissaoService;
 import base.service.NfseService;
 import util.ExibirMensagem;
@@ -40,6 +41,10 @@ public class NfseConfiguracaoMB implements Serializable {
 	private Integer aliqAno;
 	private Double aliqSimples;
 	private java.util.List<NfseAliquotaMensal> listaAliquotas;
+
+	// Modelos de descrição
+	private NfseModeloDescricao modelo = new NfseModeloDescricao();
+	private java.util.List<NfseModeloDescricao> listaModelos;
 	/** Há senha gravada no banco (não conta a digitada e ainda não salva). */
 	private boolean senhaSalva;
 
@@ -49,6 +54,43 @@ public class NfseConfiguracaoMB implements Serializable {
 		senhaSalva = temTexto(configuracao.getSenhaCertificado());
 		atualizarInfoCertificado();
 		limparAliquota();
+		listaModelos = nfseService.listarModelosDescricao();
+	}
+
+	public void novoModelo() {
+		modelo = new NfseModeloDescricao();
+		modelo.setOrdem(listaModelos == null ? 1 : listaModelos.size() + 1);
+	}
+
+	public void editarModelo(NfseModeloDescricao m) {
+		modelo = m;
+	}
+
+	public void salvarModelo() {
+		if (modelo.getNome() == null || modelo.getNome().trim().isEmpty() || modelo.getTexto() == null
+				|| modelo.getTexto().trim().isEmpty()) {
+			ExibirMensagem.exibirMensagemErro("Informe o nome do botão e o texto.");
+			return;
+		}
+		nfseService.salvarModeloDescricao(modelo);
+		listaModelos = nfseService.listarModelosDescricao();
+		novoModelo();
+		ExibirMensagem.exibirMensagem("Modelo salvo.");
+	}
+
+	public void excluirModelo(NfseModeloDescricao m) {
+		m.setStatus(false);
+		nfseService.salvarModeloDescricao(m);
+		listaModelos = nfseService.listarModelosDescricao();
+		novoModelo();
+	}
+
+	public NfseModeloDescricao getModelo() {
+		return modelo;
+	}
+
+	public java.util.List<NfseModeloDescricao> getListaModelos() {
+		return listaModelos;
 	}
 
 	private void limparAliquota() {

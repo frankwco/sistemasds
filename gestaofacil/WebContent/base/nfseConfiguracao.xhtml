@@ -289,6 +289,77 @@
 				</div>
 			</h:form>
 
+			<!-- ═══ CARD: Modelos de descrição ═══ -->
+			<div class="gf-card">
+				<div class="gf-card-header">
+					<i class="fa fa-align-left icon-purple"></i>
+					<div>
+						<h4>Modelos de descrição</h4>
+						<small>Viram botões acima da descrição na emissão. Use {MES_NOME}, {MES}, {ANO}, {BOLETO}, {CLIENTE} e {PREENCHER} (este impede emitir até ser trocado)</small>
+					</div>
+				</div>
+				<h:form id="frmModelos">
+					<h:panelGroup id="painelModelo" layout="block">
+						<div class="gf-form-group">
+							<div class="gf-form-item" style="flex:0 0 220px;">
+								<label>Nome do botão *</label>
+								<p:inputText value="#{nfseConfiguracaoMB.modelo.nome}" maxlength="60" />
+							</div>
+							<div class="gf-form-item" style="flex:0 0 100px; min-width:100px;">
+								<label>Ordem</label>
+								<p:inputText value="#{nfseConfiguracaoMB.modelo.ordem}" maxlength="3" converterMessage="Ordem inválida" />
+							</div>
+							<div class="gf-form-item">
+								<label>Texto *</label>
+								<p:inputTextarea value="#{nfseConfiguracaoMB.modelo.texto}" rows="3" maxlength="2000"
+									autoResize="false" style="width:100%" />
+							</div>
+						</div>
+						<div class="gf-modal-footer">
+							<span class="btn-secondary-modern">
+								<p:commandButton value="  Novo" icon="fa fa-plus" process="@this"
+									actionListener="#{nfseConfiguracaoMB.novoModelo()}" update="painelModelo">
+									<p:resetInput target="painelModelo" />
+								</p:commandButton>
+							</span>
+							<span class="btn-primary-modern">
+								<p:commandButton value="  Salvar modelo" icon="fa fa-save"
+									actionListener="#{nfseConfiguracaoMB.salvarModelo()}" update="@form :dlgInformacao" />
+							</span>
+						</div>
+					</h:panelGroup>
+
+					<p:dataTable value="#{nfseConfiguracaoMB.listaModelos}" var="mo" style="margin-top:16px;"
+						emptyMessage="Nenhum modelo">
+						<p:column headerText="Ordem" width="60">
+							<h:outputText value="#{mo.ordem}" />
+						</p:column>
+						<p:column headerText="Botão" width="180">
+							<h:outputText value="#{mo.nome}" />
+						</p:column>
+						<p:column headerText="Texto" style="white-space:normal !important;">
+							<h:outputText value="#{mo.texto}" />
+						</p:column>
+						<p:column headerText="Ações" width="90">
+							<div class="action-btn-icons">
+								<span class="btn-primary-modern">
+									<p:commandButton icon="fa fa-pencil" title="Alterar" process="@this"
+										actionListener="#{nfseConfiguracaoMB.editarModelo(mo)}" update=":frmModelos:painelModelo">
+										<p:resetInput target=":frmModelos:painelModelo" />
+									</p:commandButton>
+								</span>
+								<span class="btn-danger-modern">
+									<p:commandButton icon="fa fa-trash-o" title="Excluir" process="@this"
+										actionListener="#{nfseConfiguracaoMB.excluirModelo(mo)}" update="@form :dlgInformacao">
+										<p:confirm header="Confirmação" message="Excluir este modelo?" />
+									</p:commandButton>
+								</span>
+							</div>
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</div>
+
 			<!-- ═══ CARD: Alíquotas do mês ═══ -->
 			<div class="gf-card">
 				<div class="gf-card-header">

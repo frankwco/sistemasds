@@ -10,6 +10,7 @@ import base.modelo.ContasReceberParcelas;
 import base.modelo.FechamentoMesItensPontoColeta;
 import base.modelo.NfseAliquotaMensal;
 import base.modelo.NfseConfiguracao;
+import base.modelo.NfseModeloDescricao;
 import base.modelo.NotaFiscalServico;
 import base.modelo.PontoColeta;
 import dao.GenericDAO;
@@ -66,6 +67,38 @@ public class NfseService implements Serializable {
 	private static void incluirCidade(java.util.Map<Long, Cidade> cidades, PontoColeta p) {
 		if (p != null && p.getCidade() != null) {
 			cidades.put(p.getCidade().getId(), p.getCidade());
+		}
+	}
+
+	@Inject
+	private GenericDAO<NfseModeloDescricao> daoModelo;
+
+	/** Modelos de descrição; na primeira vez cria os iniciais, tirados de notas reais. */
+	@Transacional
+	public List<NfseModeloDescricao> listarModelosDescricao() {
+		NfseConfiguracao cfg = carregarConfiguracao();
+		if (!Boolean.TRUE.equals(cfg.getModelosDescricaoCriados())) {
+			String base = "COLETA, TRANSPORTE, TRATAMENTO e DESTIN. FINAL DE RESIDUOS DA SAUDE";
+			daoModelo.inserir(new NfseModeloDescricao("Mensal",
+					base + " Mês {MES_NOME}/{ANO} Conforme contrato e demonstrativo anexo. BOLETO: {BOLETO}", 1));
+			daoModelo.inserir(new NfseModeloDescricao("Coleta única",
+					base + " - {MES_NOME}/{ANO} (COLETA UNICA) boleto: {BOLETO}", 2));
+			daoModelo.inserir(new NfseModeloDescricao("Prefeitura (contrato)", base
+					+ " até Mês {MES_NOME}/{ANO} Conforme contrato e demonstrativo anexo.- solic. fornecimento {PREENCHER}"
+					+ " CONTRATO {PREENCHER} (PROC. ADMIN. {PREENCHER}) {PREENCHER} kg x R$ {PREENCHER}/kg ..."
+					+ " DEPÓSITO {PREENCHER}", 3));
+			cfg.setModelosDescricaoCriados(true);
+			daoConfiguracao.alterar(cfg);
+		}
+		return daoModelo.listaComStatus(NfseModeloDescricao.class, "ordem, nome");
+	}
+
+	@Transacional
+	public void salvarModeloDescricao(NfseModeloDescricao m) {
+		if (m.getId() == null) {
+			daoModelo.inserir(m);
+		} else {
+			daoModelo.alterar(m);
 		}
 	}
 

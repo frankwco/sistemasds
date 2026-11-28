@@ -375,6 +375,14 @@ public class NfseEmissaoService implements Serializable {
 	}
 
 	/** Refaz só a descrição (mês de referência ou boleto mudou). */
+	/** Botão de modelo: troca a descrição pelo texto do modelo escolhido. */
+	public void aplicarModeloDescricao(NotaFiscalServico n, String texto) {
+		String nova = aplicarModelo(texto, n);
+		n.setDescricaoServico(nova);
+		n.setDescricaoGerada(nova);
+		n.setModeloDescricao(texto);
+	}
+
 	public void atualizarDescricao(NotaFiscalServico n) {
 		regerarDescricao(n, nfseService.carregarConfiguracao().getDescricaoServicoPadrao());
 	}
@@ -389,7 +397,7 @@ public class NfseEmissaoService implements Serializable {
 		if (editada) {
 			return;
 		}
-		String nova = aplicarModelo(modelo, n);
+		String nova = aplicarModelo(n.getModeloDescricao() != null ? n.getModeloDescricao() : modelo, n);
 		n.setDescricaoServico(nova);
 		n.setDescricaoGerada(nova);
 	}
