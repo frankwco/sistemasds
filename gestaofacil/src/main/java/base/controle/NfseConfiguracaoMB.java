@@ -76,6 +76,7 @@ public class NfseConfiguracaoMB implements Serializable {
 		listaModelos = nfseService.listarModelosDescricao();
 		novoModelo();
 		ExibirMensagem.exibirMensagem("Modelo salvo.");
+		org.primefaces.PrimeFaces.current().executeScript("PF('dlgModelo').hide();");
 	}
 
 	public void excluirModelo(NfseModeloDescricao m) {
