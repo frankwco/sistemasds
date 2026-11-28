@@ -365,6 +365,8 @@ public class NfseNacionalClient {
 			el(doc, inf, "nDPS", String.valueOf(d.numero));
 			el(doc, inf, "dCompet", formatarData(d.competencia));
 			el(doc, inf, "tpEmit", "1");
+			// layout de 24/11/2026 (Reforma Tributária): finalidade 0 = NFS-e regular
+			el(doc, inf, "finNFSe", "0");
 			el(doc, inf, "cLocEmi", d.codigoMunicipioEmissor);
 
 			// ---- Prestador (o próprio emitente: nome/endereço vêm do cadastro nacional)
@@ -410,6 +412,8 @@ public class NfseNacionalClient {
 			if (temTexto(d.tomadorEmail) && d.tomadorEmail.contains("@")) {
 				el(doc, toma, "email", limitar(d.tomadorEmail.trim(), 80));
 			}
+			// 0 = o destinatário é o próprio tomador (com 0 o grupo "dest" não pode ir)
+			el(doc, inf, "indDest", "0");
 
 			// ---- Serviço
 			Element serv = el(doc, inf, "serv", null);
@@ -420,10 +424,11 @@ public class NfseNacionalClient {
 			if (temTexto(d.codigoTributacaoMunicipal)) {
 				el(doc, cServ, "cTribMun", somenteDigitos(d.codigoTributacaoMunicipal));
 			}
-			el(doc, cServ, "xDescServ", limitar(limpar(d.descricaoServico), 2000));
+			// no layout de 24/11/2026 o cNBS vem antes da descrição
 			if (temTexto(d.codigoNbs)) {
 				el(doc, cServ, "cNBS", somenteDigitos(d.codigoNbs));
 			}
+			el(doc, cServ, "xDescServ", limitar(limpar(d.descricaoServico), 2000));
 			if (temTexto(d.informacoesComplementares)) {
 				Element infoCompl = el(doc, serv, "infoCompl", null);
 				el(doc, infoCompl, "xInfComp", limitar(limpar(d.informacoesComplementares), 2000));
