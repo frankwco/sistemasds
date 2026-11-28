@@ -365,14 +365,20 @@ public class NfseNacionalClient {
 			el(doc, inf, "nDPS", String.valueOf(d.numero));
 			el(doc, inf, "dCompet", formatarData(d.competencia));
 			el(doc, inf, "tpEmit", "1");
-			// layout de 24/11/2026 (Reforma Tributária): finalidade 0 = NFS-e regular
-			el(doc, inf, "finNFSe", "0");
+			// O ambiente de testes já usa o layout de 24/11/2026 (Reforma
+			// Tributária); a produção ainda o anterior (conferido em notas reais).
+			boolean layoutNovo = d.ambiente == 2;
+			if (layoutNovo) {
+				el(doc, inf, "finNFSe", "0"); // 0 = NFS-e regular
+			}
 			el(doc, inf, "cLocEmi", d.codigoMunicipioEmissor);
 
 			// ---- Prestador (o próprio emitente: nome/endereço vêm do cadastro nacional)
 			Element prest = el(doc, inf, "prest", null);
 			el(doc, prest, documentoTag(d.cnpjPrestador), somenteDigitos(d.cnpjPrestador));
-			if (temTexto(d.inscricaoMunicipalPrestador)) {
+			// em testes o cadastro (CNC) não tem a inscrição e rejeita (E0120);
+			// em produção a nota do portal leva a inscrição
+			if (temTexto(d.inscricaoMunicipalPrestador) && !layoutNovo) {
 				el(doc, prest, "IM", d.inscricaoMunicipalPrestador.trim());
 			}
 			String fonePrest = somenteDigitos(d.telefonePrestador);
@@ -412,8 +418,10 @@ public class NfseNacionalClient {
 			if (temTexto(d.tomadorEmail) && d.tomadorEmail.contains("@")) {
 				el(doc, toma, "email", limitar(d.tomadorEmail.trim(), 80));
 			}
-			// 0 = o destinatário é o próprio tomador (com 0 o grupo "dest" não pode ir)
-			el(doc, inf, "indDest", "0");
+			if (layoutNovo) {
+				// 0 = o destinatário é o próprio tomador (com 0 o grupo "dest" não pode ir)
+				el(doc, inf, "indDest", "0");
+			}
 
 			// ---- Serviço
 			Element serv = el(doc, inf, "serv", null);
@@ -424,11 +432,14 @@ public class NfseNacionalClient {
 			if (temTexto(d.codigoTributacaoMunicipal)) {
 				el(doc, cServ, "cTribMun", somenteDigitos(d.codigoTributacaoMunicipal));
 			}
-			// no layout de 24/11/2026 o cNBS vem antes da descrição
-			if (temTexto(d.codigoNbs)) {
+			// no layout de 24/11/2026 o cNBS vem antes da descrição; no anterior, depois
+			if (layoutNovo && temTexto(d.codigoNbs)) {
 				el(doc, cServ, "cNBS", somenteDigitos(d.codigoNbs));
 			}
 			el(doc, cServ, "xDescServ", limitar(limpar(d.descricaoServico), 2000));
+			if (!layoutNovo && temTexto(d.codigoNbs)) {
+				el(doc, cServ, "cNBS", somenteDigitos(d.codigoNbs));
+			}
 			if (temTexto(d.informacoesComplementares)) {
 				Element infoCompl = el(doc, serv, "infoCompl", null);
 				el(doc, infoCompl, "xInfComp", limitar(limpar(d.informacoesComplementares), 2000));
@@ -762,7 +773,10 @@ public class NfseNacionalClient {
 	public byte[] baixarDanfse(String chaveAcesso) throws NfseException {
 		RespostaHttp r = requisitar("GET", urlAdn() + "/danfse/" + chaveAcesso, null, "application/pdf");
 		if (r.status != 200 || r.corpo.length < 5 || !new String(r.corpo, 0, 4, StandardCharsets.ISO_8859_1).equals("%PDF")) {
-			throw new NfseException("Não foi possível obter o PDF da NFS-e (HTTP " + r.status + "): "
+			throw new NfseException("Não foi possível obter o PDF da NFS-e (HTTP " + r.status + ")."
+					+ (r.status == 404 ? " O PDF sai do Ambiente de Dados Nacional, que recebe a nota alguns"
+							+ " minutos depois da emissão; tente de novo mais tarde. A nota está emitida e o XML"
+							+ " pode ser baixado." : "") + " "
 					+ String.join("; ", extrairMensagens(json(r.textoUtf8()), r.textoUtf8())));
 		}
 		return r.corpo;
