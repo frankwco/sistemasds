@@ -85,8 +85,8 @@ public class NfseService implements Serializable {
 					base + " - {MES_NOME}/{ANO} (COLETA UNICA) boleto: {BOLETO}", 2));
 			daoModelo.inserir(new NfseModeloDescricao("Prefeitura (contrato)", base
 					+ " até Mês {MES_NOME}/{ANO} Conforme contrato e demonstrativo anexo.- solic. fornecimento {PREENCHER}"
-					+ " CONTRATO {PREENCHER} (PROC. ADMIN. {PREENCHER}) {PREENCHER} kg x R$ {PREENCHER}/kg ..."
-					+ " DEPÓSITO {PREENCHER}", 3));
+					+ " ({PREENCHER}) CONTRATO {PREENCHER} (PROC. ADMIN. {PREENCHER}) {PREENCHER} kg x R$ {PREENCHER}/kg ..."
+					+ " Lixo A1/E/B/A3 DEPÓSITO {PREENCHER}", 3));
 			cfg.setModelosDescricaoCriados(true);
 			daoConfiguracao.alterar(cfg);
 		}
